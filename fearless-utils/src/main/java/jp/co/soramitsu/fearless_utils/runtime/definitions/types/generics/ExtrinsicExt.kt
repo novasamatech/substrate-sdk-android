@@ -25,26 +25,6 @@ fun <A> Extrinsic.Signature.Companion.new(
     signedExtras = signedExtras
 )
 
-fun Extrinsic.Signature.Companion.newV27(
-    accountId: ByteArray,
-    signature: MultiSignature,
-    signedExtras: ExtrinsicPayloadExtrasInstance
-) = Extrinsic.Signature.new(
-    accountIdentifier = accountId,
-    signature = signature,
-    signedExtras = signedExtras
-)
-
-fun Extrinsic.Signature.Companion.newV28(
-    accountId: ByteArray,
-    signature: MultiSignature,
-    signedExtras: ExtrinsicPayloadExtrasInstance
-) = Extrinsic.Signature.new(
-    accountIdentifier = multiAddressFromId(accountId),
-    signature = signature,
-    signedExtras = signedExtras
-)
-
 fun multiAddressFromId(addressId: ByteArray): DictEnum.Entry<ByteArray> {
     return DictEnum.Entry(
         name = MULTI_ADDRESS_ID,

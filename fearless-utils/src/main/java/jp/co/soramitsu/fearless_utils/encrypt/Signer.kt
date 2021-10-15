@@ -35,7 +35,7 @@ object Signer {
         encryptionType: EncryptionType,
         message: ByteArray,
         keypair: Keypair,
-        messageHashing: MessageHashing = MessageHashing.SUBSTRATE,
+        messageHashing: MessageHashing = MessageHashing.SUBSTRATE
     ): SignatureWrapper {
         return when (encryptionType) {
             EncryptionType.SR25519 -> {

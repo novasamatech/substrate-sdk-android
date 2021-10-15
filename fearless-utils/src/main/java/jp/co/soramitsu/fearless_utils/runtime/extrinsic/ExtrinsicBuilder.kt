@@ -12,7 +12,6 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Era
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Extrinsic
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.ExtrinsicPayloadExtrasInstance
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.GenericCall
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.MultiSignature
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.SignedExtras
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.new
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.instances.SignatureInstanceConstructor

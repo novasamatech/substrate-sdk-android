@@ -10,10 +10,10 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.Fixed
 
 private const val ADDRESS_TYPE = "Address"
 
-object AddressInstanceConstructor: Type.InstanceConstructor<AccountId> {
+object AddressInstanceConstructor : Type.InstanceConstructor<AccountId> {
 
     override fun constructInstance(typeRegistry: TypeRegistry, value: AccountId): Any {
-        return when(val addressType = typeRegistry.getOrThrow(ADDRESS_TYPE)) {
+        return when (val addressType = typeRegistry.getOrThrow(ADDRESS_TYPE)) {
             is DictEnum -> { // MultiAddress
                 DictEnum.Entry(MULTI_ADDRESS_ID, value)
             }

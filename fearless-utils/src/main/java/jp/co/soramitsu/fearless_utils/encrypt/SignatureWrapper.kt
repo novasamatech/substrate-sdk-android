@@ -12,7 +12,7 @@ sealed class SignatureWrapper(val encryptionType: EncryptionType) {
         override val signature: ByteArray = r + s + v
     }
 
-    class Sr25519(override val signature: ByteArray): SignatureWrapper(EncryptionType.SR25519)
+    class Sr25519(override val signature: ByteArray) : SignatureWrapper(EncryptionType.SR25519)
 
     class Ed25519(override val signature: ByteArray) : SignatureWrapper(EncryptionType.ED25519)
 }
