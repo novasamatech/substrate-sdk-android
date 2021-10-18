@@ -6,7 +6,10 @@ import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.Type
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.errors.EncodeDecodeException
 import jp.co.soramitsu.fearless_utils.runtime.metadata.Event
+import jp.co.soramitsu.fearless_utils.runtime.metadata.MetadataType
+import jp.co.soramitsu.fearless_utils.runtime.metadata.Module
 import jp.co.soramitsu.fearless_utils.runtime.metadata.eventOrNull
+import jp.co.soramitsu.fearless_utils.runtime.metadata.fullNameOf
 import jp.co.soramitsu.fearless_utils.runtime.metadata.moduleOrNull
 import jp.co.soramitsu.fearless_utils.scale.dataType.tuple
 import jp.co.soramitsu.fearless_utils.scale.dataType.uint8
@@ -23,10 +26,11 @@ object GenericEvent : Type<GenericEvent.Instance>("GenericEvent") {
         val (moduleIndex, eventIndex) = indexCoder.read(scaleCodecReader)
             .run { first.toInt() to second.toInt() }
 
-        val call = getEventOrThrow(runtime, moduleIndex, eventIndex)
+        val (module, event) = getEventOrThrow(runtime, moduleIndex, eventIndex)
 
-        val arguments = call.arguments.map { argumentDefinition ->
-            argumentDefinition.requireNonNull().decode(scaleCodecReader, runtime)
+        val arguments = event.arguments.map { argumentDefinition ->
+            argumentDefinition.requireDerivedType(module, event)
+                .decode(scaleCodecReader, runtime)
         }
 
         return Instance(moduleIndex, eventIndex, arguments)
@@ -37,12 +41,12 @@ object GenericEvent : Type<GenericEvent.Instance>("GenericEvent") {
         runtime: RuntimeSnapshot,
         value: Instance
     ) = with(value) {
-        val call = getEventOrThrow(runtime, moduleIndex, eventIndex)
+        val (module, event) = getEventOrThrow(runtime, moduleIndex, eventIndex)
 
         indexCoder.write(scaleCodecWriter, moduleIndex.toUByte() to eventIndex.toUByte())
 
-        call.arguments.forEachIndexed { index, argumentType ->
-            argumentType.requireNonNull()
+        event.arguments.forEachIndexed { index, argumentType ->
+            argumentType.requireDerivedType(module, event)
                 .encodeUnsafe(scaleCodecWriter, runtime, arguments[index])
         }
     }
@@ -51,21 +55,26 @@ object GenericEvent : Type<GenericEvent.Instance>("GenericEvent") {
         return instance is Instance
     }
 
-    private fun Type<*>?.requireNonNull() =
-        this ?: throw EncodeDecodeException("Argument $name is not resolved")
-
     private fun getEventOrThrow(
         runtime: RuntimeSnapshot,
         moduleIndex: Int,
-        callIndex: Int
-    ): Event {
-        return runtime.metadata.moduleOrNull(moduleIndex)?.eventOrNull(callIndex) ?: eventNotFound(
-            moduleIndex,
-            callIndex
-        )
+        eventIndex: Int
+    ): Pair<Module, Event> {
+        val module = runtime.metadata.moduleOrNull(moduleIndex)
+            ?: eventNotFound(moduleIndex, eventIndex)
+
+        val event = module.eventOrNull(eventIndex)
+            ?: eventNotFound(moduleIndex, eventIndex)
+
+        return module to event
     }
 
     private fun eventNotFound(moduleIndex: Int, eventIndex: Int): Nothing {
         throw EncodeDecodeException("No event for ($moduleIndex, $eventIndex) index found")
     }
 }
+
+private fun MetadataType.requireDerivedType(module: Module, event: Event) = derivedType
+        ?: throw EncodeDecodeException(
+            "Type $definition is not resolved in event ${module.fullNameOf(event)}"
+        )

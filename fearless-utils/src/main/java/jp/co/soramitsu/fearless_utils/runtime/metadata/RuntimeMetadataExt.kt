@@ -124,6 +124,14 @@ fun StorageEntry.storageKeyOrNull(runtime: RuntimeSnapshot, vararg keys: Any?): 
     return nullOnException { storageKey(runtime, keys) }
 }
 
+fun Module.fullNameOf(suffix: String): String {
+    return "$name.$suffix"
+}
+
+fun Module.fullNameOf(withName: WithName): String {
+    return "$name.${withName.name}"
+}
+
 private fun typeNotResolved(entryName: String): Nothing =
     throw IllegalStateException("Cannot resolve key or value type for storage entry `$entryName`")
 

@@ -238,7 +238,7 @@ class FunctionArgument(
 class Event(
     override val name: String,
     val index: Pair<Int, Int>,
-    val arguments: List<Type<*>?>,
+    val arguments: List<MetadataType>,
     val documentation: List<String>
 ) : WithName {
     constructor(
@@ -247,7 +247,7 @@ class Event(
         index: Pair<Int, Int>
     ) : this(
         name = struct[EventMetadataSchema.name],
-        arguments = struct[EventMetadataSchema.arguments].map { typeRegistry[it] },
+        arguments = struct[EventMetadataSchema.arguments].map { MetadataType(it, typeRegistry) },
         documentation = struct[EventMetadataSchema.documentation],
         index = index
     )
@@ -293,3 +293,13 @@ class ExtrinsicMetadata(
         signedExtensions = struct[ExtrinsicMetadataSchema.signedExtensions]
     )
 }
+
+class MetadataType(
+    val definition: String,
+    val derivedType: Type<*>?
+)
+
+fun MetadataType(definition: String, typeRegistry: TypeRegistry) = MetadataType(
+    definition = definition,
+    derivedType = typeRegistry[definition]
+)

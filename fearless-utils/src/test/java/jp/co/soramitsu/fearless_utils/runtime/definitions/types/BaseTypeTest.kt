@@ -11,6 +11,7 @@ import jp.co.soramitsu.fearless_utils.runtime.metadata.Event
 import jp.co.soramitsu.fearless_utils.runtime.metadata.ExtrinsicMetadata
 import jp.co.soramitsu.fearless_utils.runtime.metadata.Function
 import jp.co.soramitsu.fearless_utils.runtime.metadata.FunctionArgument
+import jp.co.soramitsu.fearless_utils.runtime.metadata.MetadataType
 import jp.co.soramitsu.fearless_utils.runtime.metadata.Module
 import jp.co.soramitsu.fearless_utils.runtime.metadata.RuntimeMetadata
 import jp.co.soramitsu.fearless_utils.runtime.metadata.Storage
@@ -54,12 +55,18 @@ abstract class BaseTypeTest {
                         "A" to Event(
                             name = "A",
                             arguments = listOf(
-                                BooleanType,
-                                u8
+                                MetadataType(
+                                    definition="bool",
+                                    derivedType = BooleanType,
+                                ),
+                                MetadataType(
+                                    definition="u8",
+                                    derivedType = u8,
+                                )
                             ),
                             documentation = emptyList(),
                             index = 1 to 0
-                        )
+                        ),
                     ),
                     constants = emptyMap(),
                     errors = emptyMap(),
