@@ -1,6 +1,8 @@
 package jp.co.soramitsu.fearless_utils.wsrpc.state
 
+import jp.co.soramitsu.fearless_utils.common.assertInstance
 import jp.co.soramitsu.fearless_utils.wsrpc.request.DeliveryType
+import jp.co.soramitsu.fearless_utils.wsrpc.request.runtime.createFakeChange
 import jp.co.soramitsu.fearless_utils.wsrpc.response.RpcResponse
 import jp.co.soramitsu.fearless_utils.wsrpc.state.SocketStateMachine.Event
 import jp.co.soramitsu.fearless_utils.wsrpc.state.SocketStateMachine.SideEffect
@@ -29,7 +31,8 @@ val emptyConnectedState = State.Connected(
     url = URL,
     toResendOnReconnect = emptySet(),
     waitingForResponse = emptySet(),
-    subscriptions = emptySet()
+    subscriptions = emptySet(),
+    unknownSubscriptionResponses = emptyMap()
 )
 
 class TestSendable(override val id: Int, override val deliveryType: DeliveryType) :
@@ -567,7 +570,8 @@ class SocketStateMachineTest {
             URL,
             toResendOnReconnect = emptySet(),
             waitingForResponse = sendables,
-            subscriptions = emptySet()
+            subscriptions = emptySet(),
+            unknownSubscriptionResponses = emptyMap()
         )
 
         state = transition(state, Event.Pause)
@@ -667,6 +671,36 @@ class SocketStateMachineTest {
 
         assertEquals(initialState, newState)
         assertEquals(expectedLog, sideEffectLog)
+    }
+
+    @Test
+    fun `should remember unknown subscription respondes`() {
+        val subscriptionChange = createFakeChange(result = "test")
+        val event = Event.SubscriptionResponse(subscriptionChange)
+
+        val newState = transition(emptyConnectedState, event)
+
+        assertInstance<State.Connected>(newState)
+        assertEquals(subscriptionChange, newState.unknownSubscriptionResponses[subscriptionChange.subscriptionId])
+    }
+
+    @Test
+    fun `should response to unknown subscription responses`() {
+        val subscriptionChange = createFakeChange(result = "test", subscriptionId = "test")
+
+        val subscription = TestSubscription(id = "test", initiatorId = 0)
+
+        val newState = transition(
+            emptyConnectedState,
+            Event.SubscriptionResponse(subscriptionChange),
+            Event.Subscribed(subscription)
+        )
+
+        assertInstance<State.Connected>(newState)
+        assertEquals(0, newState.unknownSubscriptionResponses.size)
+
+        assertEquals(1, sideEffectLog.size)
+        assertEquals(RespondToSubscription(subscription, subscriptionChange), sideEffectLog.first())
     }
 
     private fun moveToConnected(): State {

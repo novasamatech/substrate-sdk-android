@@ -39,6 +39,7 @@ object SocketStateMachine {
         data class Connected(
             val url: String,
             internal val toResendOnReconnect: Set<Sendable>,
+            internal val unknownSubscriptionResponses: Map<String, SubscriptionChange>,
             internal val waitingForResponse: Set<Sendable>,
             internal val subscriptions: Set<Subscription>
         ) : State()
@@ -180,7 +181,8 @@ object SocketStateMachine {
                                 DeliveryType.ON_RECONNECT
                             ),
                             waitingForResponse = state.pendingSendables,
-                            subscriptions = emptySet()
+                            subscriptions = emptySet(),
+                            unknownSubscriptionResponses = emptyMap()
                         )
                     }
                     is Event.Stop -> handleStop(sideEffects)
@@ -250,7 +252,21 @@ object SocketStateMachine {
                     }
 
                     is Event.Subscribed -> {
-                        state.copy(subscriptions = state.subscriptions + event.subscription)
+                        val subscriptionId = event.subscription.id
+
+                        state.unknownSubscriptionResponses[subscriptionId]?.let {
+                            sideEffects += SideEffect.RespondToSubscription(
+                                subscription = event.subscription,
+                                change = it
+                            )
+                        }
+
+                        val newUnknown = state.unknownSubscriptionResponses - subscriptionId
+
+                        state.copy(
+                            subscriptions = state.subscriptions + event.subscription,
+                            unknownSubscriptionResponses = newUnknown
+                        )
                     }
 
                     is Event.SubscriptionResponse -> {
@@ -264,9 +280,16 @@ object SocketStateMachine {
                                 subscription,
                                 event.response
                             )
-                        }
 
-                        state
+                            state
+                        } else {
+                            val mapEntry = event.response.subscriptionId to event.response
+                            val newUnknown = state.unknownSubscriptionResponses + mapEntry
+
+                            state.copy(
+                                unknownSubscriptionResponses = newUnknown
+                            )
+                        }
                     }
 
                     is Event.ConnectionError -> {
