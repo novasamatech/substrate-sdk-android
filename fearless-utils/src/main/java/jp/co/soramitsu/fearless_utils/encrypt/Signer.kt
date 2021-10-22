@@ -20,8 +20,7 @@ import java.security.Signature
 
 object Signer {
 
-    enum class MessageHashing(val hasher: (ByteArray) -> ByteArray) {
-
+    private enum class MessageHashing(val hasher: (ByteArray) -> ByteArray) {
         SUBSTRATE(hasher = { it.blake2b256() }),
         ETHEREUM(hasher = { it.keccak256() })
     }
@@ -32,21 +31,37 @@ object Signer {
     }
 
     fun sign(
-        encryptionType: EncryptionType,
+        multiChainEncryption: MultiChainEncryption,
         message: ByteArray,
-        keypair: Keypair,
-        messageHashing: MessageHashing = MessageHashing.SUBSTRATE
+        keypair: Keypair
     ): SignatureWrapper {
-        return when (encryptionType) {
-            EncryptionType.SR25519 -> {
-                require(keypair is Sr25519Keypair) {
-                    "Sr25519Keypair is needed to sign with SR25519"
-                }
+        return when (multiChainEncryption) {
 
-                signSr25519(message, keypair)
+            is MultiChainEncryption.Ethereum -> {
+                signEcdsa(message, keypair, MessageHashing.ETHEREUM.hasher)
             }
-            EncryptionType.ED25519 -> signEd25519(message, keypair)
-            EncryptionType.ECDSA -> signEcdsa(message, keypair, messageHashing.hasher)
+
+            is MultiChainEncryption.Substrate -> {
+
+                when (multiChainEncryption.encryptionType) {
+
+                    EncryptionType.SR25519 -> {
+                        require(keypair is Sr25519Keypair) {
+                            "Sr25519Keypair is needed to sign with SR25519"
+                        }
+
+                        signSr25519(message, keypair)
+                    }
+
+                    EncryptionType.ED25519 -> signEd25519(message, keypair)
+
+                    EncryptionType.ECDSA -> signEcdsa(
+                        message,
+                        keypair,
+                        MessageHashing.SUBSTRATE.hasher
+                    )
+                }
+            }
         }
     }
 

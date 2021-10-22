@@ -5,6 +5,7 @@ import jp.co.soramitsu.fearless_utils.encrypt.EncryptionType
 const val ENCODING_SCRYPT = "scrypt"
 const val ENCODING_SALSA = "xsalsa20-poly1305"
 const val ENCODING_PKCS8 = "pkcs8"
+const val ENCODING_ETHEREUM = "ethereum"
 
 const val JSON_VERSION = 3
 
@@ -20,8 +21,14 @@ class JsonAccountData(
         val version: Int
     ) {
         companion object {
-            fun default(encryptionType: EncryptionType) = Encoding(
+            fun substrate(encryptionType: EncryptionType) = Encoding(
                 content = listOf(ENCODING_PKCS8, encryptionType.rawName),
+                type = listOf(ENCODING_SCRYPT, ENCODING_SALSA),
+                version = JSON_VERSION
+            )
+
+            fun ethereum() = Encoding(
+                content = listOf(ENCODING_PKCS8, ENCODING_ETHEREUM),
                 type = listOf(ENCODING_SCRYPT, ENCODING_SALSA),
                 version = JSON_VERSION
             )

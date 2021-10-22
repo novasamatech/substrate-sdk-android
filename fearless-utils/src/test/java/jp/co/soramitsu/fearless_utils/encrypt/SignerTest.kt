@@ -19,7 +19,7 @@ class SignerTest {
 
         val keypair = SubstrateKeypairFactory.generate(EncryptionType.ED25519, TestData.SEED_BYTES)
 
-        val result = Signer.sign(EncryptionType.ED25519, messageHex.toByteArray(), keypair)
+        val result = Signer.sign(MultiChainEncryption.Substrate(EncryptionType.ED25519), messageHex.toByteArray(), keypair)
 
         assert(Signer.verifyEd25519(messageHex.toByteArray(), result.signature, keypair.publicKey))
     }
@@ -35,7 +35,7 @@ class SignerTest {
             "0400340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c6302286bee0000002d00000003000000e143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423ee143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e"
         val messageBytes = message.fromHex()
 
-        val signatureWrapper = Signer.sign(EncryptionType.ECDSA, messageBytes, keypair) as SignatureWrapper.Ecdsa
+        val signatureWrapper = Signer.sign(MultiChainEncryption.Substrate(EncryptionType.ECDSA), messageBytes, keypair) as SignatureWrapper.Ecdsa
 
         val expected =
             "352e2738b0e361a7c59be05d52e7e7fb860bf79c03bb7858ce3e48748b00040c4dc6eadbfd526d35ba6dff1468bf61198cc5e8570a80ddc63fdebe68dc6016a41b"

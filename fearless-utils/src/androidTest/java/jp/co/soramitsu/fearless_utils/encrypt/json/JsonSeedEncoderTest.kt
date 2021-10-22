@@ -4,8 +4,10 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.gson.Gson
 import jp.co.soramitsu.fearless_utils.TestData
 import jp.co.soramitsu.fearless_utils.encrypt.EncryptionType
+import jp.co.soramitsu.fearless_utils.encrypt.MultiChainEncryption
 import jp.co.soramitsu.fearless_utils.encrypt.keypair.substrate.Sr25519Keypair
 import jp.co.soramitsu.fearless_utils.encrypt.keypair.substrate.SubstrateKeypairFactory
+import jp.co.soramitsu.fearless_utils.ss58.SS58Encoder.toAddress
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.security.SecureRandom
@@ -31,15 +33,17 @@ class JsonSeedEncoderTest {
         require(keypairExpected is Sr25519Keypair)
 
         val decoder = JsonSeedDecoder(gson)
-        val encoder = JsonSeedEncoder(gson, SecureRandom())
+        val encoder = JsonSeedEncoder(gson)
+
+        val address = keypairExpected.publicKey.toAddress(ADDRESS_TYPE_WESTEND)
 
         val json = encoder.generate(
             keypair = keypairExpected,
             seed = null,
             password = PASSWORD,
             name = NAME,
-            encryptionType = EncryptionType.SR25519,
-            addressByte = ADDRESS_TYPE_WESTEND,
+            multiChainEncryption = MultiChainEncryption.Substrate(EncryptionType.SR25519),
+            address = address,
             genesisHash = GENESIS_HASH_WESTEND
         )
 

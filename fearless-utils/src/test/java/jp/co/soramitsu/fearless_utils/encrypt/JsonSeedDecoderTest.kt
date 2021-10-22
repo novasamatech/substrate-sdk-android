@@ -8,9 +8,8 @@ import jp.co.soramitsu.fearless_utils.common.assertThrows
 import jp.co.soramitsu.fearless_utils.encrypt.json.JsonSeedDecoder
 import jp.co.soramitsu.fearless_utils.encrypt.json.JsonSeedDecodingException.IncorrectPasswordException
 import jp.co.soramitsu.fearless_utils.encrypt.json.JsonSeedDecodingException.InvalidJsonException
-import jp.co.soramitsu.fearless_utils.encrypt.keypair.substrate.SubstrateKeypairFactory
 import jp.co.soramitsu.fearless_utils.encrypt.model.NetworkTypeIdentifier
-import jp.co.soramitsu.fearless_utils.ss58.SS58Encoder
+import jp.co.soramitsu.fearless_utils.extensions.toHexString
 import org.bouncycastle.util.encoders.Hex
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -27,7 +26,8 @@ private const val VALID_JSON_EDWARDS =
     "{\"address\":\"GnSs2bd76KkrcvN7prrFfkbu939mkZHyBzVKnjS8ikg3CZ8\",\"encoded\":\"fPeWwZNEDSNKM+k+Vjv7HFGr/r7LSev6DHmX+5TwvqYAgAAAAQAAAAgAAAAzuSqaguZBu/q23iphXVSsn3GP70l4Pn/bTw6TdYltaMZDJRADWz+T7FUfZ460FkI70yczt9O1HSAEEj5QLMJEvxa4+wNQWA+hXeQoVxKf+1iUIr+RW9wL9JGpZw61HWhpr0t4b+TEBQwbf7hDT/P0dFmYLDa3RfxVg07GTrzYe2uBQt9MCYLUcctBNk7W7r8CI3FuqbAA/oP07GB/\",\"encoding\":{\"content\":[\"pkcs8\",\"ed25519\"],\"type\":[\"scrypt\",\"xsalsa20-poly1305\"],\"version\":\"3\"},\"meta\":{\"genesisHash\":\"0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe\",\"name\":\"test\",\"tags\":[],\"whenCreated\":1600432656361,\"whenEdited\":1600433019129}}"
 private const val VALID_JSON_ECDSA =
     "{\"address\":\"0x02f3d42516c317757748b073f5221455e31035286ea7417b827d8eb8ad1a6c49d6\",\"encoded\":\"VsYSlEzIMvgk2lpGigHs8fR6kqyTZAgnz+QkoAwxy/0AgAAAAQAAAAgAAADtvqAkZhcSD94AaYzzDFLgMDgz0U3+ZD6p0eaWqlWXgPJZrTLe6Go6bXgiT0nklIHMipQ4CxDsnJwIO98NY7RJwWDqnH9+72huUq7VODaN7LUyChBLT58AwN0xXvx1cEksMlBZoCZ9W0qU0o98kfhPuLA+goplCb/XLp5PEdE=\",\"encoding\":{\"content\":[\"pkcs8\",\"ecdsa\"],\"type\":[\"scrypt\",\"xsalsa20-poly1305\"],\"version\":\"3\"},\"meta\":{\"genesisHash\":\"0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe\",\"name\":\"test\",\"tags\":[],\"whenCreated\":1600433095690}}"
-
+private const val VALID_JSON_ETHEREUM =
+    "{\"encoded\":\"uqlovHpPdx2cKc/opcB5a78YJCOiTz32ovTFsqEXvugAgAAAAQAAAAgAAAAeRik/93BCVP63EtTkiiww+UWYPEIGOdTkzhhd5kxrPC4GeTry9wE7mxooZesRwfNUOi92YGzETPiHk9PTXKV+XkpGXrBF7480dH0qbXSbIYSi0UQVLuX+4fBmLY8Y4YZCItNvHo454SiSimlBhMFX64psdIVGumzu4P3I7UU=\",\"encoding\":{\"content\":[\"pkcs8\",\"ethereum\"],\"type\":[\"scrypt\",\"xsalsa20-poly1305\"],\"version\":\"3\"},\"address\":\"0x036966ab114f00c72a1eb218e890ce940eed68a1288fe52a0665f5413aa9d19290\",\"meta\":{\"genesisHash\":\"0x91bc6e169807aaa54802737e1c504b2577d4fafedd5a02c10293b1cd60e39527\",\"isHardware\":false,\"name\":\"1\",\"tags\":[],\"whenCreated\":1634656032513}}"
 private const val JSON_NO_GENESIS =
     "{\"address\":\"GnSs2bd76KkrcvN7prrFfkbu939mkZHyBzVKnjS8ikg3CZ8\",\"encoded\":\"fPeWwZNEDSNKM+k+Vjv7HFGr/r7LSev6DHmX+5TwvqYAgAAAAQAAAAgAAAAzuSqaguZBu/q23iphXVSsn3GP70l4Pn/bTw6TdYltaMZDJRADWz+T7FUfZ460FkI70yczt9O1HSAEEj5QLMJEvxa4+wNQWA+hXeQoVxKf+1iUIr+RW9wL9JGpZw61HWhpr0t4b+TEBQwbf7hDT/P0dFmYLDa3RfxVg07GTrzYe2uBQt9MCYLUcctBNk7W7r8CI3FuqbAA/oP07GB/\",\"encoding\":{\"content\":[\"pkcs8\",\"ed25519\"],\"type\":[\"scrypt\",\"xsalsa20-poly1305\"],\"version\":\"3\"},\"meta\":{\"name\":\"test\",\"tags\":[],\"whenCreated\":1600432656361,\"whenEdited\":1600433019129}}"
 private const val JSON_NO_NETWORK_INFO =
@@ -38,6 +38,8 @@ val JSONS = listOf(VALID_JSON_EDWARDS, VALID_JSON_ECDSA)
 
 private const val VALID_PASSWORD = "12345"
 private const val INVALID_PASSWORD = "123456"
+
+private const val ETHEREUM_PASSWORD = "1"
 
 private const val VALID_NAME = "test"
 
@@ -66,6 +68,13 @@ class JsonSeedDecoderTest {
     }
 
     @Test
+    fun `should decode ethereum`() {
+        val result = decoder.decode(VALID_JSON_ETHEREUM, ETHEREUM_PASSWORD)
+        
+        assertEquals("036966ab114f00c72a1eb218e890ce940eed68a1288fe52a0665f5413aa9d19290", result.keypair.publicKey.toHexString())
+    }
+
+    @Test
     fun `should handle valid json with incorrect password`() {
         JSONS.forEach {
             assertThrows<IncorrectPasswordException> {
@@ -90,11 +99,18 @@ class JsonSeedDecoderTest {
     }
 
     @Test
+    fun `should extract meta from ethereum json`() {
+        val data = decoder.extractImportMetaData(VALID_JSON_ETHEREUM)
+
+        assertEquals(data.encryption.encryptionType, EncryptionType.ECDSA)
+    }
+
+    @Test
     fun `should extract meta from valid json`() {
         val data = decoder.extractImportMetaData(VALID_JSON_SR25519)
         val networkTypeIdentifier = data.networkTypeIdentifier
 
-        assertEquals(EncryptionType.SR25519, data.encryptionType)
+        assertEquals(EncryptionType.SR25519, data.encryption.encryptionType)
         assertInstance<NetworkTypeIdentifier.Genesis>(networkTypeIdentifier)
         assertEquals(VALID_GENESIS, networkTypeIdentifier.genesis)
         assertEquals(VALID_NAME, data.name)

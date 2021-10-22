@@ -1,6 +1,7 @@
 package jp.co.soramitsu.fearless_utils.integration.extrinsic
 
 import jp.co.soramitsu.fearless_utils.encrypt.EncryptionType
+import jp.co.soramitsu.fearless_utils.encrypt.MultiChainEncryption
 import jp.co.soramitsu.fearless_utils.encrypt.keypair.BaseKeypair
 import jp.co.soramitsu.fearless_utils.extensions.fromHex
 import jp.co.soramitsu.fearless_utils.integration.BaseIntegrationTest
@@ -36,7 +37,7 @@ class SendIntegrationTest : BaseIntegrationTest(WESTEND_URL) {
             nonce = 38.toBigInteger(),
             runtimeVersion = RuntimeVersion(48, 4),
             genesisHash = "e143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e".fromHex(),
-            encryptionType = EncryptionType.ED25519,
+            multiChainEncryption = MultiChainEncryption.Substrate(EncryptionType.ED25519),
             accountIdentifier = multiAddressFromId(KEYPAIR.publicKey),
         )
 

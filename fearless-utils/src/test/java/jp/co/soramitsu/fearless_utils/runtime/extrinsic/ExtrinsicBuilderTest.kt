@@ -1,6 +1,7 @@
 package jp.co.soramitsu.fearless_utils.runtime.extrinsic
 
 import jp.co.soramitsu.fearless_utils.encrypt.EncryptionType
+import jp.co.soramitsu.fearless_utils.encrypt.MultiChainEncryption
 import jp.co.soramitsu.fearless_utils.encrypt.keypair.BaseKeypair
 import jp.co.soramitsu.fearless_utils.extensions.fromHex
 import jp.co.soramitsu.fearless_utils.integration.transfer
@@ -41,7 +42,7 @@ class ExtrinsicBuilderTest {
             nonce = 1.toBigInteger(),
             runtimeVersion = RuntimeVersion(1, 1),
             genesisHash = "0f751ca2d30efe3385a4001d0bfa1548471babf5095f6fe88ee4813cf724fafc".fromHex(),
-            encryptionType = EncryptionType.ED25519,
+            multiChainEncryption = MultiChainEncryption.Substrate(EncryptionType.ED25519),
             accountIdentifier = from.toAccountId(),
             era = Era.getEraFromBlockPeriod(44866, 64),
             blockHash = "0xa532ea14451c9b4e1a9ed1c75ab67d8be659362c9d8f2206009ae8d62faf9fca".fromHex()
@@ -73,7 +74,7 @@ class ExtrinsicBuilderTest {
             nonce = 34.toBigInteger(),
             runtimeVersion = RuntimeVersion(48, 4),
             genesisHash = "e143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e".fromHex(),
-            encryptionType = EncryptionType.ED25519,
+            multiChainEncryption = MultiChainEncryption.Substrate(EncryptionType.ED25519),
             accountIdentifier = multiAddressFromId(KEYPAIR.publicKey),
             era = Era.Mortal(64, 59),
             blockHash = "0x1b876104c68b4a8924c098d61d2ad798761bb6fff55cca2885939ffc27ef5ecb".fromHex()
@@ -101,7 +102,7 @@ class ExtrinsicBuilderTest {
             nonce = 34.toBigInteger(),
             runtimeVersion = RuntimeVersion(48, 4),
             genesisHash = "e143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e".fromHex(),
-            encryptionType = EncryptionType.ED25519,
+            multiChainEncryption = MultiChainEncryption.Substrate(EncryptionType.ED25519),
             accountIdentifier = multiAddressFromId(KEYPAIR.publicKey),
             era = Era.Mortal(64, 59),
             blockHash = "0x1b876104c68b4a8924c098d61d2ad798761bb6fff55cca2885939ffc27ef5ecb".fromHex()

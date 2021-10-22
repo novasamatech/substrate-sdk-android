@@ -30,3 +30,40 @@ fun UInt.toUnsignedBytes(order: ByteOrder = ByteOrder.BIG_ENDIAN): ByteArray {
         it.putInt(this.toInt())
     }.array()
 }
+
+fun ByteArray.split(divider: ByteArray): List<ByteArray> {
+
+    var elementStart = 0
+
+    val dividerSize = divider.size
+    var dividerIndex = 0
+
+    val results = mutableListOf<ByteArray>()
+
+    forEachIndexed { index, byte ->
+        if (byte == divider[dividerIndex]) {
+            dividerIndex += 1
+
+            if (dividerIndex == dividerSize) {
+                val elementEnd = index - dividerSize + 1
+
+                if (elementStart < elementEnd) {
+                    results.add(copyOfRange(elementStart, elementEnd))
+                } else {
+                    results.add(byteArrayOf())
+                }
+
+                dividerIndex = 0
+                elementStart = index + 1
+            }
+        } else {
+            dividerIndex = 0
+        }
+    }
+
+    if (elementStart < size) {
+        results.add(copyOfRange(elementStart, size))
+    }
+
+    return results
+}

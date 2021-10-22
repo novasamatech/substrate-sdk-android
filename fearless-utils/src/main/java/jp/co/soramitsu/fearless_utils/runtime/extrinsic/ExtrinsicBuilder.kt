@@ -1,6 +1,6 @@
 package jp.co.soramitsu.fearless_utils.runtime.extrinsic
 
-import jp.co.soramitsu.fearless_utils.encrypt.EncryptionType
+import jp.co.soramitsu.fearless_utils.encrypt.MultiChainEncryption
 import jp.co.soramitsu.fearless_utils.encrypt.SignatureWrapper
 import jp.co.soramitsu.fearless_utils.encrypt.Signer
 import jp.co.soramitsu.fearless_utils.encrypt.keypair.Keypair
@@ -32,12 +32,11 @@ class ExtrinsicBuilder(
     private val nonce: BigInteger,
     private val runtimeVersion: RuntimeVersion,
     private val genesisHash: ByteArray,
-    private val encryptionType: EncryptionType,
+    private val multiChainEncryption: MultiChainEncryption,
     private val accountIdentifier: Any,
     private val blockHash: ByteArray = genesisHash,
     private val era: Era = Era.Immortal,
     private val tip: BigInteger = DEFAULT_TIP,
-    private val signatureHashing: Signer.MessageHashing = Signer.MessageHashing.SUBSTRATE,
     private val signatureConstructor: Type.InstanceConstructor<SignatureWrapper> = SignatureInstanceConstructor
 ) {
 
@@ -120,7 +119,7 @@ class ExtrinsicBuilder(
             payloadBytes
         }
 
-        val signatureWrapper = Signer.sign(encryptionType, messageToSign, keypair, signatureHashing)
+        val signatureWrapper = Signer.sign(multiChainEncryption, messageToSign, keypair)
 
         return signatureConstructor.constructInstance(runtime.typeRegistry, signatureWrapper)
     }
