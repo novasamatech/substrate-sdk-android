@@ -2,9 +2,9 @@ package jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite
 
 import io.emeraldpay.polkaj.scale.ScaleCodecReader
 import io.emeraldpay.polkaj.scale.ScaleCodecWriter
+import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.TypeReference
 import jp.co.soramitsu.fearless_utils.scale.dataType.compactInt
-import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
 
 class Vec(name: String, typeReference: TypeReference) : WrapperType<List<*>>(name, typeReference) {
 

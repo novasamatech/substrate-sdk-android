@@ -1,7 +1,7 @@
 package jp.co.soramitsu.fearless_utils.encrypt.xsalsa20poly1305
 
-import java.util.Arrays
 import java8.util.Optional
+import java.util.Arrays
 
 /*
  * Copyright © 2017 Coda Hale (coda.hale@gmail.com)

@@ -5,11 +5,10 @@ import io.emeraldpay.polkaj.scale.ScaleCodecWriter
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.Type
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.errors.EncodeDecodeException
-import jp.co.soramitsu.fearless_utils.runtime.metadata.Event
-import jp.co.soramitsu.fearless_utils.runtime.metadata.MetadataType
-import jp.co.soramitsu.fearless_utils.runtime.metadata.Module
 import jp.co.soramitsu.fearless_utils.runtime.metadata.eventOrNull
 import jp.co.soramitsu.fearless_utils.runtime.metadata.fullNameOf
+import jp.co.soramitsu.fearless_utils.runtime.metadata.module.Event
+import jp.co.soramitsu.fearless_utils.runtime.metadata.module.Module
 import jp.co.soramitsu.fearless_utils.runtime.metadata.moduleOrNull
 import jp.co.soramitsu.fearless_utils.scale.dataType.tuple
 import jp.co.soramitsu.fearless_utils.scale.dataType.uint8
@@ -29,7 +28,7 @@ object GenericEvent : Type<GenericEvent.Instance>("GenericEvent") {
         val (module, event) = getEventOrThrow(runtime, moduleIndex, eventIndex)
 
         val arguments = event.arguments.map { argumentDefinition ->
-            argumentDefinition.requireDerivedType(module, event)
+            argumentDefinition.requireNonNull(module, event)
                 .decode(scaleCodecReader, runtime)
         }
 
@@ -46,7 +45,7 @@ object GenericEvent : Type<GenericEvent.Instance>("GenericEvent") {
         indexCoder.write(scaleCodecWriter, moduleIndex.toUByte() to eventIndex.toUByte())
 
         event.arguments.forEachIndexed { index, argumentType ->
-            argumentType.requireDerivedType(module, event)
+            argumentType.requireNonNull(module, event)
                 .encodeUnsafe(scaleCodecWriter, runtime, arguments[index])
         }
     }
@@ -74,7 +73,7 @@ object GenericEvent : Type<GenericEvent.Instance>("GenericEvent") {
     }
 }
 
-private fun MetadataType.requireDerivedType(module: Module, event: Event) = derivedType
-        ?: throw EncodeDecodeException(
-            "Type $definition is not resolved in event ${module.fullNameOf(event)}"
-        )
+private fun Type<*>?.requireNonNull(module: Module, event: Event) = this
+    ?: throw EncodeDecodeException(
+        "Not resolved type in event ${module.fullNameOf(event)}"
+    )

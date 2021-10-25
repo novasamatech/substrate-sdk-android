@@ -9,9 +9,6 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.Type
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEnum
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
 
-private const val NAME_MULTI_SIGNATURE = "MultiSignature"
-private const val NAME_ETHEREUM_SIGNATURE = "EthereumSignature"
-
 private const val EXTRINSIC_SIGNATURE_TYPE = "ExtrinsicSignature"
 
 private val EncryptionType.multiSignatureName
@@ -22,11 +19,11 @@ object SignatureInstanceConstructor : Type.InstanceConstructor<SignatureWrapper>
     override fun constructInstance(typeRegistry: TypeRegistry, value: SignatureWrapper): Any {
         val type = typeRegistry.getOrThrow(EXTRINSIC_SIGNATURE_TYPE)
 
-        return when (type.name) {
-            NAME_MULTI_SIGNATURE -> {
+        return when (type) {
+            is DictEnum -> { // MultiSignature
                 DictEnum.Entry(value.encryptionType.multiSignatureName, value.signature)
             }
-            NAME_ETHEREUM_SIGNATURE -> {
+            is Struct -> { // EthereumSignature
                 require(value is SignatureWrapper.Ecdsa) {
                     "Cannot construct extrinsic signature from ${value::class.simpleName}"
                 }

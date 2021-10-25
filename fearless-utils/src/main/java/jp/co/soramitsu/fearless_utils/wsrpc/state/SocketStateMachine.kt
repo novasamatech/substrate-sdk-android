@@ -342,8 +342,8 @@ object SocketStateMachine {
             is State.Paused -> {
                 when (event) {
                     is Event.Send -> state.copy(
-                            pendingSendables = state.pendingSendables + event.sendable
-                        )
+                        pendingSendables = state.pendingSendables + event.sendable
+                    )
 
                     is Event.Cancel -> state.copy(
                         pendingSendables = state.pendingSendables - event.sendable

@@ -4,6 +4,7 @@ package jp.co.soramitsu.fearless_utils.scale
 
 import io.emeraldpay.polkaj.scale.ScaleCodecReader
 import io.emeraldpay.polkaj.scale.ScaleCodecWriter
+import jp.co.soramitsu.fearless_utils.extensions.fromHex
 import jp.co.soramitsu.fearless_utils.scale.Account.address
 import jp.co.soramitsu.fearless_utils.scale.Account.balance
 import jp.co.soramitsu.fearless_utils.scale.Account.something

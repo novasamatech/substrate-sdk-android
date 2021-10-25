@@ -5,17 +5,21 @@ import io.emeraldpay.polkaj.scale.ScaleCodecWriter
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.Type
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.errors.EncodeDecodeException
-import jp.co.soramitsu.fearless_utils.runtime.metadata.Function
-import jp.co.soramitsu.fearless_utils.runtime.metadata.FunctionArgument
-import jp.co.soramitsu.fearless_utils.runtime.metadata.Module
 import jp.co.soramitsu.fearless_utils.runtime.metadata.callOrNull
+import jp.co.soramitsu.fearless_utils.runtime.metadata.module.FunctionArgument
+import jp.co.soramitsu.fearless_utils.runtime.metadata.module.MetadataFunction
+import jp.co.soramitsu.fearless_utils.runtime.metadata.module.Module
 import jp.co.soramitsu.fearless_utils.runtime.metadata.moduleOrNull
 import jp.co.soramitsu.fearless_utils.scale.dataType.tuple
 import jp.co.soramitsu.fearless_utils.scale.dataType.uint8
 
 object GenericCall : Type<GenericCall.Instance>("GenericCall") {
 
-    class Instance(val module: Module, val function: Function, val arguments: Map<String, Any?>)
+    class Instance(
+        val module: Module,
+        val function: MetadataFunction,
+        val arguments: Map<String, Any?>
+    )
 
     private val indexCoder = tuple(uint8, uint8)
 
@@ -61,7 +65,7 @@ object GenericCall : Type<GenericCall.Instance>("GenericCall") {
         runtime: RuntimeSnapshot,
         moduleIndex: Int,
         callIndex: Int
-    ): Pair<Module, Function> {
+    ): Pair<Module, MetadataFunction> {
         val module =
             runtime.metadata.moduleOrNull(moduleIndex) ?: callNotFound(moduleIndex, callIndex)
         val call = module.callOrNull(callIndex) ?: callNotFound(moduleIndex, callIndex)

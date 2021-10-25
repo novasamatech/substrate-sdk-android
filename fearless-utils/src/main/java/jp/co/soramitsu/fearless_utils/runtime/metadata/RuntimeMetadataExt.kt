@@ -5,6 +5,11 @@ import jp.co.soramitsu.fearless_utils.hash.Hasher.xxHash128
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.bytes
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.errors.EncodeDecodeException
+import jp.co.soramitsu.fearless_utils.runtime.metadata.module.Event
+import jp.co.soramitsu.fearless_utils.runtime.metadata.module.MetadataFunction
+import jp.co.soramitsu.fearless_utils.runtime.metadata.module.Module
+import jp.co.soramitsu.fearless_utils.runtime.metadata.module.StorageEntry
+import jp.co.soramitsu.fearless_utils.runtime.metadata.module.StorageEntryType
 import java.io.ByteArrayOutputStream
 
 /**
@@ -33,16 +38,16 @@ fun Module.storageOrNull(name: String): StorageEntry? = storage?.get(name)
 /**
  * @throws NoSuchElementException if call was not found
  */
-fun Module.call(index: Int): Function = requireElementInMap(calls, index)
+fun Module.call(index: Int): MetadataFunction = requireElementInMap(calls, index)
 
-fun Module.callOrNull(index: Int): Function? = nullOnException { call(index) }
+fun Module.callOrNull(index: Int): MetadataFunction? = nullOnException { call(index) }
 
 /**
  * @throws NoSuchElementException if call was not found
  */
-fun Module.call(name: String): Function = callOrNull(name) ?: throw NoSuchElementException()
+fun Module.call(name: String): MetadataFunction = callOrNull(name) ?: throw NoSuchElementException()
 
-fun Module.callOrNull(name: String): Function? = calls?.get(name)
+fun Module.callOrNull(name: String): MetadataFunction? = calls?.get(name)
 
 /**
  * @throws NoSuchElementException if event was not found
@@ -75,8 +80,6 @@ fun StorageEntry.storageKeyOrNull() = nullOnException { storageKey() }
  */
 fun StorageEntryType.dimension() = when (this) {
     is StorageEntryType.Plain -> 0
-    is StorageEntryType.Map -> 1
-    is StorageEntryType.DoubleMap -> 2
     is StorageEntryType.NMap -> keys.size
 }
 
@@ -96,11 +99,6 @@ fun StorageEntry.storageKey(runtime: RuntimeSnapshot, vararg keys: Any?): String
 
     val keysWithHashers = when (type) {
         is StorageEntryType.Plain -> emptyList()
-        is StorageEntryType.Map -> listOf(type.key to type.hasher)
-        is StorageEntryType.DoubleMap -> listOf(
-            type.key1 to type.key1Hasher,
-            type.key2 to type.key2Hasher
-        )
         is StorageEntryType.NMap -> type.keys.zip(type.hashers)
     }
 

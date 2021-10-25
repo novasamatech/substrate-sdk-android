@@ -1,6 +1,7 @@
 package jp.co.soramitsu.fearless_utils.wsrpc.mappers
 
 import com.google.gson.Gson
+import jp.co.soramitsu.fearless_utils.extensions.fromHex
 import jp.co.soramitsu.fearless_utils.scale.EncodableStruct
 import jp.co.soramitsu.fearless_utils.scale.Schema
 import jp.co.soramitsu.fearless_utils.wsrpc.exception.RpcException
@@ -24,7 +25,7 @@ class ScaleMapper<S : Schema<S>>(val schema: S) : NullableMapper<EncodableStruct
     override fun mapNullable(rpcResponse: RpcResponse, jsonMapper: Gson): EncodableStruct<S>? {
         val raw = rpcResponse.result as? String ?: return null
 
-        return schema.read(raw)
+        return schema.read(raw.fromHex())
     }
 }
 
@@ -37,7 +38,7 @@ class ScaleCollectionMapper<S : Schema<S>>(val schema: S) :
     ): List<EncodableStruct<S>>? {
         val raw = rpcResponse.result as? List<String> ?: return null
 
-        return raw.map { schema.read(it) }
+        return raw.map(schema::read)
     }
 }
 

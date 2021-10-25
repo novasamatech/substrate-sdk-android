@@ -14,16 +14,11 @@ import jp.co.soramitsu.fearless_utils.scale.dataType.scalable
 import jp.co.soramitsu.fearless_utils.scale.enum
 import jp.co.soramitsu.fearless_utils.scale.schema
 import jp.co.soramitsu.fearless_utils.scale.string
-import jp.co.soramitsu.fearless_utils.scale.uint32
 import jp.co.soramitsu.fearless_utils.scale.uint8
 import jp.co.soramitsu.fearless_utils.scale.vector
 import jp.co.soramitsu.fearless_utils.scale.dataType.string as stringType
 
 object RuntimeMetadataSchema : Schema<RuntimeMetadataSchema>() {
-    val magicNumber by uint32()
-
-    val runtimeVersion by uint8()
-
     val modules by vector(ModuleMetadataSchema)
 
     val extrinsic by schema(ExtrinsicMetadataSchema)
@@ -69,7 +64,7 @@ object StorageEntryMetadataSchema : Schema<StorageEntryMetadataSchema>() {
 }
 
 enum class StorageEntryModifier {
-    Optional, Default
+    Optional, Default, Required
 }
 
 object MapSchema : Schema<MapSchema>() {

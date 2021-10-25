@@ -1,9 +1,9 @@
 package jp.co.soramitsu.fearless_utils.encrypt.keypair.substrate
 
 import jp.co.soramitsu.fearless_utils.encrypt.EncryptionType
+import jp.co.soramitsu.fearless_utils.encrypt.junction.Junction
 import jp.co.soramitsu.fearless_utils.encrypt.keypair.Keypair
 import jp.co.soramitsu.fearless_utils.encrypt.keypair.generate
-import jp.co.soramitsu.fearless_utils.encrypt.junction.Junction
 
 object SubstrateKeypairFactory {
 

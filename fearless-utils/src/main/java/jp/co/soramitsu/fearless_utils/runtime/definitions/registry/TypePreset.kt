@@ -67,7 +67,26 @@ fun typePreset(builder: TypePresetBuilder.() -> Unit): TypePreset {
     return createTypePresetBuilder().apply(builder)
 }
 
-fun substratePreParsePreset(): TypePreset = typePreset {
+fun v14Preset() = typePreset {
+    type(BooleanType)
+    type(u8)
+    type(u16)
+    type(u32)
+    type(u64)
+    type(u128)
+    type(u256)
+
+    type(Bytes)
+    type(Null)
+    type(H256)
+
+    type(GenericCall)
+    type(GenericEvent)
+
+    type(Data(this))
+}
+
+fun v13Preset(): TypePreset = typePreset {
     type(BooleanType)
 
     type(u8)

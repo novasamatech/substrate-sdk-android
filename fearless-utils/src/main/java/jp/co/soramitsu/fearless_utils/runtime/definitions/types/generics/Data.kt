@@ -11,7 +11,7 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.errors.EncodeDec
 import jp.co.soramitsu.fearless_utils.scale.dataType.byte
 import jp.co.soramitsu.fearless_utils.scale.utils.directWrite
 
-class Data(preset: TypePresetBuilder) : DictEnum("Data", createMapping(preset)) {
+class Data(preset: TypePresetBuilder) : DictEnum(TYPE_NAME, createMapping(preset)) {
 
     companion object {
         const val NONE = "None"
@@ -20,6 +20,8 @@ class Data(preset: TypePresetBuilder) : DictEnum("Data", createMapping(preset)) 
         const val SHA_256 = "Sha256"
         const val KECCAK_256 = "Keccak256"
         const val SHA_3_256 = "ShaThree256"
+
+        const val TYPE_NAME = "Data"
     }
 
     override fun decode(scaleCodecReader: ScaleCodecReader, runtime: RuntimeSnapshot): Entry<Any?> {

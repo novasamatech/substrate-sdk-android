@@ -2,10 +2,10 @@ package jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite
 
 import io.emeraldpay.polkaj.scale.ScaleCodecReader
 import io.emeraldpay.polkaj.scale.ScaleCodecWriter
+import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.Type
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.TypeReference
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.skipAliases
-import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
 
 @Suppress("UNCHECKED_CAST")
 class Struct(

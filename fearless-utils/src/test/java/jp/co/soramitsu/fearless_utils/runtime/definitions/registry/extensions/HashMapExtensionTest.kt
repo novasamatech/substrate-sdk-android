@@ -10,7 +10,7 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.dynamic.DynamicTypeRes
 import jp.co.soramitsu.fearless_utils.runtime.definitions.dynamic.TypeProvider
 import jp.co.soramitsu.fearless_utils.runtime.definitions.dynamic.extentsions.HashMapExtension
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypeRegistry
-import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.substratePreParsePreset
+import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.v13Preset
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.TypeReference
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Tuple
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Vec
@@ -37,7 +37,7 @@ class HashMapExtensionTest {
         val defaultReader = JsonReader(getResourceReader("default.json"))
         val defaultTree =
             gson.fromJson<TypeDefinitionsTree>(defaultReader, TypeDefinitionsTree::class.java)
-        val defaultParsed = TypeDefinitionParser.parseBaseDefinitions(defaultTree, substratePreParsePreset())
+        val defaultParsed = TypeDefinitionParser.parseBaseDefinitions(defaultTree, v13Preset())
         val defaultRegistry = TypeRegistry(defaultParsed.typePreset, DynamicTypeResolver.defaultCompoundResolver())
         val type = defaultRegistry["HashMap<Text, Text>"]
         assertInstance<Vec>(type)

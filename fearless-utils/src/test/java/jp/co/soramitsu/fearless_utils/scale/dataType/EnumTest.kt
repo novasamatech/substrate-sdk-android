@@ -1,5 +1,6 @@
 package jp.co.soramitsu.fearless_utils.scale.dataType
 
+import jp.co.soramitsu.fearless_utils.extensions.fromHex
 import jp.co.soramitsu.fearless_utils.scale.Schema
 import jp.co.soramitsu.fearless_utils.scale.enum
 import jp.co.soramitsu.fearless_utils.scale.toHexString

@@ -7,7 +7,7 @@ import jp.co.soramitsu.fearless_utils.getResourceReader
 import jp.co.soramitsu.fearless_utils.runtime.definitions.dynamic.DynamicTypeResolver
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypePreset
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypeRegistry
-import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.substratePreParsePreset
+import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.v13Preset
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.type
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.typePreset
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.CollectionEnum
@@ -376,7 +376,7 @@ class TypeDefinitionParserTest {
         val reader = JsonReader(getResourceReader("default.json"))
         val tree = gson.fromJson<TypeDefinitionsTree>(reader, TypeDefinitionsTree::class.java)
 
-        val result = TypeDefinitionParser.parseBaseDefinitions(tree, substratePreParsePreset())
+        val result = TypeDefinitionParser.parseBaseDefinitions(tree, v13Preset())
 
         print(result.unknownTypes)
 
@@ -395,7 +395,7 @@ class TypeDefinitionParserTest {
         val kusamaTree =
             gson.fromJson<TypeDefinitionsTree>(kusamaReader, TypeDefinitionsTree::class.java)
 
-        val defaultParsed = TypeDefinitionParser.parseBaseDefinitions(defaultTree, substratePreParsePreset())
+        val defaultParsed = TypeDefinitionParser.parseBaseDefinitions(defaultTree, v13Preset())
         val defaultRegistry = TypeRegistry(defaultParsed.typePreset, DynamicTypeResolver.defaultCompoundResolver())
 
         val keysDefault = defaultRegistry["Keys"]

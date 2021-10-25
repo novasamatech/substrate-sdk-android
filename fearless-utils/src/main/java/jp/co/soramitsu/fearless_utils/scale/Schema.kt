@@ -4,15 +4,15 @@ import io.emeraldpay.polkaj.scale.ScaleCodecReader
 import io.emeraldpay.polkaj.scale.ScaleCodecWriter
 import io.emeraldpay.polkaj.scale.ScaleReader
 import io.emeraldpay.polkaj.scale.ScaleWriter
+import jp.co.soramitsu.fearless_utils.extensions.fromHex
 import jp.co.soramitsu.fearless_utils.extensions.toHexString
 import jp.co.soramitsu.fearless_utils.scale.dataType.DataType
 import jp.co.soramitsu.fearless_utils.scale.dataType.optional
-import org.bouncycastle.util.encoders.Hex
 import java.io.ByteArrayOutputStream
-import kotlin.Exception
 
 @Suppress("UNCHECKED_CAST")
-abstract class Schema<S : Schema<S>> : ScaleReader<EncodableStruct<S>>,
+abstract class Schema<S : Schema<S>> :
+    ScaleReader<EncodableStruct<S>>,
     ScaleWriter<EncodableStruct<S>> {
     companion object;
 
@@ -36,17 +36,17 @@ abstract class Schema<S : Schema<S>> : ScaleReader<EncodableStruct<S>>,
 
     fun readOrNull(source: String): EncodableStruct<S>? {
         return try {
-            read(source)
+            read(source.fromHex())
         } catch (_: Exception) {
             return null
         }
     }
 
-    fun read(source: String): EncodableStruct<S> {
-        val withoutPrefix = source.removePrefix("0x")
+    fun read(scale: String): EncodableStruct<S> {
+        return read(scale.fromHex())
+    }
 
-        val bytes = Hex.decode(withoutPrefix)
-
+    fun read(bytes: ByteArray): EncodableStruct<S> {
         val reader = ScaleCodecReader(bytes)
 
         return read(reader)

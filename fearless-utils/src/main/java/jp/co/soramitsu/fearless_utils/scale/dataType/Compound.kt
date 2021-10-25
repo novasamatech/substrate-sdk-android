@@ -153,9 +153,9 @@ class union(val dataTypes: Array<out DataType<*>>) : DataType<Any?>() {
         if (typeIndex == -1) {
             throw java.lang.IllegalArgumentException(
                 "Unknown type ${value?.javaClass} for this enum. Supported: ${
-                    dataTypes.joinToString(
-                        ", "
-                    )
+                dataTypes.joinToString(
+                    ", "
+                )
                 }"
             )
         }

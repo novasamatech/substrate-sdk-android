@@ -2,9 +2,9 @@ package jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite
 
 import io.emeraldpay.polkaj.scale.ScaleCodecReader
 import io.emeraldpay.polkaj.scale.ScaleCodecWriter
+import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.Type
 import jp.co.soramitsu.fearless_utils.scale.dataType.CollectionEnumType
-import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
 
 class CollectionEnum(
     name: String,

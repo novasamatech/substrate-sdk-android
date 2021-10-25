@@ -42,15 +42,18 @@ suspend fun SocketService.executeAsync(
     deliveryType: DeliveryType = DeliveryType.AT_LEAST_ONCE
 ) = suspendCancellableCoroutine<RpcResponse> { cont ->
     val cancellable =
-        executeRequest(request, deliveryType, object : SocketService.ResponseListener<RpcResponse> {
-            override fun onNext(response: RpcResponse) {
-                cont.resume(response)
-            }
+        executeRequest(
+            request, deliveryType,
+            object : SocketService.ResponseListener<RpcResponse> {
+                override fun onNext(response: RpcResponse) {
+                    cont.resume(response)
+                }
 
-            override fun onError(throwable: Throwable) {
-                cont.resumeWithException(throwable)
+                override fun onError(throwable: Throwable) {
+                    cont.resumeWithException(throwable)
+                }
             }
-        })
+        )
 
     cont.invokeOnCancellation {
         cancellable.cancel()
@@ -63,15 +66,19 @@ fun SocketService.subscriptionFlow(
 ): Flow<SubscriptionChange> =
     callbackFlow {
         val cancellable =
-            subscribe(request, object : SocketService.ResponseListener<SubscriptionChange> {
-                override fun onNext(response: SubscriptionChange) {
-                    offer(response)
-                }
+            subscribe(
+                request,
+                object : SocketService.ResponseListener<SubscriptionChange> {
+                    override fun onNext(response: SubscriptionChange) {
+                        offer(response)
+                    }
 
-                override fun onError(throwable: Throwable) {
-                    close(throwable)
-                }
-            }, unsubscribeMethod)
+                    override fun onError(throwable: Throwable) {
+                        close(throwable)
+                    }
+                },
+                unsubscribeMethod
+            )
 
         awaitClose {
             cancellable.cancel()

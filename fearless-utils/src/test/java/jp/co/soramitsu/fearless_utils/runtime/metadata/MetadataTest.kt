@@ -5,6 +5,8 @@ import jp.co.soramitsu.fearless_utils.getFileContentFromResources
 import jp.co.soramitsu.fearless_utils.runtime.RealRuntimeProvider
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypeRegistry
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.stub.FakeType
+import jp.co.soramitsu.fearless_utils.runtime.metadata.builder.VersionedRuntimeBuilder
+import jp.co.soramitsu.fearless_utils.runtime.metadata.module.StorageEntryType
 import jp.co.soramitsu.fearless_utils.scale.EncodableStruct
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -30,10 +32,10 @@ class MetadataTest {
 
     @Test
     fun `should decode metadata`() {
-        val inHex = getFileContentFromResources("kusama_metadata")
+        val inHex = getFileContentFromResources("westend_metadata")
 
-        val metadataRaw = RuntimeMetadataSchema.read(inHex)
-        val metadata = RuntimeMetadata(typeRegistry, metadataRaw)
+        val metadataReader = RuntimeMetadataReader.read(inHex)
+        val metadata = VersionedRuntimeBuilder.buildMetadata(metadataReader, typeRegistry)
 
         assertInstance<StorageEntryType.Plain>(metadata.module("System").storage("Events").type)
         assertEquals(4 to 2, metadata.module("Balances").event("Transfer").index)
@@ -44,28 +46,28 @@ class MetadataTest {
     fun `should decode metadata with NMap`() {
         val inHex = getFileContentFromResources("statemine_metadata")
 
-        val metadataRaw = RuntimeMetadataSchema.read(inHex)
-        val metadata = RuntimeMetadata(typeRegistry, metadataRaw)
+        val metadataReader = RuntimeMetadataReader.read(inHex)
+        val metadata = VersionedRuntimeBuilder.buildMetadata(metadataReader, typeRegistry)
 
         assertInstance<StorageEntryType.NMap>(metadata.module("Assets").storage("Approvals").type)
     }
 
     @Test
     fun `connect metadata with real type registry`() {
-        val metadataRaw = RealRuntimeProvider.buildRawMetadata()
+        val metadataReader = RealRuntimeProvider.buildRawMetadata()
         val kusamaTypeRegistry = RealRuntimeProvider.buildRegistry("kusama")
 
-        RuntimeMetadata(kusamaTypeRegistry, metadataRaw)
+        VersionedRuntimeBuilder.buildMetadata(metadataReader, kusamaTypeRegistry)
     }
 
     @Test
     fun `find unknown types in metadata`() {
-        val metadata = RealRuntimeProvider.buildRawMetadata()
+        val metadataReader = RealRuntimeProvider.buildRawMetadata()
         val kusamaTypeRegistry = RealRuntimeProvider.buildRegistry("kusama")
 
         val toResolve = mutableSetOf<Holder>()
 
-        for (module in metadata[RuntimeMetadataSchema.modules]) {
+        for (module in metadataReader.metadata[RuntimeMetadataSchema.modules]) {
             val toResolveInModule = mutableSetOf<String>()
 
             val storage = module[ModuleMetadataSchema.storage]

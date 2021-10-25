@@ -5,6 +5,8 @@ import jp.co.soramitsu.fearless_utils.extensions.toHexString
 import jp.co.soramitsu.fearless_utils.hash.Hasher.xxHash128
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.BooleanType
+import jp.co.soramitsu.fearless_utils.runtime.metadata.module.StorageEntry
+import jp.co.soramitsu.fearless_utils.runtime.metadata.module.StorageEntryType
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,46 +35,6 @@ class RuntimeMetadataExtKtTest {
 
         assertThrows<IllegalArgumentException> {
             storageEntry.storageKey(runtime, false)
-        }
-    }
-
-    @Test
-    fun `test single map storage`() {
-        val storageEntry = storageEntry(
-            StorageEntryType.Map(
-                value = BooleanType,
-                key = BooleanType,
-                hasher = StorageHasher.Identity,
-                unused = false
-            )
-        )
-
-        assertEquals(PREFIX, storageEntry.storageKey(runtime))
-        assertEquals(PREFIX + "01", storageEntry.storageKey(runtime, true))
-
-        assertThrows<IllegalArgumentException> {
-            storageEntry.storageKey(runtime, false, false)
-        }
-    }
-
-    @Test
-    fun `test double map storage`() {
-        val storageEntry = storageEntry(
-            StorageEntryType.DoubleMap(
-                value = BooleanType,
-                key1 = BooleanType,
-                key1Hasher = StorageHasher.Identity,
-                key2 = BooleanType,
-                key2Hasher = StorageHasher.Identity,
-            )
-        )
-
-        assertEquals(PREFIX, storageEntry.storageKey(runtime))
-        assertEquals(PREFIX + "01", storageEntry.storageKey(runtime, true))
-        assertEquals(PREFIX + "0100", storageEntry.storageKey(runtime, true, false))
-
-        assertThrows<IllegalArgumentException> {
-            storageEntry.storageKey(runtime, false, false, false)
         }
     }
 

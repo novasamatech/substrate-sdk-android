@@ -67,3 +67,13 @@ fun ByteArray.split(divider: ByteArray): List<ByteArray> {
 
     return results
 }
+
+internal fun String.snakeCaseToCamelCase(): String {
+    return split("_").mapIndexed { index, segment ->
+        if (index > 0) { // do not capitalize first segment
+            segment.capitalize()
+        } else {
+            segment
+        }
+    }.joinToString(separator = "")
+}

@@ -1,13 +1,13 @@
 package jp.co.soramitsu.fearless_utils.encrypt.keypair.ethereum
 
 import jp.co.soramitsu.fearless_utils.encrypt.hmacSHA512
+import jp.co.soramitsu.fearless_utils.encrypt.junction.Junction
+import jp.co.soramitsu.fearless_utils.encrypt.junction.JunctionType
 import jp.co.soramitsu.fearless_utils.encrypt.keypair.ECDSAUtils
 import jp.co.soramitsu.fearless_utils.encrypt.keypair.KeypairFactory
 import jp.co.soramitsu.fearless_utils.encrypt.keypair.derivePublicKey
 import jp.co.soramitsu.fearless_utils.extensions.fromUnsignedBytes
 import jp.co.soramitsu.fearless_utils.extensions.requireOrException
-import jp.co.soramitsu.fearless_utils.encrypt.junction.Junction
-import jp.co.soramitsu.fearless_utils.encrypt.junction.JunctionType
 import jp.co.soramitsu.fearless_utils.scale.utils.toUnsignedBytes
 import java.math.BigInteger
 

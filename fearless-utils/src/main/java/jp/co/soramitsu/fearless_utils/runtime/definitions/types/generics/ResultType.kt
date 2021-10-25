@@ -4,7 +4,8 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.TypeReference
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEnum
 
 class ResultType(ok: TypeReference, err: TypeReference) : DictEnum(
-    "Result", listOf(
+    "Result",
+    listOf(
         Entry(Ok, ok),
         Entry(Err, err)
     )

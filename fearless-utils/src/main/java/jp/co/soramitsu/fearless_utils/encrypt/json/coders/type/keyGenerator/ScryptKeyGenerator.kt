@@ -58,7 +58,7 @@ object ScryptKeyGenerator : JsonEncryptionKeyGenerator {
 
         return JsonTypeEncoder.KeyGenerationResult(
             encryptingPrefix = salt + N.asLittleEndianBytes() + p.asLittleEndianBytes() +
-                    r.asLittleEndianBytes(),
+                r.asLittleEndianBytes(),
             encryptionKey = encryptionKey
         )
     }

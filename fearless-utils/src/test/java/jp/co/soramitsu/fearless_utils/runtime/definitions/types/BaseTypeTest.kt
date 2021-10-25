@@ -4,23 +4,22 @@ import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
 import jp.co.soramitsu.fearless_utils.runtime.definitions.dynamic.DynamicTypeResolver
 import jp.co.soramitsu.fearless_utils.runtime.definitions.dynamic.extentsions.GenericsExtension
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypeRegistry
-import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.substratePreParsePreset
+import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.v13Preset
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.BooleanType
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u8
-import jp.co.soramitsu.fearless_utils.runtime.metadata.Event
 import jp.co.soramitsu.fearless_utils.runtime.metadata.ExtrinsicMetadata
-import jp.co.soramitsu.fearless_utils.runtime.metadata.Function
-import jp.co.soramitsu.fearless_utils.runtime.metadata.FunctionArgument
-import jp.co.soramitsu.fearless_utils.runtime.metadata.MetadataType
-import jp.co.soramitsu.fearless_utils.runtime.metadata.Module
 import jp.co.soramitsu.fearless_utils.runtime.metadata.RuntimeMetadata
-import jp.co.soramitsu.fearless_utils.runtime.metadata.Storage
+import jp.co.soramitsu.fearless_utils.runtime.metadata.module.Event
+import jp.co.soramitsu.fearless_utils.runtime.metadata.module.FunctionArgument
+import jp.co.soramitsu.fearless_utils.runtime.metadata.module.MetadataFunction
+import jp.co.soramitsu.fearless_utils.runtime.metadata.module.Module
+import jp.co.soramitsu.fearless_utils.runtime.metadata.module.Storage
 import java.math.BigInteger
 
 abstract class BaseTypeTest {
 
     protected val typeRegistry = TypeRegistry(
-        substratePreParsePreset(),
+        v13Preset(),
         dynamicTypeResolver = DynamicTypeResolver(
             extensions = DynamicTypeResolver.DEFAULT_COMPOUND_EXTENSIONS + listOf(GenericsExtension)
         )
@@ -35,7 +34,7 @@ abstract class BaseTypeTest {
                     name = "A",
                     storage = Storage("_A", emptyMap()),
                     calls = mapOf(
-                        "B" to Function(
+                        "B" to MetadataFunction(
                             name = "B",
                             arguments = listOf(
                                 FunctionArgument(
@@ -55,14 +54,8 @@ abstract class BaseTypeTest {
                         "A" to Event(
                             name = "A",
                             arguments = listOf(
-                                MetadataType(
-                                    definition="bool",
-                                    derivedType = BooleanType,
-                                ),
-                                MetadataType(
-                                    definition="u8",
-                                    derivedType = u8,
-                                )
+                                BooleanType,
+                                u8
                             ),
                             documentation = emptyList(),
                             index = 1 to 0
