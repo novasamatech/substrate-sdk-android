@@ -15,6 +15,13 @@ fun Extrinsic.Signature.tryExtractMultiSignature(): MultiSignature? {
     return MultiSignature(encryptionType, value)
 }
 
+private val EncryptionType.multiSignatureName
+    get() = rawName.capitalize()
+
+fun MultiSignature.prepareForEncoding(): Any {
+    return DictEnum.Entry(encryptionType.multiSignatureName, value)
+}
+
 fun <A> Extrinsic.Signature.Companion.new(
     accountIdentifier: A,
     signature: Any?,

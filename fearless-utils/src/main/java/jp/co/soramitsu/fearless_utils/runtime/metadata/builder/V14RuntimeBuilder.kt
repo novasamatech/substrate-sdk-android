@@ -2,10 +2,12 @@ package jp.co.soramitsu.fearless_utils.runtime.metadata.builder
 
 import jp.co.soramitsu.fearless_utils.extensions.requireOrException
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypeRegistry
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.Type
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.TypeReference
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEnum
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Tuple
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Null
 import jp.co.soramitsu.fearless_utils.runtime.metadata.ExtrinsicMetadata
 import jp.co.soramitsu.fearless_utils.runtime.metadata.RuntimeMetadata
 import jp.co.soramitsu.fearless_utils.runtime.metadata.RuntimeMetadataReader
@@ -120,20 +122,28 @@ object V14RuntimeBuilder : RuntimeBuilder {
         if (type !is DictEnum) return emptyMap()
 
         return type.elements.mapIndexed { index, call ->
-            val argumentsStruct = call.value.value as Struct
-
             MetadataFunction(
                 name = call.name,
-                arguments = argumentsStruct.mapping.map { mapEntry ->
-                    FunctionArgument(
-                        name = mapEntry.key,
-                        type = mapEntry.value.value
-                    )
+                arguments = extractArguments(call.value.value!!) { name, type ->
+                    FunctionArgument(name, type)
                 },
                 documentation = emptyList(),
                 index = moduleIndex to index
             )
         }.groupByName()
+    }
+
+    private fun <T> extractArguments(
+        type: Type<*>,
+        mapper: (name: String, type: Type<*>?) -> T
+    ): List<T> {
+        return when (type) {
+            is Null -> emptyList()
+            is Struct -> type.mapping.map { mapEntry ->
+                mapper(mapEntry.key, mapEntry.value.value)
+            }
+            else -> listOf(mapper(type.name, type))
+        }
     }
 
     private fun buildEvents(
@@ -147,19 +157,9 @@ object V14RuntimeBuilder : RuntimeBuilder {
         if (type !is DictEnum) return emptyMap()
 
         return type.elements.mapIndexed { index, event ->
-            val eventArgumentsType = event.value.value
-
-            val arguments = if (eventArgumentsType is Struct) {
-                eventArgumentsType.mapping.map { mapEntry ->
-                    mapEntry.value.value
-                }
-            } else {
-                listOf(eventArgumentsType)
-            }
-
             Event(
                 name = event.name,
-                arguments = arguments,
+                arguments = extractArguments(event.value.value!!) { _, type -> type },
                 documentation = emptyList(),
                 index = moduleIndex to index
             )

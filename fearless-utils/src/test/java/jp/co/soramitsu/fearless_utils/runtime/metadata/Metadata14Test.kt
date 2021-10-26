@@ -5,10 +5,11 @@ import jp.co.soramitsu.fearless_utils.getFileContentFromResources
 import jp.co.soramitsu.fearless_utils.runtime.definitions.dynamic.DynamicTypeResolver
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypeRegistry
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.v14Preset
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEnum
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Vec
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Data
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.GenericCall
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.GenericAccountId
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Null
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.DynamicByteArray
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.UIntType
 import jp.co.soramitsu.fearless_utils.runtime.definitions.v14.TypesParserV14
@@ -67,6 +68,14 @@ class Metadata14Test {
 
         val systemRemarkType = metadata.module("System").call("remark").arguments.first().type
         assertInstance<DynamicByteArray>(systemRemarkType)
+
+        val setPayeeVariant = metadata.module("Staking").call("set_payee").arguments.first().type
+        assertInstance<DictEnum>(setPayeeVariant)
+
+        // empty variant element -> null optimization
+        assertInstance<Null>(setPayeeVariant["Staked"])
+        // 1 field variant element -> unwrap struct optimization
+        assertInstance<GenericAccountId>(setPayeeVariant["Account"])
 
         Assert.assertEquals(4 to 2, metadata.module("Balances").event("Transfer").index)
         Assert.assertEquals(4 to 3, metadata.module("Balances").call("transfer_keep_alive").index)

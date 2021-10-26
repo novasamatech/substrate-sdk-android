@@ -1,6 +1,5 @@
 package jp.co.soramitsu.fearless_utils.runtime.definitions.types.instances
 
-import jp.co.soramitsu.fearless_utils.encrypt.EncryptionType
 import jp.co.soramitsu.fearless_utils.encrypt.SignatureWrapper
 import jp.co.soramitsu.fearless_utils.encrypt.vByte
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypeRegistry
@@ -8,20 +7,17 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.getOrThrow
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.Type
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEnum
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.MultiSignature
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.prepareForEncoding
 
 private const val EXTRINSIC_SIGNATURE_TYPE = "ExtrinsicSignature"
-
-private val EncryptionType.multiSignatureName
-    get() = rawName.capitalize()
 
 object SignatureInstanceConstructor : Type.InstanceConstructor<SignatureWrapper> {
 
     override fun constructInstance(typeRegistry: TypeRegistry, value: SignatureWrapper): Any {
-        val type = typeRegistry.getOrThrow(EXTRINSIC_SIGNATURE_TYPE)
-
-        return when (type) {
+        return when (val type = typeRegistry.getOrThrow(EXTRINSIC_SIGNATURE_TYPE)) {
             is DictEnum -> { // MultiSignature
-                DictEnum.Entry(value.encryptionType.multiSignatureName, value.signature)
+                MultiSignature(value.encryptionType, value.signature).prepareForEncoding()
             }
             is Struct -> { // EthereumSignature
                 require(value is SignatureWrapper.Ecdsa) {

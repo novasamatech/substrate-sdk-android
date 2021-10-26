@@ -16,6 +16,7 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Tuple
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Vec
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Bytes
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Null
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.Compact
 import jp.co.soramitsu.fearless_utils.runtime.definitions.v14.typeMapping.SiTypeMapping
 import jp.co.soramitsu.fearless_utils.runtime.definitions.v14.typeMapping.default
@@ -115,22 +116,23 @@ object TypesParserV14 {
 
                             val children = parseTypeMapping(params, fields, useSnakeCaseForFieldNames = false)
 
-                            if (children.size == 1) {
-                                val (childName, childTypeRef) = children.entries.first()
+                            val valueReference = when (children.size) {
+                                0 -> TypeReference(Null)
+                                1 -> {
+                                    val (childName, childTypeRef) = children.entries.first()
 
-                                if (childName == NAME_NONE) {
-                                    return@map DictEnum.Entry(
-                                        name = it[TypeDefVariantItem.name],
-                                        value = childTypeRef
-                                    )
+                                    if (childName == NAME_NONE) {
+                                        childTypeRef
+                                    } else {
+                                        TypeReference(Struct(itemName, children))
+                                    }
                                 }
+                                else -> TypeReference(Struct(itemName, children))
                             }
-
-                            val struct = Struct(itemName, children)
 
                             DictEnum.Entry(
                                 name = it[TypeDefVariantItem.name],
-                                value = TypeReference(struct)
+                                value = valueReference
                             )
                         }
 
