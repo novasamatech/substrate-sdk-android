@@ -9,6 +9,7 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Vec
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Data
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.GenericCall
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.DynamicByteArray
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.UIntType
 import jp.co.soramitsu.fearless_utils.runtime.definitions.v14.TypesParserV14
 import jp.co.soramitsu.fearless_utils.runtime.metadata.builder.VersionedRuntimeBuilder
@@ -63,6 +64,9 @@ class Metadata14Test {
         assertInstance<Struct>(identityType)
         val dataType = identityType.get<Data>("display")
         assertInstance<Data>(dataType)
+
+        val systemRemarkType = metadata.module("System").call("remark").arguments.first().type
+        assertInstance<DynamicByteArray>(systemRemarkType)
 
         Assert.assertEquals(4 to 2, metadata.module("Balances").event("Transfer").index)
         Assert.assertEquals(4 to 3, metadata.module("Balances").call("transfer_keep_alive").index)

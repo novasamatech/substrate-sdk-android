@@ -10,12 +10,14 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Option
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.SetType
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Data
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.GenericAccountId
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.DynamicByteArray
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.FixedByteArray
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u8
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.skipAliases
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.RegistryType
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.TypeDefArray
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.TypeDefComposite
+import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.TypeDefSequence
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.TypeParameter
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.def
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.name
@@ -23,6 +25,7 @@ import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.params
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.path
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.type
 import jp.co.soramitsu.fearless_utils.scale.EncodableStruct
+import java.math.BigInteger
 
 interface SiTypeMapping {
 
@@ -176,17 +179,29 @@ object SiByteArrayMapping : SiTypeMapping {
     ): Type<*>? {
         val def = originalDefinition.def
 
-        if (def is EncodableStruct<*> && def.schema is TypeDefArray) {
-            val innerTypeId = def[TypeDefArray.type].toString()
+        if (def is EncodableStruct<*>) {
+            when (def.schema) {
+                is TypeDefArray -> {
+                    if (isInnerTypeU8(typesBuilder, def[TypeDefArray.type])) {
+                        return FixedByteArray(name = typeId, length = def[TypeDefArray.len].toInt())
+                    }
+                }
 
-            val innerType = typesBuilder[innerTypeId]
-
-            if (innerType?.skipAliases()?.value == u8) {
-                return FixedByteArray(name = typeId, length = def[TypeDefArray.len].toInt())
+                is TypeDefSequence -> {
+                    if (isInnerTypeU8(typesBuilder, def[TypeDefSequence.type])) {
+                        return DynamicByteArray(name = typeId)
+                    }
+                }
             }
         }
 
         return null
+    }
+
+    private fun isInnerTypeU8(typesBuilder: TypePresetBuilder, innerTypeId: BigInteger): Boolean {
+        val innerType = typesBuilder[innerTypeId.toString()]
+
+        return innerType?.skipAliases()?.value == u8
     }
 }
 
