@@ -5,6 +5,9 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.BaseTypeTest
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.errors.EncodeDecodeException
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.fromHex
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.toHex
+import jp.co.soramitsu.fearless_utils.runtime.metadata.call
+import jp.co.soramitsu.fearless_utils.runtime.metadata.event
+import jp.co.soramitsu.fearless_utils.runtime.metadata.module
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -12,9 +15,12 @@ class GenericEventTest : BaseTypeTest() {
 
     val inHex = "0x01000103"
 
+    val module = runtime.metadata.module("A")
+    val event = module.event("A")
+
     val instance = GenericEvent.Instance(
-        moduleIndex = 1,
-        eventIndex = 0,
+        module = module,
+        event = event,
         arguments = listOf(
             true,
             3.toBigInteger()
@@ -33,26 +39,15 @@ class GenericEventTest : BaseTypeTest() {
         val decoded = GenericEvent.fromHex(runtime, inHex)
 
         assertEquals(instance.arguments, decoded.arguments)
-        assertEquals(instance.moduleIndex, decoded.moduleIndex)
-        assertEquals(instance.eventIndex, decoded.eventIndex)
-    }
-
-    @Test
-    fun `should throw for encoding instance with invalid index`() {
-        val invalidInstance = GenericEvent.Instance(
-            moduleIndex = 2,
-            eventIndex = 3,
-            arguments = emptyList()
-        )
-
-        assertThrows<EncodeDecodeException> { GenericEvent.toHex(runtime, invalidInstance) }
+        assertEquals(instance.module, decoded.module)
+        assertEquals(instance.event, decoded.event)
     }
 
     @Test
     fun `should throw for encoding instance with invalid arguments`() {
         val invalidInstance = GenericEvent.Instance(
-            moduleIndex = 1,
-            eventIndex = 0,
+            module = module,
+            event = event,
             arguments = listOf(
                 "arg1" to true,
                 "arg2" to 3 // invalid param type - should be BigInteger

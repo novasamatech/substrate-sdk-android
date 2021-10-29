@@ -8,7 +8,7 @@ apply from: '../maven-publish-helper.gradle'
 publishing {
     publications {
         release(MavenPublication) {
-            groupId 'jp.co.soramitsu.fearless-utils'
+            groupId 'io.github.nova-wallet'
         }
     }
 }

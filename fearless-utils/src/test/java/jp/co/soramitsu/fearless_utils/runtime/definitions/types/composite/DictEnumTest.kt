@@ -3,6 +3,7 @@ package jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.BaseTypeTest
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.TypeReference
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.fromHex
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Null
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.BooleanType
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u128
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u8
@@ -28,6 +29,15 @@ class DictEnumTest : BaseTypeTest() {
         enumValues,
     )
 
+    private val enumValuesCustomIndexing = mapOf(
+        0 to DictEnum.Entry("A", TypeReference(u8)),
+        1 to DictEnum.Entry("B", TypeReference(u128)),
+        8 to DictEnum.Entry("C", TypeReference(BooleanType)),
+        128 to DictEnum.Entry("D", TypeReference(Null))
+        )
+
+    private val typeCustomIndexing = DictEnum("test", enumValuesCustomIndexing)
+
     @Test
     fun `should decode instance`() {
         val expectedInstance = DictEnum.Entry("B", true)
@@ -37,6 +47,46 @@ class DictEnumTest : BaseTypeTest() {
 
         assertEquals(expectedInstance.name, decoded.name)
         assertEquals(expectedInstance.value, decoded.value)
+    }
+
+    @Test
+    fun `should decode instance with custom indexing`() {
+        val expectedInstance = DictEnum.Entry("C", true)
+        val inHex = "0x0801"
+
+        val decoded = typeCustomIndexing.fromHex(runtime, inHex)
+
+        assertEquals(expectedInstance.name, decoded.name)
+        assertEquals(expectedInstance.value, decoded.value)
+    }
+
+    @Test
+    fun `should decode instance if index greater than Byte range`() {
+        val expectedInstance = DictEnum.Entry("D", null)
+        val inHex = "0x80"
+
+        val decoded = typeCustomIndexing.fromHex(runtime, inHex)
+
+        assertEquals(expectedInstance.name, decoded.name)
+        assertEquals(expectedInstance.value, decoded.value)
+    }
+
+    @Test
+    fun `should encode instance if index greater than Byte range`() {
+        val instance = DictEnum.Entry("D", null)
+
+        val encoded = typeCustomIndexing.toHex(runtime, instance)
+
+        assertEquals("0x80", encoded)
+    }
+
+    @Test
+    fun `should encode instance with custom indexing`() {
+        val instance = DictEnum.Entry("C", true)
+
+        val encoded = typeCustomIndexing.toHex(runtime, instance)
+
+        assertEquals("0x0801", encoded)
     }
 
     @Test

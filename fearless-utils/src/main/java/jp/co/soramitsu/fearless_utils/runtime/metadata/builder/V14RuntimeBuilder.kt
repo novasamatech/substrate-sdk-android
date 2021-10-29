@@ -121,29 +121,16 @@ object V14RuntimeBuilder : RuntimeBuilder {
 
         if (type !is DictEnum) return emptyMap()
 
-        return type.elements.mapIndexed { index, call ->
+        return type.elements.map { (index, call) ->
             MetadataFunction(
                 name = call.name,
                 arguments = extractArguments(call.value.value!!) { name, type ->
-                    FunctionArgument(name, type)
+                    FunctionArgument(name!!, type)
                 },
                 documentation = emptyList(),
                 index = moduleIndex to index
             )
         }.groupByName()
-    }
-
-    private fun <T> extractArguments(
-        type: Type<*>,
-        mapper: (name: String, type: Type<*>?) -> T
-    ): List<T> {
-        return when (type) {
-            is Null -> emptyList()
-            is Struct -> type.mapping.map { mapEntry ->
-                mapper(mapEntry.key, mapEntry.value.value)
-            }
-            else -> listOf(mapper(type.name, type))
-        }
     }
 
     private fun buildEvents(
@@ -156,7 +143,7 @@ object V14RuntimeBuilder : RuntimeBuilder {
 
         if (type !is DictEnum) return emptyMap()
 
-        return type.elements.mapIndexed { index, event ->
+        return type.elements.map { (index, event) ->
             Event(
                 name = event.name,
                 arguments = extractArguments(event.value.value!!) { _, type -> type },
@@ -164,6 +151,22 @@ object V14RuntimeBuilder : RuntimeBuilder {
                 index = moduleIndex to index
             )
         }.groupByName()
+    }
+
+    private fun <T> extractArguments(
+        type: Type<*>,
+        mapper: (name: String?, type: Type<*>?) -> T
+    ): List<T> {
+        return when (type) {
+            is Null -> emptyList()
+            is Tuple -> type.typeReferences.map { typeRef ->
+                mapper(null, typeRef.value)
+            }
+            is Struct -> type.mapping.map { mapEntry ->
+                mapper(mapEntry.key, mapEntry.value.value)
+            }
+            else -> listOf(mapper(null, type))
+        }
     }
 
     private fun buildConstants(
@@ -192,7 +195,7 @@ object V14RuntimeBuilder : RuntimeBuilder {
 
         if (type !is DictEnum) return emptyMap()
 
-        return type.elements.map {
+        return type.elements.values.map {
             Error(
                 name = it.name,
                 documentation = emptyList(),

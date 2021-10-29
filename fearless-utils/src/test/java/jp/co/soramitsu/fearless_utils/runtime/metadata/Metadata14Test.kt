@@ -17,6 +17,7 @@ import jp.co.soramitsu.fearless_utils.runtime.metadata.builder.VersionedRuntimeB
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module.StorageEntryType
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.RuntimeMetadataSchemaV14
 import org.junit.Assert
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,7 +34,7 @@ class Metadata14Test {
             metadataReader.metadata[RuntimeMetadataSchemaV14.lookup],
             v14Preset()
         )
-        Assert.assertEquals(0, parseResult.unknownTypes.size)
+        assertEquals(0, parseResult.unknownTypes.size)
     }
 
     @Test
@@ -77,7 +78,15 @@ class Metadata14Test {
         // 1 field variant element -> unwrap struct optimization
         assertInstance<GenericAccountId>(setPayeeVariant["Account"])
 
-        Assert.assertEquals(4 to 2, metadata.module("Balances").event("Transfer").index)
-        Assert.assertEquals(4 to 3, metadata.module("Balances").call("transfer_keep_alive").index)
+        // multiple null-named elements in struct does not collapse into single one
+        val dustLostEventArguments = metadata.module("Balances").event("DustLost").arguments
+        assertEquals(2, dustLostEventArguments.size)
+
+        // multiple null-named elements with same type in struct does not collapse into single one
+        val transferEventArguments = metadata.module("Balances").event("Transfer").arguments
+        assertEquals(3, transferEventArguments.size)
+
+        assertEquals(4 to 2, metadata.module("Balances").event("Transfer").index)
+        assertEquals(4 to 3, metadata.module("Balances").call("transfer_keep_alive").index)
     }
 }

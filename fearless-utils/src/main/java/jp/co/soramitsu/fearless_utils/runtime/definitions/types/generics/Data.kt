@@ -38,8 +38,9 @@ class Data(preset: TypePresetBuilder) : DictEnum(TYPE_NAME, createMapping(preset
 
             in 34..37 -> {
                 val offset = 32
+                val variantIndex = typeIndex - offset
 
-                val typeEntry = elements[typeIndex - offset]
+                val typeEntry = elements[variantIndex] ?: elementNotFound(variantIndex)
 
                 val decoded = typeEntry.value.requireValue().decode(scaleCodecReader, runtime)
 
@@ -67,13 +68,11 @@ class Data(preset: TypePresetBuilder) : DictEnum(TYPE_NAME, createMapping(preset
             }
             else -> {
                 val offset = 32
-                val index = elements.indexOfFirst { it.name == value.name }
+                val entry = entryOf(value.name)
 
-                if (index == -1) elementNotFound(value.name)
+                val type = entry.value.value.requireValue()
 
-                val type = elements[index].value.requireValue()
-
-                scaleCodecWriter.writeByte(index + offset)
+                scaleCodecWriter.writeByte(entry.key + offset)
                 type.encodeUnsafe(scaleCodecWriter, runtime, value.value)
             }
         }

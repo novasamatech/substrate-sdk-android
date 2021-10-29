@@ -33,9 +33,6 @@ import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.TypeDefSequence
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.TypeDefVariant
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.TypeDefVariantItem
 import jp.co.soramitsu.fearless_utils.scale.EncodableStruct
-import java.math.BigInteger
-
-private const val NAME_NONE = ""
 
 @OptIn(ExperimentalUnsignedTypes::class)
 object TypesParserV14 {
@@ -86,9 +83,9 @@ object TypesParserV14 {
                 when (def.schema) {
                     is TypeDefComposite -> {
                         val list = def[TypeDefComposite.fields2]
-                        val children = parseTypeMapping(params, list, useSnakeCaseForFieldNames = true)
+                        val childrenTypeMapping = parseTypeMapping(params, list, useSnakeCaseForFieldNames = true)
 
-                        Struct(name, children)
+                        typeMappingToType(name, childrenTypeMapping)
                     }
 
                     is TypeDefArray -> {
@@ -109,32 +106,43 @@ object TypesParserV14 {
                     is TypeDefVariant -> {
                         val variants = def[TypeDefVariant.variants]
 
-                        val transformedVariants = variants.map {
-                            val fields = it[TypeDefVariantItem.fields2]
+                        val transformedVariants = variants.associateBy(
+                            keySelector = { it[TypeDefVariantItem.index].toInt() },
+                            valueTransform = {
+                                val fields = it[TypeDefVariantItem.fields2]
 
-                            val itemName = it[TypeDefVariantItem.index].toString()
+                                val itemName = it[TypeDefVariantItem.index].toString()
 
-                            val children = parseTypeMapping(params, fields, useSnakeCaseForFieldNames = false)
+                                val children = parseTypeMapping(
+                                    params = params,
+                                    childrenRaw = fields,
+                                    useSnakeCaseForFieldNames = false
+                                )
 
-                            val valueReference = when (children.size) {
-                                0 -> TypeReference(Null)
-                                1 -> {
-                                    val (childName, childTypeRef) = children.entries.first()
+                                val valueReference = when (children.size) {
+                                    0 -> TypeReference(Null)
+                                    1 -> {
+                                        when (children) {
+                                            is FieldsTypeMapping.Named -> {
+                                                TypeReference(Struct(itemName, children.value))
+                                            }
+                                            // unwrap single unnamed struct
+                                            is FieldsTypeMapping.Unnamed -> children.value.first()
+                                        }
+                                    }
+                                    else -> {
+                                        val fieldsType = typeMappingToType(itemName, children)
 
-                                    if (childName == NAME_NONE) {
-                                        childTypeRef
-                                    } else {
-                                        TypeReference(Struct(itemName, children))
+                                        TypeReference(fieldsType)
                                     }
                                 }
-                                else -> TypeReference(Struct(itemName, children))
-                            }
 
-                            DictEnum.Entry(
-                                name = it[TypeDefVariantItem.name],
-                                value = valueReference
-                            )
-                        }
+                                DictEnum.Entry(
+                                    name = it[TypeDefVariantItem.name],
+                                    value = valueReference
+                                )
+                            }
+                        )
 
                         DictEnum(name, transformedVariants)
                     }
@@ -167,12 +175,9 @@ object TypesParserV14 {
                 }
             }
             is List<*> -> {
-                (def as? List<BigInteger>)?.let { list ->
-                    Tuple(
-                        name,
-                        list.map { params.typesBuilder.getOrCreate(it.toString()) }
-                    )
-                }
+                val typeReferences = def.map { params.typesBuilder.getOrCreate(it.toString()) }
+
+                Tuple(name = name, typeReferences = typeReferences)
             }
             else -> {
                 null
@@ -180,27 +185,55 @@ object TypesParserV14 {
         }
     }
 
+    private fun typeMappingToType(itemName: String, typeMapping: FieldsTypeMapping): Type<*> {
+        return when (typeMapping) {
+            is FieldsTypeMapping.Named -> Struct(itemName, typeMapping.value)
+            is FieldsTypeMapping.Unnamed -> Tuple(itemName, typeMapping.value)
+        }
+    }
+
     private fun parseTypeMapping(
         params: Params,
         childrenRaw: List<EncodableStruct<TypeDefCompositeField>>,
         useSnakeCaseForFieldNames: Boolean
-    ): LinkedHashMap<String, TypeReference> {
-        val children = LinkedHashMap<String, TypeReference>()
-
-        for (child in childrenRaw) {
+    ): FieldsTypeMapping {
+        val children = childrenRaw.map { child ->
             val typeIndex = child[TypeDefCompositeField.type].toString()
-
-            val entryName = child[TypeDefCompositeField.name] ?: NAME_NONE
-
-            val entryNameTransformed = if (useSnakeCaseForFieldNames) {
-                entryName.snakeCaseToCamelCase()
-            } else {
-                entryName
+            val entryName = child[TypeDefCompositeField.name]?.let {
+                if (useSnakeCaseForFieldNames) it.snakeCaseToCamelCase() else it
             }
 
-            children[entryNameTransformed] = params.typesBuilder.getOrCreate(typeIndex)
+            entryName to params.typesBuilder.getOrCreate(typeIndex)
         }
 
-        return children
+        // there should either be all named arguments or all unnamed
+        val allFieldsHasNames = children.all { (name, _) -> name != null }
+
+        return if (allFieldsHasNames) {
+            val childrenAsMap = children.associateByTo(
+                LinkedHashMap(),
+                keySelector = { (name, _) -> name!! },
+                valueTransform = { (_, typeReference) -> typeReference }
+            )
+
+            FieldsTypeMapping.Named(childrenAsMap)
+        } else {
+            val childrenAsList = children.map { (_, typeRef) -> typeRef }
+
+            FieldsTypeMapping.Unnamed(childrenAsList)
+        }
+    }
+
+    private sealed class FieldsTypeMapping {
+
+        abstract val size: Int
+
+        class Named(val value: LinkedHashMap<String, TypeReference>) : FieldsTypeMapping() {
+            override val size: Int = value.size
+        }
+
+        class Unnamed(val value: List<TypeReference>) : FieldsTypeMapping() {
+            override val size: Int = value.size
+        }
     }
 }
