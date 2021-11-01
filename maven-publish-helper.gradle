@@ -10,24 +10,7 @@
  */
 
 apply plugin: 'maven-publish'
-
-def getReleaseRepositoryUrl() {
-    return hasProperty('RELEASE_REPOSITORY_URL') ? RELEASE_REPOSITORY_URL
-            : System.env.RELEASE_REPOSITORY_URL
-}
-
-def getSnapshotRepositoryUrl() {
-    return hasProperty('SNAPSHOT_REPOSITORY_URL') ? SNAPSHOT_REPOSITORY_URL
-            : System.env.RELEASE_REPOSITORY_URL
-}
-
-def getRepositoryUsername() {
-    return hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : System.env.NEXUS_USERNAME
-}
-
-def getRepositoryPassword() {
-    return hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : System.env.NEXUS_PASSWORD
-}
+apply plugin: 'signing'
 
 task androidJavadocs(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
@@ -57,6 +40,9 @@ afterEvaluate {
         publications {
             // Creates a Maven publication called "release".
             release(MavenPublication) {
+                // Temporarily override the artifactId until it is corrected in the project
+                artifactId "substrate-sdk-android"
+
                 // Applies the component for the release build variant.
                 from components.release
 
@@ -68,15 +54,42 @@ afterEvaluate {
                 //groupId = 'com.example'
                 artifactId = 'substrate-sdk-android'
                 version = android.defaultConfig.versionName // or just '1.0'
+
+                pom {
+                    signing {
+                        sign publishing.publications.release
+                        sign configurations.archives
+                    }
+                    name = "substrate-sdk-android"
+                    description = "Nova Substrate SDK is a native Android library to help developers build native mobile apps for Substrate-based networks, e.g. Polkadot, Kusama & parachains"
+                    url = "https://github.com/nova-wallet/substrate-sdk-android"
+                    licenses {
+                        license {
+                            name = "The Apache License, Version 2.0"
+                            url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                        }
+                    }
+                    scm {
+                        connection = "scm:git:https://github.com/nova-wallet/substrate-sdk-android.git"
+                        developerConnection = "scm:git:https://github.com/nova-wallet/substrate-sdk-android.git"
+                        url = "https://github.com/nova-wallet/substrate-sdk-android"
+                    }
+                    developers {
+                        developer {
+                            id = "valentun"
+                            name = "Valentun Sergeev"
+                            email = "valentun@novawallet.io"
+                        }
+                    }
+                }
             }
         }
 
         repositories {
             maven {
-                url getReleaseRepositoryUrl()
                 credentials {
-                    username = getRepositoryUsername()
-                    password = getRepositoryPassword()
+                    username = ossrhUsername
+                    password = ossrhPassword
                 }
             }
         }

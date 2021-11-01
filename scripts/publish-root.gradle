@@ -1,0 +1,20 @@
+apply from: "${rootDir}/scripts/secrets.gradle"
+
+ext["ossrhUsername"] = readSecret('OSSRH_USERNAME')
+ext["ossrhPassword"] = readSecret('OSSRH_PASSWORD')
+ext["sonatypeStagingProfileId"] = readSecret('SONATYPE_STAGING_PROFILE_ID')
+ext["signing.keyId"] = readSecret('SIGNING_KEY_ID')
+ext["signing.password"] = readSecret('SIGNING_PASSWORD')
+
+// Set up Sonatype repository
+nexusPublishing {
+    repositories {
+        sonatype {
+            stagingProfileId = sonatypeStagingProfileId
+            username = ossrhUsername
+            password = ossrhPassword
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+        }
+    }
+}

@@ -72,8 +72,12 @@ buildscript {
         classpath 'com.android.tools.build:gradle:3.6.0'
         classpath 'org.mozilla.rust-android-gradle:plugin:0.9.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath 'io.github.gradle-nexus:publish-plugin:1.1.0'
     }
 }
+
+apply plugin: 'io.github.gradle-nexus.publish-plugin'
+
 
 allprojects {
     repositories {
@@ -111,3 +115,5 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
     main = "com.pinterest.ktlint.Main"
     args "-F", "$project.rootDir/**/src/main/**/*.kt"
 }
+
+apply from: "${rootDir}/scripts/publish-root.gradle"
