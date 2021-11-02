@@ -13,6 +13,12 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+
+
     buildTypes {
         debug {
             versionNameSuffix '-debug'
@@ -27,7 +33,9 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation project(':fearless-utils')
-    implementation kotlinDep
     implementation androidDep
     implementation constraintDep
+    implementation spoungyCastleBcPixDep
+    implementation spoungyCastleBcPgDep
+    implementation gsonDep
 }

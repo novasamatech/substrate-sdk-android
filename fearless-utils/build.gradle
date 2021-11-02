@@ -2,6 +2,16 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'org.mozilla.rust-android-gradle.rust-android'
+apply from: '../maven-publish-helper.gradle'
+
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId 'io.github.nova-wallet'
+        }
+    }
+}
 
 android {
     compileSdkVersion rootProject.compileVersion
@@ -9,7 +19,7 @@ android {
         minSdkVersion rootProject.minVersion
         targetSdkVersion rootProject.targetVersion
         versionCode rootProject.versionCode
-        versionName rootProject.versionName
+        versionName computeVersionName()
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -19,14 +29,86 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+
+    sourceSets {
+        test {
+            java.srcDirs += "$projectDir/src/testShared/java"
+        }
+
+        androidTest {
+            java.srcDirs += "$projectDir/src/testShared/java"
+        }
+    }
 }
+
+cargo {
+    module = "../sr25519-java/"
+    libname = "sr25519java"
+    targets = ["arm", "arm64", "x86", "x86_64"]
+}
+
+tasks.whenTaskAdded { task ->
+    if ((task.name == 'javaPreCompileDebug' || task.name == 'javaPreCompileRelease')) {
+        task.dependsOn 'cargoBuild'
+    }
+}
+
+task deleteJar(type: Delete) {
+    delete 'libs/jars/libfearless.jar'
+}
+
+task createJar(type: Copy) {
+    from('build/intermediates/bundles/release/')
+    into('libs/jars/')
+    include('classes.jar')
+    rename('classes.jar', 'libfearless.jar')
+}
+
+createJar.dependsOn(deleteJar, build)
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation kotlinDep
-    implementation androidDep
-    implementation cardViewDep
-    implementation materialDep
-    implementation constraintDep
+    implementation spoungyCastleBcPixDep
+    implementation spoungyCastleBcPgDep
+    implementation ed25519Dep
+    implementation svgDep
+    implementation bip39Dep
+    implementation secureStringDep
+    implementation wsDep
+    implementation gsonDep
+    implementation web3jDep
+    implementation gsonDep
+    implementation apacheXercesDep
+    implementation xxHashDep
+
+    implementation coroutinesDep
+
+    testImplementation jUnitDep
+    testImplementation mockitoDep
+
+    androidTestImplementation androidTestRunnerDep
+    androidTestImplementation androidTestRulesDep
+    androidTestImplementation androidJunitDep
+}
+
+def computeVersionName() {
+    def verMatcher = rootProject.versionName =~ /^([0-9]+\.[0-9]+)\.([0-9]+)$/
+    if (!verMatcher.find()) {
+        throw new GradleException("Invalid versionName!")
+    }
+    if (System.getenv('BUILD_ID') != null && System.getenv('BRANCH_NAME') != null && System.getenv('BRANCH_NAME') == 'develop') {
+        return "${verMatcher.group(1)}.${System.getenv('BUILD_ID')}"
+    } else {
+        return "${rootProject.versionName}"
+    }
 }

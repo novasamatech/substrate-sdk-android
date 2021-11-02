@@ -1,7 +1,7 @@
 buildscript {
     ext {
         // App version
-        versionName = '1.0.0'
+        versionName = '1.0.96'
         versionCode = 1
 
         // SDK and tools
@@ -9,81 +9,84 @@ buildscript {
         minVersion = 21
         targetVersion = 28
 
-        kotlinVersion = '1.3.61'
+        kotlinVersion = '1.4.31'
 
         supportVersion = '1.0.0'
         constraintVersion = '1.1.3'
 
         rxJavaVersion = '2.2.7'
-        rxAndroidVersion = '2.1.0'
+        coroutinesVersion = '1.4.2'
 
-        daggerVersion = '2.25.2'
-        javaxInjectVersion = '1'
-
-        architectureComponentVersion = '2.0.0'
-
-        retrofitVersion = '2.4.0'
-        okhttpVersion = '3.8.0'
         gsonVersion = '2.8.2'
 
         zXingVersion = '3.5.0'
 
-        navControllerVersion = '2.0.0-rc02'
+        spoungyCastleVersion = '1.58.0.0'
+        ed25519Version = '0.3.0'
+        bip39version = '2019.01.27'
+        web3jVersion = '4.6.0-android'
+        apacheXercesVersion = '2.9.0'
 
         junitVersion = '4.12'
         mockitoVersion = '2.23.0'
-        robolectricVersion = '4.1'
-
-        kotlinDep = "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
+        wsVersion = '2.10'
+        xxHashVersion = '1.7.1'
+        svgVersion = '1.4'
 
         androidDep = "androidx.appcompat:appcompat:$supportVersion"
-        cardViewDep = "androidx.cardview:cardview:$supportVersion"
-        recyclerViewDep = "androidx.recyclerview:recyclerview:$supportVersion"
         constraintDep = "androidx.constraintlayout:constraintlayout:$constraintVersion"
         materialDep = "com.google.android.material:material:$supportVersion"
 
         rxJavaDep = "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
-        rxAndroidDep = "io.reactivex.rxjava2:rxandroid:$rxAndroidVersion"
+        coroutinesDep = "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
 
-        daggerDep = "com.google.dagger:dagger:$daggerVersion"
-        daggerKapt = "com.google.dagger:dagger-compiler:$daggerVersion"
-
-        lifecycleDep = "androidx.lifecycle:lifecycle-extensions:$architectureComponentVersion"
-        lifecycleKapt = "androidx.lifecycle:lifecycle-compiler:$architectureComponentVersion"
-
-        roomDep = "androidx.room:room-runtime:$architectureComponentVersion"
-        rxRoomDep = "androidx.room:room-rxjava2:$architectureComponentVersion"
-        roomKapt = "androidx.room:room-compiler:$architectureComponentVersion"
-
-        navigationFragmentDep = "androidx.navigation:navigation-fragment:$navControllerVersion"
-        navigationUiDep = "androidx.navigation:navigation-ui:$navControllerVersion"
-
-        retrofitDep = "com.squareup.retrofit2:retrofit:$retrofitVersion"
-        rxCallAdapterDep = "com.squareup.retrofit2:adapter-rxjava2:$retrofitVersion"
-        gsonConvertedDep = "com.squareup.retrofit2:converter-gson:$retrofitVersion"
         gsonDep = "com.google.code.gson:gson:$gsonVersion"
+
+        spoungyCastleBcPixDep = "com.madgag.spongycastle:bcpkix-jdk15on:$spoungyCastleVersion"
+        spoungyCastleBcPgDep = "com.madgag.spongycastle:bcpg-jdk15on:$spoungyCastleVersion"
+        ed25519Dep = "net.i2p.crypto:eddsa:$ed25519Version"
+        web3jDep = "org.web3j:crypto:$web3jVersion"
+        apacheXercesDep = "org.eclipse.birt.runtime.3_7_1:org.apache.xerces:$apacheXercesVersion"
+
+        bip39Dep = "io.github.novacrypto:BIP39:$bip39version"
+        secureStringDep = "io.github.novacrypto:securestring:$bip39version@jar"
+        wsDep = "com.neovisionaries:nv-websocket-client:$wsVersion"
+        xxHashDep = "org.lz4:lz4-java:$xxHashVersion"
+        svgDep = "com.caverock:androidsvg-aar:$svgVersion"
 
         jUnitDep = "junit:junit:$junitVersion"
         mockitoDep = "org.mockito:mockito-inline:$mockitoVersion"
-        robolectricDep = "org.robolectric:robolectric:$robolectricVersion"
-        robolectricMultidexDep = "org.robolectric:shadows-multidex:$robolectricVersion"
-        archCoreTestDep = "androidx.arch.core:core-testing:$architectureComponentVersion"
-        kotlin_version = '1.3.61'
+
+        androidTestRunnerDep = 'androidx.test:runner:1.4.0'
+        androidTestRulesDep = 'androidx.test:rules:1.4.0'
+        androidJunitDep = 'androidx.test.ext:junit:1.1.3'
     }
     repositories {
         google()
         jcenter()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.6.0'
+        classpath 'org.mozilla.rust-android-gradle:plugin:0.9.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath 'io.github.gradle-nexus:publish-plugin:1.1.0'
     }
 }
+
+apply plugin: 'io.github.gradle-nexus.publish-plugin'
+
 
 allprojects {
     repositories {
         google()
         jcenter()
+        maven {
+            url "https://jitpack.io"
+        }
+        mavenCentral()
     }
 }
 
@@ -96,12 +99,21 @@ task clean(type: Delete) {
 }
 
 dependencies {
-    ktlint 'com.github.shyiko:ktlint:0.31.0'
+    ktlint "com.pinterest:ktlint:0.40.0"
 }
 
 task ktlint(type: JavaExec, group: "verification") {
     description = "Check Kotlin code style."
     classpath = configurations.ktlint
-    main = "com.github.shyiko.ktlint.Main"
+    main = "com.pinterest.ktlint.Main"
     args "$project.rootDir/**/src/main/**/*.kt", "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/reports/checkstyle/kotlin-checkstyle-report.xml"
 }
+
+task ktlintFormat(type: JavaExec, group: "formatting") {
+    description = "Fix Kotlin code style deviations."
+    classpath = configurations.ktlint
+    main = "com.pinterest.ktlint.Main"
+    args "-F", "$project.rootDir/**/src/main/**/*.kt"
+}
+
+apply from: "${rootDir}/scripts/publish-root.gradle"

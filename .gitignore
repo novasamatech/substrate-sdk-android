@@ -8,3 +8,7 @@
 app/src/main/aidl/
 app/*.apk
 /.idea/
+*.so
+*.lock
+/sr25519-java/target
+/sr25519-java/.idea
