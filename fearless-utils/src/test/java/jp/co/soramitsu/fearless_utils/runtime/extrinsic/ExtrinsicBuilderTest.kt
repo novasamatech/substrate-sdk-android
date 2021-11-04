@@ -83,6 +83,31 @@ class ExtrinsicBuilderTest {
     }
 
     @Test
+    fun `should replace call`() {
+        val extrinsicInHex =
+            "0x41028400fdc41550fb5186d71cae699c31731b3e1baa10680c7bd6b3831a6d222cf4d16800080bfe8bc67f44b498239887dc5679523cfcb1d20fd9ec9d6bae0a385cca118d2cb7ef9f4674d52a810feb32932d7c6fe3e05ce9e06cd72cf499c8692206410ab5038800040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402"
+
+        val correctAmount = "10000000000".toBigInteger()
+        val wrongAMount = "123".toBigInteger()
+
+        val recipientAccountId = "340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c63".fromHex()
+
+        val encoded = createExtrinsicBuilder()
+            .transfer(
+                recipientAccountId = recipientAccountId,
+                amount = wrongAMount
+            )
+            .reset()
+            .transfer(
+                recipientAccountId = recipientAccountId,
+                amount = correctAmount
+            )
+            .build()
+
+        assertEquals(extrinsicInHex, encoded)
+    }
+
+    @Test
     fun `should build batch extrinsic`() {
 
         val extrinsicInHex =

@@ -68,6 +68,12 @@ class ExtrinsicBuilder(
         return this
     }
 
+    fun reset(): ExtrinsicBuilder {
+        calls.clear()
+
+        return this
+    }
+
     fun build(
         useBatchAll: Boolean = false
     ): String {
