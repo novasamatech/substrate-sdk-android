@@ -68,8 +68,16 @@ class ExtrinsicBuilder(
         return this
     }
 
-    fun build(): String {
-        val call = maybeWrapInBatch()
+    fun reset(): ExtrinsicBuilder {
+        calls.clear()
+
+        return this
+    }
+
+    fun build(
+        useBatchAll: Boolean = false
+    ): String {
+        val call = maybeWrapInBatch(useBatchAll)
         val multiSignature = buildSignature(call)
         val signedExtras = buildSignedExtras()
 
@@ -85,11 +93,11 @@ class ExtrinsicBuilder(
         return Extrinsic.toHex(runtime, extrinsic)
     }
 
-    private fun maybeWrapInBatch(): GenericCall.Instance {
+    private fun maybeWrapInBatch(useBatchAll: Boolean): GenericCall.Instance {
         return if (calls.size == 1) {
             calls.first()
         } else {
-            wrapInBatch()
+            wrapInBatch(useBatchAll)
         }
     }
 
@@ -124,9 +132,10 @@ class ExtrinsicBuilder(
         return signatureConstructor.constructInstance(runtime.typeRegistry, signatureWrapper)
     }
 
-    private fun wrapInBatch(): GenericCall.Instance {
+    private fun wrapInBatch(useBatchAll: Boolean): GenericCall.Instance {
         val batchModule = runtime.metadata.module("Utility")
-        val batchFunction = batchModule.call("batch")
+        val batchFunctionName = if (useBatchAll) "batch_all" else "batch"
+        val batchFunction = batchModule.call(batchFunctionName)
 
         return GenericCall.Instance(
             module = batchModule,
