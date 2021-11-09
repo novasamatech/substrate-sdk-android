@@ -4,6 +4,7 @@ import jp.co.soramitsu.fearless_utils.extensions.snakeCaseToCamelCase
 import jp.co.soramitsu.fearless_utils.runtime.definitions.ParseResult
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypePreset
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypePresetBuilder
+import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.alias
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.getOrCreate
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.newBuilder
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.type
@@ -61,14 +62,22 @@ object TypesParserV14 {
 
     private fun parseParams(params: Params) {
         for (type in params.types) {
-            val t = parseParam(params, type) ?: continue
-            params.typesBuilder.type(t)
+            val constructedType = parseParam(params, type) ?: continue
+            params.typesBuilder.type(constructedType)
+
+            val aliasedName = type[PortableType.id].toString()
+
+            if (aliasedName != constructedType.name) {
+                params.typesBuilder.alias(alias = aliasedName, original = constructedType.name)
+            }
         }
     }
 
     private fun parseParam(params: Params, portableType: EncodableStruct<PortableType>): Type<*>? {
         val typesBuilder = params.typesBuilder
-        val name = portableType[PortableType.id].toString()
+
+        val name = portableType.pathBasedName() ?: portableType[PortableType.id].toString()
+
         val type = portableType[PortableType.type]
         val def = type[RegistryType.def]
 
@@ -235,5 +244,11 @@ object TypesParserV14 {
         class Unnamed(val value: List<TypeReference>) : FieldsTypeMapping() {
             override val size: Int = value.size
         }
+    }
+
+    private fun EncodableStruct<PortableType>.pathBasedName(): String? {
+        val pathSegments = this[PortableType.type][RegistryType.path]
+
+        return if (pathSegments.isEmpty()) null else pathSegments.joinToString(separator = ".")
     }
 }
