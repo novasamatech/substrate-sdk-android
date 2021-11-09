@@ -84,6 +84,7 @@ fun v14Preset() = typePreset {
     type(GenericEvent)
 
     type(Data(this))
+    type(GenericAccountId)
 }
 
 fun v13Preset(): TypePreset = typePreset {

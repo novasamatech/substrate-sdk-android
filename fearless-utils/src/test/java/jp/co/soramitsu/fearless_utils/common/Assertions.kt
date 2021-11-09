@@ -13,6 +13,10 @@ inline fun <reified T> assertInstance(value: Any?) {
     Assert.assertTrue("$value is not a ${T::class}", value is T)
 }
 
+inline fun <reified T> assertNotInstance(value: Any?) {
+    Assert.assertTrue("$value is a ${T::class}", value !is T)
+}
+
 inline fun <reified T : Throwable> assertThrows(block: () -> Unit): T {
     var throwable: Throwable? = null
 

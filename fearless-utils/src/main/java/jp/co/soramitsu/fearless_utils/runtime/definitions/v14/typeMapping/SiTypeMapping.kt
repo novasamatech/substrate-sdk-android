@@ -8,8 +8,6 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.TypeReference
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Alias
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Option
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.SetType
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Data
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.GenericAccountId
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.DynamicByteArray
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.FixedByteArray
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u8
@@ -48,46 +46,6 @@ class OneOfSiTypeMapping(
         typesBuilder: TypePresetBuilder
     ): Type<*>? {
         return inner.tryFindNonNull { it.map(originalDefinition, typeId, typesBuilder) }
-    }
-}
-
-class LastSegmentReplacingTypeMapping(
-    private val replacements: Map<String, Type<*>>,
-) : SiTypeMapping {
-
-    override fun map(
-        originalDefinition: EncodableStruct<RegistryType>,
-        typeId: String,
-        typesBuilder: TypePresetBuilder
-    ): Type<*>? {
-        val lastSegment = originalDefinition.lastPathSegment ?: return null
-
-        val replacement = replacements[lastSegment]
-
-        return replacement?.let {
-            Alias(typeId, TypeReference(it))
-        }
-    }
-}
-
-typealias TypeCreator = (TypePresetBuilder) -> Type<*>?
-
-class FullPathReplacingTypeMapping(
-    private val replacements: Map<String, TypeCreator>,
-) : SiTypeMapping {
-
-    override fun map(
-        originalDefinition: EncodableStruct<RegistryType>,
-        typeId: String,
-        typesBuilder: TypePresetBuilder
-    ): Type<*>? {
-        val fullPath = originalDefinition.calculateFullPath() ?: return null
-
-        val replacementCreator = replacements[fullPath]
-
-        return replacementCreator?.let {
-            Alias(typeId, TypeReference(replacementCreator(typesBuilder)))
-        }
     }
 }
 
@@ -211,27 +169,9 @@ fun SiTypeMapping.Companion.default(): SiTypeMapping {
             SiByteArrayMapping,
             SiOptionTypeMapping,
             SiSetTypeMapping,
-            LastSegmentReplacingTypeMapping(
-                replacements = mapOf(
-                    "AccountId32" to GenericAccountId
-                )
-            ),
-            FullPathReplacingTypeMapping(
-                replacements = mapOf(
-                    "pallet_identity::types::Data" to { it[Data.TYPE_NAME]?.value }
-                )
-            ),
             SiCompositeNoneToAliasTypeMapping
         )
     )
-}
-
-fun EncodableStruct<RegistryType>.calculateFullPath(): String? {
-    if (path.isEmpty()) {
-        return null
-    }
-
-    return path.joinToString(separator = "::")
 }
 
 private val EncodableStruct<RegistryType>.lastPathSegment: String?
