@@ -30,19 +30,18 @@ object SS58Encoder {
         }
     }
 
-    fun encode(publicKey: ByteArray, addressByte: Byte): String {
+    fun encode(publicKey: ByteArray, addressPrefix: Short): String {
         val normalizedKey = if (publicKey.size > 32) {
             publicKey.blake2b256()
         } else {
             publicKey
         }
-        val ident = addressByte.toShort() and 0b00111111_11111111
+        val ident = addressPrefix.toInt() and 0b0011_1111_1111_1111
         val addressTypeByteArray = when (ident) {
             in 0..63 -> byteArrayOf(ident.toByte())
-            in 64..127 -> {
-                val first = (ident and 0b00000000_11111100).toInt() shr 2
-                val second =
-                    (ident.toInt() shr 8) or ((ident and 0b00000000_00000011).toInt() shl 6)
+            in 64..16_383 -> {
+                val first = (ident and 0b0000_0000_1111_1100) shr 2
+                val second = (ident shr 8) or ((ident and 0b0000_0000_0000_0011) shl 6)
                 byteArrayOf(first.toByte() or 0b01000000, second.toByte())
             }
             else -> throw IllegalArgumentException("Reserved for future address format extensions")
@@ -70,24 +69,24 @@ object SS58Encoder {
     }
 
     @Throws(AddressFormatException::class)
-    fun extractAddressByte(address: String): Byte {
+    fun extractAddressPrefix(address: String): Short {
         val decodedByteArray = base58.decode(address)
         if (decodedByteArray.size < 2) throw IllegalArgumentException("Invalid address")
         val (_, ident) = getPrefixLenIdent(decodedByteArray)
-        return ident.toByte()
+        return ident
     }
 
-    fun extractAddressByteOrNull(address: String): Byte? = try {
-        extractAddressByte(address)
+    fun extractAddressByteOrNull(address: String): Short? = try {
+        extractAddressPrefix(address)
     } catch (e: Exception) {
         null
     }
 
-    fun ByteArray.toAddress(addressByte: Byte) = encode(this, addressByte)
+    fun ByteArray.toAddress(addressPrefix: Short) = encode(this, addressPrefix)
 
     fun String.toAccountId() = decode(this)
 
-    fun String.addressByte() = extractAddressByte(this)
+    fun String.addressPrefix() = extractAddressPrefix(this)
 
     fun String.addressByteOrNull() = extractAddressByteOrNull(this)
 }

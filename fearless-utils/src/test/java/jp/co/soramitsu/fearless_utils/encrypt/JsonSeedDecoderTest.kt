@@ -129,7 +129,7 @@ class JsonSeedDecoderTest {
         val networkTypeIdentifier = result.networkTypeIdentifier
 
         assertInstance<NetworkTypeIdentifier.AddressByte>(networkTypeIdentifier)
-        assertEquals(VALID_ADDRESS_BYTE, networkTypeIdentifier.addressByte)
+        assertEquals(VALID_ADDRESS_BYTE, networkTypeIdentifier.addressPrefix)
     }
 
     @Test
