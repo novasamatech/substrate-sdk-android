@@ -81,7 +81,7 @@ object TypesParserV14 {
         val type = portableType[PortableType.type]
         val def = type[RegistryType.def]
 
-        val fromTypeMapping = params.typeMapping.map(type, name, params.typesBuilder)
+        val fromTypeMapping = params.typeMapping.map(portableType, name, params.typesBuilder)
 
         if (fromTypeMapping != null) {
             return fromTypeMapping
