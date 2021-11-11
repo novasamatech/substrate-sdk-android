@@ -3,7 +3,7 @@ package jp.co.soramitsu.fearless_utils.ss58
 import jp.co.soramitsu.fearless_utils.common.TestAddressBytes
 import jp.co.soramitsu.fearless_utils.extensions.fromHex
 import jp.co.soramitsu.fearless_utils.extensions.toHexString
-import jp.co.soramitsu.fearless_utils.ss58.SS58Encoder.addressByte
+import jp.co.soramitsu.fearless_utils.ss58.SS58Encoder.addressPrefix
 import jp.co.soramitsu.fearless_utils.ss58.SS58Encoder.toAccountId
 import jp.co.soramitsu.fearless_utils.ss58.SS58Encoder.toAddress
 import org.junit.Assert.assertEquals
@@ -53,6 +53,20 @@ class SS58EncoderTest {
     }
 
     @Test
+    fun `should encode address with address byte bigger than 127`() {
+        val result = PUBLIC_KEY.fromHex().toAddress(10041)
+
+        assertEquals("bXj1Y1F3VPGeDw4sUWESaWfh1ed5VaBo1Bic5Jz4aGebJpkCG", result)
+    }
+
+    @Test
+    fun `should decode address with address byte bigger than 127`() {
+        val accountIdActual = "bXj1Y1F3VPGeDw4sUWESaWfh1ed5VaBo1Bic5Jz4aGebJpkCG".toAccountId()
+
+        assertEquals(PUBLIC_KEY, accountIdActual.toHexString())
+    }
+
+    @Test
     fun `encode key to address with westend prefix`() {
         val hexKey = "0x84bdc405d139399bba3ccea5d3de23316c9deeab661f57e2f4d1720cc6649859"
         val address = hexKey.fromHex().toAddress(TestAddressBytes.WESTEND)
@@ -63,16 +77,16 @@ class SS58EncoderTest {
     fun `decode address to key with 69 prefix`() {
         val address = "cnUVLAjzRsrXrzEiqjxMpBwvb6YgdBy8DKibonvZgtcQY5ZKe"
         val hexKey = address.toAccountId().toHexString(true)
-        val prefix = address.addressByte()
+        val prefix = address.addressPrefix()
         assertEquals("0x84bdc405d139399bba3ccea5d3de23316c9deeab661f57e2f4d1720cc6649859", hexKey)
-        assertEquals(69.toByte(), prefix)
+        assertEquals(69.toShort(), prefix)
     }
 
     @Test
     fun `decode address to key with kusama prefix`() {
         val address = "FaNDBF8erbEfQtpLuwpk6kmQrYyiKNzBQm6BSuh2fdCqajb"
         val hexKey = address.toAccountId().toHexString(true)
-        val prefix = address.addressByte()
+        val prefix = address.addressPrefix()
         assertEquals("0x84bdc405d139399bba3ccea5d3de23316c9deeab661f57e2f4d1720cc6649859", hexKey)
         assertEquals(TestAddressBytes.KUSAMA, prefix)
     }
@@ -81,7 +95,7 @@ class SS58EncoderTest {
     fun `decode address to key with polkadot prefix`() {
         val address = "1413hCAKtGqnMJ5tXrBmzJDv7tGPbx7woXepx5d66xSEH6qM"
         val hexKey = address.toAccountId().toHexString(true)
-        val prefix = address.addressByte()
+        val prefix = address.addressPrefix()
         assertEquals("0x84bdc405d139399bba3ccea5d3de23316c9deeab661f57e2f4d1720cc6649859", hexKey)
         assertEquals(TestAddressBytes.POLKADOT, prefix)
     }
@@ -90,7 +104,7 @@ class SS58EncoderTest {
     fun `decode address to key with westend prefix`() {
         val address = "5F4kYruG2VaJum5NaD8mr9PmGGGjueZoj2vLnndjYsQi6Vkw"
         val hexKey = address.toAccountId().toHexString(true)
-        val prefix = address.addressByte()
+        val prefix = address.addressPrefix()
         assertEquals("0x84bdc405d139399bba3ccea5d3de23316c9deeab661f57e2f4d1720cc6649859", hexKey)
         assertEquals(TestAddressBytes.WESTEND, prefix)
     }
