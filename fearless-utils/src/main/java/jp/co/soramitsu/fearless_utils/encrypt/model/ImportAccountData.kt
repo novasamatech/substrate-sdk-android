@@ -20,7 +20,7 @@ class ImportAccountMeta(
 sealed class NetworkTypeIdentifier {
     class Genesis(val genesis: String) : NetworkTypeIdentifier()
 
-    class AddressByte(val addressByte: Byte) : NetworkTypeIdentifier()
+    class AddressByte(val addressPrefix: Short) : NetworkTypeIdentifier()
 
     object Undefined : NetworkTypeIdentifier()
 }

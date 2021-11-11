@@ -9,11 +9,13 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.v14Preset
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Alias
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEnum
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.FixedArray
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Option
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Vec
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Null
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.DynamicByteArray
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.UIntType
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u64
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.skipAliases
 import jp.co.soramitsu.fearless_utils.runtime.definitions.v14.TypesParserV14
 import jp.co.soramitsu.fearless_utils.runtime.metadata.builder.VersionedRuntimeBuilder
@@ -21,6 +23,7 @@ import jp.co.soramitsu.fearless_utils.runtime.metadata.module.StorageEntryType
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.RuntimeMetadataSchemaV14
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.junit.MockitoJUnitRunner
@@ -64,10 +67,12 @@ class Metadata14Test {
         val misFrozenType = accountData.get<UIntType>("miscFrozen")
         assertNotNull(misFrozenType) // test that snake case -> camel case is performed
 
-        val systemRemarkType = metadata.module("System").call("remark").arguments.first().type?.skipAliases()
+        val systemRemarkType =
+            metadata.module("System").call("remark").arguments.first().type?.skipAliases()
         assertInstance<DynamicByteArray>(systemRemarkType)
 
-        val setPayeeVariant = metadata.module("Staking").call("set_payee").arguments.first().type?.skipAliases()
+        val setPayeeVariant =
+            metadata.module("Staking").call("set_payee").arguments.first().type?.skipAliases()
         assertInstance<DictEnum>(setPayeeVariant)
 
         // empty variant element -> null optimization
@@ -92,6 +97,14 @@ class Metadata14Test {
         val callType = batchArgument.innerType
         assertInstance<Alias>(callType)
         assertEquals("westend_runtime.Call", callType.aliasedReference.value?.name)
+
+        // Options should not be path-based
+        val optionType = typeRegistry["Option"]
+        assertNull(optionType)
+        val activeEraReturnType = metadata.module("Staking").storage("ActiveEra").type.value
+        assertInstance<Struct>(activeEraReturnType)
+        val eraStartType = activeEraReturnType.get<Option>("start")?.innerType?.skipAliases()
+        assertEquals(u64, eraStartType)
 
         // id-based types with empty path shold not be aliased
         val u8Primitive = typeRegistry["2"]

@@ -12,6 +12,7 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.Dynam
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.FixedByteArray
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u8
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.skipAliases
+import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.PortableType
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.RegistryType
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.TypeDefArray
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.TypeDefComposite
@@ -30,8 +31,8 @@ interface SiTypeMapping {
     companion object // extensions
 
     fun map(
-        originalDefinition: EncodableStruct<RegistryType>,
-        typeId: String,
+        originalDefinition: EncodableStruct<PortableType>,
+        suggestedTypeName: String,
         typesBuilder: TypePresetBuilder
     ): Type<*>?
 }
@@ -41,31 +42,32 @@ class OneOfSiTypeMapping(
 ) : SiTypeMapping {
 
     override fun map(
-        originalDefinition: EncodableStruct<RegistryType>,
-        typeId: String,
+        originalDefinition: EncodableStruct<PortableType>,
+        suggestedTypeName: String,
         typesBuilder: TypePresetBuilder
     ): Type<*>? {
-        return inner.tryFindNonNull { it.map(originalDefinition, typeId, typesBuilder) }
+        return inner.tryFindNonNull { it.map(originalDefinition, suggestedTypeName, typesBuilder) }
     }
 }
 
 object SiSetTypeMapping : SiTypeMapping {
 
     override fun map(
-        originalDefinition: EncodableStruct<RegistryType>,
-        typeId: String,
+        originalDefinition: EncodableStruct<PortableType>,
+        suggestedTypeName: String,
         typesBuilder: TypePresetBuilder,
     ): Type<*>? {
-        if (originalDefinition.lastPathSegment != "BitFlags") return null
+        val registryType = originalDefinition.type
+        if (registryType.lastPathSegment != "BitFlags") return null
 
-        val typeDef = originalDefinition.def
+        val typeDef = registryType.def
 
         if (typeDef is EncodableStruct<*> && typeDef.schema is TypeDefComposite) {
             val typeIndex = typeDef[TypeDefComposite.fields2].firstOrNull()?.type
 
             if (typeIndex != null) {
                 return SetType(
-                    name = typeId,
+                    name = suggestedTypeName,
                     valueTypeReference = typesBuilder.getOrCreate(typeIndex.toString()),
                     valueList = LinkedHashMap()
                 )
@@ -73,7 +75,7 @@ object SiSetTypeMapping : SiTypeMapping {
         }
 
         return SetType(
-            name = typeId,
+            name = suggestedTypeName,
             valueTypeReference = TypeReference(null),
             valueList = LinkedHashMap()
         )
@@ -83,11 +85,11 @@ object SiSetTypeMapping : SiTypeMapping {
 object SiCompositeNoneToAliasTypeMapping : SiTypeMapping {
 
     override fun map(
-        originalDefinition: EncodableStruct<RegistryType>,
-        typeId: String,
+        originalDefinition: EncodableStruct<PortableType>,
+        suggestedTypeName: String,
         typesBuilder: TypePresetBuilder
     ): Type<*>? {
-        val typeDef = originalDefinition.def
+        val typeDef = originalDefinition.type.def
 
         if (
             typeDef is EncodableStruct<*> &&
@@ -99,7 +101,7 @@ object SiCompositeNoneToAliasTypeMapping : SiTypeMapping {
                 val aliasedTypeIndex = fields.first().type.toString()
                 val aliasedReference = typesBuilder.getOrCreate(aliasedTypeIndex)
 
-                return Alias(typeId, aliasedReference)
+                return Alias(suggestedTypeName, aliasedReference)
             }
         }
 
@@ -110,20 +112,23 @@ object SiCompositeNoneToAliasTypeMapping : SiTypeMapping {
 object SiOptionTypeMapping : SiTypeMapping {
 
     override fun map(
-        originalDefinition: EncodableStruct<RegistryType>,
-        typeId: String,
+        originalDefinition: EncodableStruct<PortableType>,
+        suggestedTypeName: String,
         typesBuilder: TypePresetBuilder
     ): Type<*>? {
-        val path = originalDefinition.path
+        val path = originalDefinition.type.path
 
         if (path.size != 1 || path.first() != "Option") {
             return null
         }
 
-        val innerTypeIndex = originalDefinition.params.firstOrNull()?.get(TypeParameter.type)
-            ?: return Option(typeId, typeReference = TypeReference(null))
+        // always use id-based name for Options since all Options have the same apth
+        val typeName = originalDefinition.id.toString()
 
-        return Option(typeId, typeReference = typesBuilder.getOrCreate(innerTypeIndex.toString()))
+        val innerTypeIndex = originalDefinition.type.params.firstOrNull()?.get(TypeParameter.type)
+            ?: return Option(typeName, typeReference = TypeReference(null))
+
+        return Option(typeName, typeReference = typesBuilder.getOrCreate(innerTypeIndex.toString()))
     }
 }
 
@@ -131,23 +136,26 @@ object SiOptionTypeMapping : SiTypeMapping {
 object SiByteArrayMapping : SiTypeMapping {
 
     override fun map(
-        originalDefinition: EncodableStruct<RegistryType>,
-        typeId: String,
+        originalDefinition: EncodableStruct<PortableType>,
+        suggestedTypeName: String,
         typesBuilder: TypePresetBuilder
     ): Type<*>? {
-        val def = originalDefinition.def
+        val def = originalDefinition.type.def
 
         if (def is EncodableStruct<*>) {
             when (def.schema) {
                 is TypeDefArray -> {
                     if (isInnerTypeU8(typesBuilder, def[TypeDefArray.type])) {
-                        return FixedByteArray(name = typeId, length = def[TypeDefArray.len].toInt())
+                        return FixedByteArray(
+                            name = suggestedTypeName,
+                            length = def[TypeDefArray.len].toInt()
+                        )
                     }
                 }
 
                 is TypeDefSequence -> {
                     if (isInnerTypeU8(typesBuilder, def[TypeDefSequence.type])) {
-                        return DynamicByteArray(name = typeId)
+                        return DynamicByteArray(name = suggestedTypeName)
                     }
                 }
             }
@@ -176,3 +184,9 @@ fun SiTypeMapping.Companion.default(): SiTypeMapping {
 
 private val EncodableStruct<RegistryType>.lastPathSegment: String?
     get() = path.lastOrNull()
+
+private val EncodableStruct<PortableType>.id: BigInteger
+    get() = get(PortableType.id)
+
+private val EncodableStruct<PortableType>.type: EncodableStruct<RegistryType>
+    get() = get(PortableType.type)
