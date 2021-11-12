@@ -145,7 +145,7 @@ object SocketStateMachine {
                     is Event.SwitchUrl -> {
                         applySwitchUrlSideEffects(event.url, sideEffects)
 
-                        State.Connecting(event.url, state.attempt, state.pendingSendables)
+                        State.Connecting(event.url, attempt = 0, state.pendingSendables)
                     }
                     is Event.Pause -> {
                         applyPauseEffects(sideEffects)
@@ -189,7 +189,7 @@ object SocketStateMachine {
                     is Event.SwitchUrl -> {
                         applySwitchUrlSideEffects(event.url, sideEffects)
 
-                        State.Connecting(event.url, state.attempt, state.pendingSendables)
+                        State.Connecting(event.url, attempt = 0, state.pendingSendables)
                     }
                     is Event.Pause -> {
                         applyPauseEffects(sideEffects)
@@ -309,7 +309,7 @@ object SocketStateMachine {
 
                         applySwitchUrlSideEffects(event.url, sideEffects)
 
-                        State.Connecting(url = event.url, pendingSendables = toResend)
+                        State.Connecting(url = event.url, attempt = 0, pendingSendables = toResend)
                     }
                     is Event.Pause -> {
                         val toResend = getRequestsToResendAndReportErrorToOthers(

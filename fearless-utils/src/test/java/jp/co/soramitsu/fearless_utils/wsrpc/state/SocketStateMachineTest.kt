@@ -53,7 +53,7 @@ private val CONNECT_SIDE_EFFECT = Connect(URL)
 private val TEST_RESPONSE_EVENT = Event.SendableResponse(TEST_RESPONSE)
 
 @RunWith(MockitoJUnitRunner::class)
-class SocketStateMachineTest {
+open class SocketStateMachineTest {
 
     private val sideEffectLog = mutableListOf<SideEffect>()
 
@@ -703,6 +703,22 @@ class SocketStateMachineTest {
         assertEquals(RespondToSubscription(subscription, subscriptionChange), sideEffectLog.first())
     }
 
+    @Test
+    fun `should reset attempt after url switch`() {
+        val statesFrom = listOf(
+            connectedState(),
+            waitingForReconnectState(attempt = 3),
+            connectingState(attempt = 3),
+        )
+
+        statesFrom.forEach {
+            val (nextState, _) = SocketStateMachine.transition(it, Event.SwitchUrl("new url"))
+
+            assertInstance<State.Connecting>(nextState)
+            assertEquals(0, nextState.attempt)
+        }
+    }
+
     private fun moveToConnected(): State {
         val started = moveToStart()
 
@@ -745,4 +761,28 @@ class SocketStateMachineTest {
 
         return tempState
     }
+
+    private fun connectedState() = State.Connected(
+        url = "test",
+        toResendOnReconnect = emptySet(),
+        unknownSubscriptionResponses = emptyMap(),
+        waitingForResponse = emptySet(),
+        subscriptions = emptySet()
+    )
+
+    private fun waitingForReconnectState(
+        attempt: Int
+    ) = State.WaitingForReconnect(
+        url = "TEST",
+        attempt,
+        pendingSendables = emptySet()
+    )
+
+    private fun connectingState(
+        attempt: Int
+    ) = State.Connecting(
+        url = "TEST",
+        attempt,
+        pendingSendables = emptySet()
+    )
 }
