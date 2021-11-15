@@ -41,6 +41,7 @@ object TypesParserV14 {
     private class Params(
         val types: List<EncodableStruct<PortableType>>,
         val typeMapping: SiTypeMapping,
+        val uniquePathNames: Set<String>,
         val typesBuilder: TypePresetBuilder
     )
 
@@ -50,7 +51,11 @@ object TypesParserV14 {
         typeMapping: SiTypeMapping = SiTypeMapping.default()
     ): ParseResult {
         val builder = typePreset.newBuilder()
-        val params = Params(lookup[LookupSchema.types], typeMapping, builder)
+        val rawTypes = lookup[LookupSchema.types]
+
+        val uniquePathNames = findUniquePathNames(rawTypes)
+
+        val params = Params(rawTypes, typeMapping, uniquePathNames, builder)
 
         parseParams(params)
 
@@ -58,6 +63,13 @@ object TypesParserV14 {
             .mapNotNull { (name, typeRef) -> if (!typeRef.isResolved()) name else null }
 
         return ParseResult(params.typesBuilder, unknownTypes)
+    }
+
+    private fun findUniquePathNames(types: List<EncodableStruct<PortableType>>): Set<String> {
+        return types
+            .groupingBy { it.pathBasedName() }
+            .eachCount()
+            .mapNotNullTo(mutableSetOf()) { (name, count) -> name.takeIf { count == 1 } }
     }
 
     private fun parseParams(params: Params) {
@@ -76,7 +88,8 @@ object TypesParserV14 {
     private fun parseParam(params: Params, portableType: EncodableStruct<PortableType>): Type<*>? {
         val typesBuilder = params.typesBuilder
 
-        val name = portableType.pathBasedName() ?: portableType[PortableType.id].toString()
+        val name = portableType.pathNameIfWhitelisted(whitelist = params.uniquePathNames)
+            ?: portableType[PortableType.id].toString()
 
         val type = portableType[PortableType.type]
         val def = type[RegistryType.def]
@@ -250,5 +263,11 @@ object TypesParserV14 {
         val pathSegments = this[PortableType.type][RegistryType.path]
 
         return if (pathSegments.isEmpty()) null else pathSegments.joinToString(separator = ".")
+    }
+
+    private fun EncodableStruct<PortableType>.pathNameIfWhitelisted(
+        whitelist: Set<String>
+    ): String? {
+        return pathBasedName()?.takeIf { it in whitelist }
     }
 }

@@ -11,11 +11,16 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEn
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.FixedArray
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Option
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Tuple
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Vec
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.GenericAccountId
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Null
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.DynamicByteArray
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.FixedByteArray
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.UIntType
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u32
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u64
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u8
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.skipAliases
 import jp.co.soramitsu.fearless_utils.runtime.definitions.v14.TypesParserV14
 import jp.co.soramitsu.fearless_utils.runtime.metadata.builder.VersionedRuntimeBuilder
@@ -105,6 +110,21 @@ class Metadata14Test {
         assertInstance<Struct>(activeEraReturnType)
         val eraStartType = activeEraReturnType.get<Option>("start")?.innerType?.skipAliases()
         assertEquals(u64, eraStartType)
+
+        // BTreeMaps should not be path-based
+        val bTreemapType = typeRegistry["BTreeMap"]
+        assertNull(bTreemapType)
+
+        // Verify id-based BTreeMaps on failing case for path-based
+        val eraRewardPointsReturnType = metadata.module("Staking").storage("ErasRewardPoints").type.value
+        assertInstance<Struct>(eraRewardPointsReturnType)
+        val individualType = eraRewardPointsReturnType.get<Vec>("individual")?.innerType?.skipAliases()
+        assertInstance<Tuple>(individualType)
+        val shouldBeAccountId = individualType[0]
+        assertInstance<FixedArray>(shouldBeAccountId)
+        assertEquals(32, shouldBeAccountId.length)
+        assertEquals(u8, shouldBeAccountId.innerType())
+        assertEquals(u32, individualType[1])
 
         // id-based types with empty path shold not be aliased
         val u8Primitive = typeRegistry["2"]
