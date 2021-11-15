@@ -38,15 +38,14 @@ object RealRuntimeProvider {
         val kusamaTree =
             gson.fromJson<TypeDefinitionsTree>(kusamaReader, TypeDefinitionsTree::class.java)
 
-        val defaultTypeRegistry =
-            TypeDefinitionParser.parseBaseDefinitions(tree, v13Preset()).typePreset
+        val defaultTypeRegistry = TypeDefinitionParser.parseBaseDefinitions(tree, v13Preset())
         val networkParsed = TypeDefinitionParser.parseNetworkVersioning(
             kusamaTree,
             defaultTypeRegistry
         )
 
         return TypeRegistry(
-            types = networkParsed.typePreset,
+            types = networkParsed,
             dynamicTypeResolver = DynamicTypeResolver(
                 DynamicTypeResolver.DEFAULT_COMPOUND_EXTENSIONS + GenericsExtension
             )

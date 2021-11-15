@@ -1,7 +1,6 @@
 package jp.co.soramitsu.fearless_utils.runtime.definitions.v14
 
 import jp.co.soramitsu.fearless_utils.extensions.snakeCaseToCamelCase
-import jp.co.soramitsu.fearless_utils.runtime.definitions.ParseResult
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypePreset
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypePresetBuilder
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.alias
@@ -49,7 +48,7 @@ object TypesParserV14 {
         lookup: EncodableStruct<LookupSchema>,
         typePreset: TypePreset,
         typeMapping: SiTypeMapping = SiTypeMapping.default()
-    ): ParseResult {
+    ): TypePreset {
         val builder = typePreset.newBuilder()
         val rawTypes = lookup[LookupSchema.types]
 
@@ -59,10 +58,7 @@ object TypesParserV14 {
 
         parseParams(params)
 
-        val unknownTypes = params.typesBuilder.entries
-            .mapNotNull { (name, typeRef) -> if (!typeRef.isResolved()) name else null }
-
-        return ParseResult(params.typesBuilder, unknownTypes)
+        return params.typesBuilder
     }
 
     private fun findUniquePathNames(types: List<EncodableStruct<PortableType>>): Set<String> {
@@ -105,7 +101,8 @@ object TypesParserV14 {
                 when (def.schema) {
                     is TypeDefComposite -> {
                         val list = def[TypeDefComposite.fields2]
-                        val childrenTypeMapping = parseTypeMapping(params, list, useSnakeCaseForFieldNames = true)
+                        val childrenTypeMapping =
+                            parseTypeMapping(params, list, useSnakeCaseForFieldNames = true)
 
                         typeMappingToType(name, childrenTypeMapping)
                     }
