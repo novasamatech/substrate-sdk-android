@@ -7,9 +7,10 @@ import jp.co.soramitsu.fearless_utils.getResourceReader
 import jp.co.soramitsu.fearless_utils.runtime.definitions.dynamic.DynamicTypeResolver
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypePreset
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypeRegistry
-import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.v13Preset
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.type
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.typePreset
+import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.unknownTypes
+import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.v13Preset
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.CollectionEnum
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEnum
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.FixedArray
@@ -24,9 +25,12 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u64
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u8
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.stub.FakeType
 import org.junit.Assert.assertEquals
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 
 
 @RunWith(JUnit4::class)
@@ -364,8 +368,8 @@ class TypeDefinitionParserTest {
 
         val tree = gson.fromJson(definitions, TypeDefinitionsTree::class.java)
 
-        val unknown =
-            TypeDefinitionParser.parseBaseDefinitions(tree, initialTypeRegistry).unknownTypes
+        val unknown = TypeDefinitionParser.parseBaseDefinitions(tree, initialTypeRegistry)
+            .unknownTypes()
 
         assert("F" in unknown)
     }
@@ -378,9 +382,10 @@ class TypeDefinitionParserTest {
 
         val result = TypeDefinitionParser.parseBaseDefinitions(tree, v13Preset())
 
-        print(result.unknownTypes)
+        val unknownTypes = result.unknownTypes()
 
-        assertEquals(0, result.unknownTypes.size)
+        print(unknownTypes)
+        assertEquals(0, unknownTypes.size)
     }
 
     @Test
@@ -396,19 +401,21 @@ class TypeDefinitionParserTest {
             gson.fromJson<TypeDefinitionsTree>(kusamaReader, TypeDefinitionsTree::class.java)
 
         val defaultParsed = TypeDefinitionParser.parseBaseDefinitions(defaultTree, v13Preset())
-        val defaultRegistry = TypeRegistry(defaultParsed.typePreset, DynamicTypeResolver.defaultCompoundResolver())
+        val defaultRegistry =
+            TypeRegistry(defaultParsed, DynamicTypeResolver.defaultCompoundResolver())
 
         val keysDefault = defaultRegistry["Keys"]
         assertEquals("SessionKeysSubstrate", keysDefault?.name)
 
         val kusamaParsed = TypeDefinitionParser.parseNetworkVersioning(
             kusamaTree,
-            defaultParsed.typePreset,
+            defaultParsed,
             1057
         )
-        val kusamaRegistry = TypeRegistry(kusamaParsed.typePreset, DynamicTypeResolver.defaultCompoundResolver())
+        val kusamaRegistry =
+            TypeRegistry(kusamaParsed, DynamicTypeResolver.defaultCompoundResolver())
 
-        print(kusamaParsed.unknownTypes)
+        print(kusamaParsed.unknownTypes())
 
         val keysKusama = kusamaRegistry["Keys"]
         assertEquals("Keys", keysKusama?.name) // changed from SessionKeysSubstrate
@@ -417,7 +424,10 @@ class TypeDefinitionParserTest {
         assertEquals("CompactAssignmentsTo257", assignments?.name) // changed only at 2023
 
         val addressKusama = kusamaRegistry["Address"]
-        assertEquals("GenericAccountId", addressKusama?.name) // Address changed to MultiAddress only in 2028
+        assertEquals(
+            "GenericAccountId",
+            addressKusama?.name
+        ) // Address changed to MultiAddress only in 2028
 
         val weight = kusamaRegistry["Weight"]
         assertEquals(u64, weight) // changed multiple times, latest at 1057
@@ -426,11 +436,32 @@ class TypeDefinitionParserTest {
         assertEquals(u8, refCount)
     }
 
+    @OptIn(ExperimentalTime::class)
+    @Test
+    @Ignore
+    fun `performance test`() {
+        val times = 10
+
+        val gson = Gson()
+        val reader = JsonReader(getResourceReader("default.json"))
+
+        val tree = gson.fromJson<TypeDefinitionsTree>(reader, TypeDefinitionsTree::class.java)
+
+        val parseTimes = (0..times).map {
+            measureTime {
+                TypeDefinitionParser.parseBaseDefinitions(tree, v13Preset())
+            }.inMilliseconds
+        }
+
+        println(parseTimes)
+        print(parseTimes.average())
+    }
+
     private fun parseFromJson(typePreset: TypePreset, json: String): TypeRegistry {
         val tree = gson.fromJson(json, TypeDefinitionsTree::class.java)
 
         return TypeRegistry(
-            TypeDefinitionParser.parseBaseDefinitions(tree, typePreset).typePreset,
+            TypeDefinitionParser.parseBaseDefinitions(tree, typePreset),
             dynamicTypeResolver = DynamicTypeResolver.defaultCompoundResolver()
         )
     }

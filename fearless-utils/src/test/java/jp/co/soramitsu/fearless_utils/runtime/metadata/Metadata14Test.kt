@@ -5,6 +5,7 @@ import jp.co.soramitsu.fearless_utils.common.assertNotInstance
 import jp.co.soramitsu.fearless_utils.getFileContentFromResources
 import jp.co.soramitsu.fearless_utils.runtime.definitions.dynamic.DynamicTypeResolver
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypeRegistry
+import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.unknownTypes
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.v14Preset
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Alias
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEnum
@@ -13,10 +14,8 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Option
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Tuple
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Vec
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.GenericAccountId
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Null
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.DynamicByteArray
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.FixedByteArray
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.UIntType
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u32
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u64
@@ -29,9 +28,12 @@ import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.RuntimeMetadataSchema
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.junit.MockitoJUnitRunner
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 
 @RunWith(MockitoJUnitRunner::class)
 class Metadata14Test {
@@ -40,24 +42,48 @@ class Metadata14Test {
     fun `should decode metadata types v14`() {
         val inHex = getFileContentFromResources("westend_metadata_v14")
         val metadataReader = RuntimeMetadataReader.read(inHex)
-        val parseResult = TypesParserV14.parse(
+
+        val typesBuilder = TypesParserV14.parse(
             metadataReader.metadata[RuntimeMetadataSchemaV14.lookup],
             v14Preset()
         )
-        assertEquals(0, parseResult.unknownTypes.size)
+
+        assertEquals(0, typesBuilder.unknownTypes().size)
+    }
+
+    @OptIn(ExperimentalTime::class)
+    @Test
+    @Ignore
+    fun `performance test`() {
+        val times = 10
+
+        val inHex = getFileContentFromResources("westend_metadata_v14")
+        val metadataReader = RuntimeMetadataReader.read(inHex)
+
+        val parseTimes = (0..times).map {
+            measureTime {
+                TypesParserV14.parse(
+                    metadataReader.metadata[RuntimeMetadataSchemaV14.lookup],
+                    v14Preset()
+                )
+            }.inMilliseconds
+        }
+
+        println(parseTimes)
+        print(parseTimes.average())
     }
 
     @Test
     fun `should decode metadata v14`() {
         val inHex = getFileContentFromResources("westend_metadata_v14")
         val metadataReader = RuntimeMetadataReader.read(inHex)
-        val parseResult = TypesParserV14.parse(
+        val typePreset = TypesParserV14.parse(
             lookup = metadataReader.metadata[RuntimeMetadataSchemaV14.lookup],
             typePreset = v14Preset()
         )
 
         val typeRegistry = TypeRegistry(
-            parseResult.typePreset,
+            typePreset,
             DynamicTypeResolver.defaultCompoundResolver()
         )
         val metadata = VersionedRuntimeBuilder.buildMetadata(metadataReader, typeRegistry)
@@ -116,9 +142,11 @@ class Metadata14Test {
         assertNull(bTreemapType)
 
         // Verify id-based BTreeMaps on failing case for path-based
-        val eraRewardPointsReturnType = metadata.module("Staking").storage("ErasRewardPoints").type.value
+        val eraRewardPointsReturnType =
+            metadata.module("Staking").storage("ErasRewardPoints").type.value
         assertInstance<Struct>(eraRewardPointsReturnType)
-        val individualType = eraRewardPointsReturnType.get<Vec>("individual")?.innerType?.skipAliases()
+        val individualType =
+            eraRewardPointsReturnType.get<Vec>("individual")?.innerType?.skipAliases()
         assertInstance<Tuple>(individualType)
         val shouldBeAccountId = individualType[0]
         assertInstance<FixedArray>(shouldBeAccountId)

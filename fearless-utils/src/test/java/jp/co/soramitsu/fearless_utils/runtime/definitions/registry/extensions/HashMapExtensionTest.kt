@@ -38,7 +38,7 @@ class HashMapExtensionTest {
         val defaultTree =
             gson.fromJson<TypeDefinitionsTree>(defaultReader, TypeDefinitionsTree::class.java)
         val defaultParsed = TypeDefinitionParser.parseBaseDefinitions(defaultTree, v13Preset())
-        val defaultRegistry = TypeRegistry(defaultParsed.typePreset, DynamicTypeResolver.defaultCompoundResolver())
+        val defaultRegistry = TypeRegistry(defaultParsed, DynamicTypeResolver.defaultCompoundResolver())
         val type = defaultRegistry["HashMap<Text, Text>"]
         assertInstance<Vec>(type)
         assertInstance<Tuple>(type.typeReference.value)

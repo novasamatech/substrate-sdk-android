@@ -151,3 +151,6 @@ fun v13Preset(): TypePreset = typePreset {
     type(GenericSeal(this))
     type(GenericConsensus(this))
 }
+
+fun TypePreset.unknownTypes() = entries
+    .mapNotNull { (name, typeRef) -> if (!typeRef.isResolved()) name else null }

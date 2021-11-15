@@ -33,11 +33,6 @@ class TypeDefinitionsTree(
     }
 }
 
-class ParseResult(
-    val typePreset: TypePreset,
-    val unknownTypes: List<String>
-)
-
 private const val TOKEN_SET = "set"
 private const val TOKEN_STRUCT = "struct"
 private const val TOKEN_ENUM = "enum"
@@ -54,17 +49,14 @@ object TypeDefinitionParser {
         tree: TypeDefinitionsTree,
         typePreset: TypePreset,
         dynamicTypeResolver: DynamicTypeResolver = DynamicTypeResolver.defaultCompoundResolver()
-    ): ParseResult {
+    ): TypePreset {
         val builder = typePreset.newBuilder()
 
         val params = Params(tree.types, dynamicTypeResolver, builder)
 
         parseTypes(params)
 
-        val unknownTypes = params.typesBuilder.entries
-            .mapNotNull { (name, typeRef) -> if (!typeRef.isResolved()) name else null }
-
-        return ParseResult(params.typesBuilder, unknownTypes)
+        return params.typesBuilder
     }
 
     fun parseNetworkVersioning(
@@ -72,7 +64,7 @@ object TypeDefinitionParser {
         typePreset: TypePreset,
         currentRuntimeVersion: Int = tree.runtimeId!!,
         dynamicTypeResolver: DynamicTypeResolver = DynamicTypeResolver.defaultCompoundResolver()
-    ): ParseResult {
+    ): TypePreset {
         val versioning = tree.versioning
         requireNotNull(versioning)
 
@@ -84,10 +76,7 @@ object TypeDefinitionParser {
                 parseTypes(Params(it.types, dynamicTypeResolver, builder))
             }
 
-        val unknownTypes = builder.entries
-            .mapNotNull { (name, typeRef) -> if (!typeRef.isResolved()) name else null }
-
-        return ParseResult(builder, unknownTypes)
+        return builder
     }
 
     private fun parseTypes(parsingParams: Params) {
