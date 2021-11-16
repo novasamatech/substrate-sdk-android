@@ -1,0 +1,37 @@
+[
+  {
+    "address": "1413hCAKtGqnMJ5tXrBmzJDv7tGPbx7woXepx5d66xSEH6qM",
+    "publicKey": "0x84bdc405d139399bba3ccea5d3de23316c9deeab661f57e2f4d1720cc6649859",
+    "addressPrefix": 0
+  },
+  {
+    "address": "FaNDBF8erbEfQtpLuwpk6kmQrYyiKNzBQm6BSuh2fdCqajb",
+    "publicKey": "0x84bdc405d139399bba3ccea5d3de23316c9deeab661f57e2f4d1720cc6649859",
+    "addressPrefix": 2
+  },
+  {
+    "address": "5F4kYruG2VaJum5NaD8mr9PmGGGjueZoj2vLnndjYsQi6Vkw",
+    "publicKey": "0x84bdc405d139399bba3ccea5d3de23316c9deeab661f57e2f4d1720cc6649859",
+    "addressPrefix": 42
+  },
+  {
+    "address": "hJJCCRziNMHV4pGG6Nzk92XmcymvDCsMzHpGLAS7jrLg2ZNG7",
+    "publicKey": "0x84bdc405d139399bba3ccea5d3de23316c9deeab661f57e2f4d1720cc6649859",
+    "addressPrefix": 110
+  },
+  {
+    "address": "p8Dwc6d8BMju8ZBWpKbUPNF3mV9Lzz5sJn4VKQa2T7J6sHEDC",
+    "publicKey": "0x84bdc405d139399bba3ccea5d3de23316c9deeab661f57e2f4d1720cc6649859",
+    "addressPrefix": 172
+  },
+  {
+    "address": "yGFjZAdDruDn4CzV1ZkYZD5m2cexzXceAnTGmXLHpfUh4FUgc",
+    "publicKey": "0x84bdc405d139399bba3ccea5d3de23316c9deeab661f57e2f4d1720cc6649859",
+    "addressPrefix": 255
+  },
+  {
+    "address": "bXjbTjWHWhkx18SofTq3Vv23owpSGBN6mp2k6HejCMFw4v3Wi",
+    "publicKey": "0x84bdc405d139399bba3ccea5d3de23316c9deeab661f57e2f4d1720cc6649859",
+    "addressPrefix": 10041
+  }
+]

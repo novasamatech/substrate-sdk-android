@@ -3,6 +3,8 @@ package jp.co.soramitsu.fearless_utils.ss58
 import jp.co.soramitsu.fearless_utils.encrypt.Base58
 import jp.co.soramitsu.fearless_utils.encrypt.json.copyBytes
 import jp.co.soramitsu.fearless_utils.exceptions.AddressFormatException
+import jp.co.soramitsu.fearless_utils.extensions.shl
+import jp.co.soramitsu.fearless_utils.extensions.shr
 import jp.co.soramitsu.fearless_utils.hash.Hasher.blake2b256
 import jp.co.soramitsu.fearless_utils.hash.Hasher.blake2b512
 import java.lang.Exception
@@ -17,14 +19,15 @@ object SS58Encoder {
 
     private val base58 = Base58()
 
+    @OptIn(ExperimentalUnsignedTypes::class)
     private fun getPrefixLenIdent(decodedByteArray: ByteArray): Pair<Int, Short> {
         return when {
             decodedByteArray[0] in 0..63 -> 1 to decodedByteArray[0].toShort()
             decodedByteArray[0] in 64..127 -> {
-                val lower =
-                    ((decodedByteArray[0].toInt() shl 2) or (decodedByteArray[1].toInt() shr 6)).toByte()
-                val upper = (decodedByteArray[1] and 0b00111111)
-                2 to (lower.toShort() or (upper.toInt() shl 8).toShort())
+                val lower = (decodedByteArray[0].toUByte() shl 2) or (decodedByteArray[1].toUByte() shr 6)
+                val upper = (decodedByteArray[1].toUByte() and 0b00111111.toUByte())
+
+                2 to (lower.toInt() or (upper.toInt() shl 8)).toShort()
             }
             else -> throw IllegalArgumentException("Incorrect address byte")
         }

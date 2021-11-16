@@ -77,3 +77,15 @@ internal fun String.snakeCaseToCamelCase(): String {
         }
     }.joinToString(separator = "")
 }
+
+@ExperimentalUnsignedTypes
+/**
+ * Unsafe to overflow
+ */
+infix fun UByte.shl(numOfBytes: Int) = (toInt() shl numOfBytes).toUByte()
+
+@ExperimentalUnsignedTypes
+/**
+ * Unsafe to overflow
+ */
+infix fun UByte.shr(numOfBytes: Int) = (toInt() shr numOfBytes).toUByte()
