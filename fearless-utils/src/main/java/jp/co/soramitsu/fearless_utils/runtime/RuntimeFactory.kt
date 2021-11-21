@@ -12,7 +12,6 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypeRegistry
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.v13Preset
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.v14Preset
 import jp.co.soramitsu.fearless_utils.runtime.definitions.v14.TypesParserV14
-import jp.co.soramitsu.fearless_utils.runtime.metadata.GetMetadataRequest
 import jp.co.soramitsu.fearless_utils.runtime.metadata.Magic
 import jp.co.soramitsu.fearless_utils.runtime.metadata.RuntimeMetadata
 import jp.co.soramitsu.fearless_utils.runtime.metadata.RuntimeMetadataSchema
@@ -20,10 +19,6 @@ import jp.co.soramitsu.fearless_utils.runtime.metadata.builder.V13RuntimeBuilder
 import jp.co.soramitsu.fearless_utils.runtime.metadata.builder.V14RuntimeBuilder
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.RuntimeMetadataSchemaV14
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.lookup
-import jp.co.soramitsu.fearless_utils.wsrpc.SocketService
-import jp.co.soramitsu.fearless_utils.wsrpc.executeAsync
-import jp.co.soramitsu.fearless_utils.wsrpc.mappers.nonNull
-import jp.co.soramitsu.fearless_utils.wsrpc.mappers.string
 
 class RuntimeFactory(
     private val jsonCodec: JsonCodec
@@ -103,17 +98,5 @@ class RuntimeFactory(
             parseNetworkVersioning(tree, typePreset)
         }
     }
-}
-
-suspend fun RuntimeFactory.create(
-    socketService: SocketService,
-    typeJsons: List<String> = emptyList()
-): RuntimeSnapshot {
-    val metadata = socketService.executeAsync(GetMetadataRequest, mapper = string().nonNull())
-
-    return create(
-        runtimeMetadata = metadata,
-        typeJsons = typeJsons
-    )
 }
 

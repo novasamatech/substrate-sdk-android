@@ -36,6 +36,7 @@ dependencies {
 
     implementation wsDep
 
+    implementation project(':coroutines-adapter')
     implementation project(':fearless-utils')
 
     testImplementation jUnitDep

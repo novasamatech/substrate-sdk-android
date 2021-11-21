@@ -4,3 +4,4 @@ rootProject.name = "fearless-utils-android"
 include ':decoratable-api'
 include ':gson-codec'
 include ':samples'
+include ':coroutines-adapter'

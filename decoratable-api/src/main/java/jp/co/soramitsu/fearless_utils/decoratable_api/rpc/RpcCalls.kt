@@ -1,7 +1,7 @@
 package jp.co.soramitsu.fearless_utils.decoratable_api.rpc
 
 import jp.co.soramitsu.fearless_utils.wsrpc.SocketService
-import jp.co.soramitsu.fearless_utils.wsrpc.executeAsync
+import jp.co.soramitsu.fearless_utils.coroutines_adapter.executeAsync
 import jp.co.soramitsu.fearless_utils.wsrpc.request.runtime.RuntimeRequest
 
 class RpcCall0<R>(

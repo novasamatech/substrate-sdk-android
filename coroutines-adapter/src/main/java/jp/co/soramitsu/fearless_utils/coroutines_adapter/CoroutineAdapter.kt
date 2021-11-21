@@ -1,7 +1,8 @@
 @file:Suppress("EXPERIMENTAL_API_USAGE")
 
-package jp.co.soramitsu.fearless_utils.wsrpc
+package jp.co.soramitsu.fearless_utils.coroutines_adapter
 
+import jp.co.soramitsu.fearless_utils.wsrpc.SocketService
 import jp.co.soramitsu.fearless_utils.wsrpc.mappers.ResponseMapper
 import jp.co.soramitsu.fearless_utils.wsrpc.request.DeliveryType
 import jp.co.soramitsu.fearless_utils.wsrpc.request.runtime.RuntimeRequest

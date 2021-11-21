@@ -1,9 +1,9 @@
 package jp.co.soramitsu.fearless_utils.decoratable_api.rpc
 
+import jp.co.soramitsu.fearless_utils.coroutines_adapter.subscriptionFlow
 import jp.co.soramitsu.fearless_utils.wsrpc.SocketService
 import jp.co.soramitsu.fearless_utils.wsrpc.request.runtime.RuntimeRequest
 import jp.co.soramitsu.fearless_utils.wsrpc.subscription.response.SubscriptionChange
-import jp.co.soramitsu.fearless_utils.wsrpc.subscriptionFlow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 

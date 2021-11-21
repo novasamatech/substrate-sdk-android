@@ -6,23 +6,11 @@ import jp.co.soramitsu.fearless_utils.gson_codec.GsonCodec
 import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.staking.historyDepth
 import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.staking.staking
 import jp.co.soramitsu.fearless_utils.wsrpc.SocketService
-import jp.co.soramitsu.fearless_utils.wsrpc.logging.Logger
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.Reader
-
-class StdoutLogger : Logger {
-    override fun log(message: String?) {
-        println(message)
-    }
-
-    override fun log(throwable: Throwable?) {
-        throwable?.printStackTrace()
-    }
-
-}
 
 class DecoratableApiSample {
 

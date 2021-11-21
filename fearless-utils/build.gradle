@@ -87,11 +87,10 @@ dependencies {
     api wsDep
     implementation gsonDep
     implementation web3jDep
-    implementation gsonDep
+    api gsonDep
     implementation apacheXercesDep
     implementation xxHashDep
 
-    implementation coroutinesDep
 
     testImplementation jUnitDep
     testImplementation mockitoDep
