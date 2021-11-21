@@ -3,12 +3,6 @@ package jp.co.soramitsu.fearless_utils.decoratable_api.rpc
 import jp.co.soramitsu.fearless_utils.wsrpc.SocketService
 import jp.co.soramitsu.fearless_utils.wsrpc.subscription.response.SubscriptionChange
 import jp.co.soramitsu.feature_wallet_impl.data.buyToken.Decoratable
-import jp.co.soramitsu.feature_wallet_impl.data.buyToken.rpc.RpcCall0
-import jp.co.soramitsu.feature_wallet_impl.data.buyToken.rpc.RpcCall1
-import jp.co.soramitsu.feature_wallet_impl.data.buyToken.rpc.RpcCallList
-import jp.co.soramitsu.feature_wallet_impl.data.buyToken.rpc.RpcSubscription0
-import jp.co.soramitsu.feature_wallet_impl.data.buyToken.rpc.RpcSubscription1
-import jp.co.soramitsu.feature_wallet_impl.data.buyToken.rpc.RpcSubscriptionList
 
 class DecoratableRPC(
     private val socketService: SocketService,

@@ -1,4 +1,4 @@
-package jp.co.soramitsu.feature_wallet_impl.data.buyToken.rpc
+package jp.co.soramitsu.fearless_utils.decoratable_api.rpc
 
 import jp.co.soramitsu.fearless_utils.wsrpc.SocketService
 import jp.co.soramitsu.fearless_utils.wsrpc.executeAsync

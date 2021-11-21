@@ -30,10 +30,7 @@ class DecoratableApiSample {
         val gson = Gson()
         val jsonCodec = GsonCodec(gson)
 
-        val socketService = SocketService(
-            jsonMapper = gson,
-            logger = StdoutLogger()
-        )
+        val socketService = SocketService(gson)
         socketService.start("wss://rpc.polkadot.io")
 
         val types = getFileContentFromResources("polkadot.json")

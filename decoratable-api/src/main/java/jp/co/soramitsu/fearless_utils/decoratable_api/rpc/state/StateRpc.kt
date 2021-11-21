@@ -1,20 +1,11 @@
-package jp.co.soramitsu.fearless_utils.decoratable_api.rpc
+package jp.co.soramitsu.fearless_utils.decoratable_api.rpc.state
 
+import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.DecoratableRPC
+import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.DecoratableRPCModule
+import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.RpcCall1
+import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.RpcSubscription1
+import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.asOptionalString
 import jp.co.soramitsu.fearless_utils.wsrpc.request.runtime.storage.storageChange
-import jp.co.soramitsu.feature_wallet_impl.data.buyToken.rpc.RpcCall1
-import jp.co.soramitsu.feature_wallet_impl.data.buyToken.rpc.RpcSubscription1
-
-interface AuthorRpc : DecoratableRPCModule
-
-val DecoratableRPC.author: AuthorRpc
-    get() = decorate("author") {
-        object : AuthorRpc, DecoratableRPCModule by this {}
-    }
-
-val AuthorRpc.submitExtrinsic: RpcCall1<String, String>
-    get() = with(decorator) {
-        call1("submitExtrinsic", asString)
-    }
 
 interface StateRpc : DecoratableRPCModule
 
