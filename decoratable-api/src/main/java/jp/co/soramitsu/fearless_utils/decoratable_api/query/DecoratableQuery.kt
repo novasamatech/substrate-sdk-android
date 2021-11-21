@@ -33,7 +33,7 @@ class DecoratableQuery(
                 }
             }
 
-            override fun <K, R> single(name: String, binder: (Any?) -> R): SingleMapStorageEntry<K, R> {
+            override fun <K, R> map1(name: String, binder: (Any?) -> R): SingleMapStorageEntry<K, R> {
                 return decorateInternal(name) {
                     SingleMapStorageEntry(runtime, storageEntryMetadata(name), api, binder)
                 }

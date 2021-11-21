@@ -20,4 +20,4 @@ val StakingStorage.historyDepth
     get() = decorator.plain("HistoryDepth", ::bindNumber)
 
 val StakingStorage.bonded
-    get() = decorator.single<AccountId, AccountId>("Bonded", ::bindAccountId)
+    get() = decorator.map1<AccountId, AccountId>("Bonded", ::bindAccountId)

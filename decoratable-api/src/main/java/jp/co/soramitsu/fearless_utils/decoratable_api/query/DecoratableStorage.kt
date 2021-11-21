@@ -7,6 +7,6 @@ interface DecoratableStorage {
     interface Decorator {
         fun <R> plain(name: String, binder: (Any?) -> R): PlainStorageEntry<R>
 
-        fun <K, R> single(name: String, binder: (Any?) -> R): SingleMapStorageEntry<K, R>
+        fun <K, R> map1(name: String, binder: (Any?) -> R): SingleMapStorageEntry<K, R>
     }
 }
