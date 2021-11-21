@@ -15,11 +15,21 @@ import jp.co.soramitsu.fearless_utils.scale.dataType.uint8
 
 object GenericCall : Type<GenericCall.Instance>("GenericCall") {
 
-    class Instance(
-        val module: Module,
-        val function: MetadataFunction,
+    interface Instance {
+        val module: Module
+        val function: MetadataFunction
         val arguments: Map<String, Any?>
-    )
+    }
+
+    fun Instance(
+        module: Module,
+        function: MetadataFunction,
+        arguments: Map<String, Any?>
+    ) = object : Instance {
+        override val module: Module = module
+        override val function: MetadataFunction = function
+        override val arguments: Map<String, Any?> = arguments
+    }
 
     private val indexCoder = tuple(uint8, uint8)
 
