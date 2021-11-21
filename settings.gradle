@@ -2,3 +2,5 @@ include ':fearless-utils'
 include ':app'
 rootProject.name = "fearless-utils-android"
 include ':decoratable-api'
+include ':gson-codec'
+include ':samples'

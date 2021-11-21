@@ -13,7 +13,6 @@ import jp.co.soramitsu.fearless_utils.runtime.metadata.ModuleConstantMetadataSch
 import jp.co.soramitsu.fearless_utils.runtime.metadata.ModuleMetadataSchema
 import jp.co.soramitsu.fearless_utils.runtime.metadata.NMapSchema
 import jp.co.soramitsu.fearless_utils.runtime.metadata.RuntimeMetadata
-import jp.co.soramitsu.fearless_utils.runtime.metadata.RuntimeMetadataReader
 import jp.co.soramitsu.fearless_utils.runtime.metadata.RuntimeMetadataSchema
 import jp.co.soramitsu.fearless_utils.runtime.metadata.StorageEntryMetadataSchema
 import jp.co.soramitsu.fearless_utils.runtime.metadata.StorageMetadataSchema
@@ -30,20 +29,17 @@ import jp.co.soramitsu.fearless_utils.runtime.metadata.module.StorageEntryType
 import jp.co.soramitsu.fearless_utils.scale.EncodableStruct
 
 @OptIn(ExperimentalUnsignedTypes::class)
-internal object V13RuntimeBuilder : RuntimeBuilder {
+internal object V13RuntimeBuilder : RuntimeMetadataBuilder<RuntimeMetadataSchema> {
 
     override fun buildMetadata(
-        reader: RuntimeMetadataReader,
+        metadataStruct: EncodableStruct<RuntimeMetadataSchema>,
+        metadataVersion: Int,
         typeRegistry: TypeRegistry
     ): RuntimeMetadata {
-        val metadataStruct = reader.metadata
-
-        require(metadataStruct.schema is RuntimeMetadataSchema)
-
         return RuntimeMetadata(
             extrinsic = buildExtrinsic(metadataStruct[RuntimeMetadataSchema.extrinsic]),
             modules = buildModules(metadataStruct[RuntimeMetadataSchema.modules], typeRegistry),
-            runtimeVersion = reader.metadataVersion.toBigInteger()
+            runtimeVersion = metadataVersion.toBigInteger()
         )
     }
 

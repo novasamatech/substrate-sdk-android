@@ -32,8 +32,7 @@ android {
 }
 
 dependencies {
-    implementation coroutinesDep
-    implementation gsonDep
+    api coroutinesDep
 
     implementation wsDep
 

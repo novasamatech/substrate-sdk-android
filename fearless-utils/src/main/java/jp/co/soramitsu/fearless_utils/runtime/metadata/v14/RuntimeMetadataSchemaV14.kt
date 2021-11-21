@@ -20,6 +20,9 @@ object RuntimeMetadataSchemaV14 : Schema<RuntimeMetadataSchemaV14>() {
     val type by compactInt()
 }
 
+val EncodableStruct<RuntimeMetadataSchemaV14>.lookup
+    get() = get(RuntimeMetadataSchemaV14.lookup)
+
 object LookupSchema : Schema<LookupSchema>() {
     val types by vector(PortableType)
 }

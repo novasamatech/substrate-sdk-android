@@ -84,7 +84,7 @@ dependencies {
     implementation svgDep
     implementation bip39Dep
     implementation secureStringDep
-    implementation wsDep
+    api wsDep
     implementation gsonDep
     implementation web3jDep
     implementation gsonDep

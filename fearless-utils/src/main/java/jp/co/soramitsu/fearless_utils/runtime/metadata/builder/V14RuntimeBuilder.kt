@@ -10,7 +10,6 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Tuple
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Null
 import jp.co.soramitsu.fearless_utils.runtime.metadata.ExtrinsicMetadata
 import jp.co.soramitsu.fearless_utils.runtime.metadata.RuntimeMetadata
-import jp.co.soramitsu.fearless_utils.runtime.metadata.RuntimeMetadataReader
 import jp.co.soramitsu.fearless_utils.runtime.metadata.groupByName
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module.Constant
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module.Error
@@ -36,20 +35,17 @@ import jp.co.soramitsu.fearless_utils.scale.EncodableStruct
 import java.math.BigInteger
 
 @OptIn(ExperimentalUnsignedTypes::class)
-object V14RuntimeBuilder : RuntimeBuilder {
+object V14RuntimeBuilder : RuntimeMetadataBuilder<RuntimeMetadataSchemaV14> {
 
     override fun buildMetadata(
-        reader: RuntimeMetadataReader,
+        metadataStruct: EncodableStruct<RuntimeMetadataSchemaV14>,
+        metadataVersion: Int,
         typeRegistry: TypeRegistry
     ): RuntimeMetadata {
-        val metadataStruct = reader.metadata
-
-        require(metadataStruct.schema is RuntimeMetadataSchemaV14)
-
         return RuntimeMetadata(
             extrinsic = buildExtrinsic(metadataStruct[RuntimeMetadataSchemaV14.extrinsic]),
             modules = buildModules(metadataStruct[RuntimeMetadataSchemaV14.pallets], typeRegistry),
-            runtimeVersion = reader.metadataVersion.toBigInteger()
+            runtimeVersion = metadataVersion.toBigInteger()
         )
     }
 
