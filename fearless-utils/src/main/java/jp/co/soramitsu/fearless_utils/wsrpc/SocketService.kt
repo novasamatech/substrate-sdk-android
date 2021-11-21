@@ -3,8 +3,10 @@ package jp.co.soramitsu.fearless_utils.wsrpc
 import com.google.gson.Gson
 import com.neovisionaries.ws.client.WebSocketFactory
 import com.neovisionaries.ws.client.WebSocketState
+import jp.co.soramitsu.fearless_utils.json.JsonCodec
 import jp.co.soramitsu.fearless_utils.wsrpc.exception.ConnectionClosedException
 import jp.co.soramitsu.fearless_utils.wsrpc.logging.Logger
+import jp.co.soramitsu.fearless_utils.wsrpc.logging.NoOpLogger
 import jp.co.soramitsu.fearless_utils.wsrpc.mappers.nonNull
 import jp.co.soramitsu.fearless_utils.wsrpc.mappers.string
 import jp.co.soramitsu.fearless_utils.wsrpc.recovery.Reconnector
@@ -25,11 +27,11 @@ import jp.co.soramitsu.fearless_utils.wsrpc.subscription.RespondableSubscription
 import jp.co.soramitsu.fearless_utils.wsrpc.subscription.response.SubscriptionChange
 
 class SocketService(
-    val jsonMapper: Gson,
-    private val logger: Logger,
-    private val webSocketFactory: WebSocketFactory,
-    private val reconnector: Reconnector,
-    private val requestExecutor: RequestExecutor
+    val jsonMapper: Gson, // TODO depend on JsonCodec instead
+    private val logger: Logger = NoOpLogger(),
+    private val webSocketFactory: WebSocketFactory = WebSocketFactory(),
+    private val reconnector: Reconnector = Reconnector(),
+    private val requestExecutor: RequestExecutor = RequestExecutor()
 ) : RpcSocketListener {
 
     private var socket: RpcSocket? = null
