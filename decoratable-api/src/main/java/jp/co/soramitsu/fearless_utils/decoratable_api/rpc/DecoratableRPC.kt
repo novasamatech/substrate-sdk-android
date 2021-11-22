@@ -2,7 +2,7 @@ package jp.co.soramitsu.fearless_utils.decoratable_api.rpc
 
 import jp.co.soramitsu.fearless_utils.json.JsonCodec
 import jp.co.soramitsu.fearless_utils.wsrpc.SocketService
-import jp.co.soramitsu.feature_wallet_impl.data.buyToken.Decoratable
+import jp.co.soramitsu.fearless_utils.decoratable_api.Decoratable
 
 class DecoratableRPC(
     override val jsonCodec: JsonCodec,

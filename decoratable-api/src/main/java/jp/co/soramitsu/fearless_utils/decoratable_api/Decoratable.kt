@@ -1,4 +1,4 @@
-package jp.co.soramitsu.feature_wallet_impl.data.buyToken
+package jp.co.soramitsu.fearless_utils.decoratable_api
 
 abstract class Decoratable {
     private val initialized = mutableMapOf<String, Any?>()

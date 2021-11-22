@@ -5,7 +5,7 @@ import jp.co.soramitsu.fearless_utils.runtime.metadata.module
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module.Module
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module.StorageEntry
 import jp.co.soramitsu.fearless_utils.runtime.metadata.storage
-import jp.co.soramitsu.feature_wallet_impl.data.buyToken.Decoratable
+import jp.co.soramitsu.fearless_utils.decoratable_api.Decoratable
 import jp.co.soramitsu.fearless_utils.decoratable_api.SubstrateApi
 
 class DecoratableQuery(

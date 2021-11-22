@@ -2,20 +2,25 @@ package jp.co.soramitsu.fearless_utils.decoratable_api.tx
 
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
 import jp.co.soramitsu.fearless_utils.runtime.metadata.call
-import jp.co.soramitsu.fearless_utils.runtime.metadata.module
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module.Module
-import jp.co.soramitsu.feature_wallet_impl.data.buyToken.Decoratable
+import jp.co.soramitsu.fearless_utils.decoratable_api.Decoratable
 import jp.co.soramitsu.fearless_utils.decoratable_api.SubstrateApi
+import jp.co.soramitsu.fearless_utils.runtime.metadata.moduleOrNull
 
-class DecoratableTx(
+interface DecoratableTx {
+
+    fun <R : DecoratableFunctions> decorate(moduleName: String, creator: DecoratableFunctions.() -> R): R?
+}
+
+internal class DecoratableTxImpl(
     private val api: SubstrateApi,
     private val runtime: RuntimeSnapshot,
-) : Decoratable() {
+) : Decoratable(), DecoratableTx {
 
-    fun <R : DecoratableFunctions> decorate(moduleName: String, creator: DecoratableFunctions.() -> R): R = decorateInternal(moduleName) {
-        val module = runtime.metadata.module(moduleName)
-
-        creator(DecoratableFunctionsImpl(api, module))
+    override fun <R : DecoratableFunctions> decorate(moduleName: String, creator: DecoratableFunctions.() -> R): R? = decorateInternal(moduleName) {
+        runtime.metadata.moduleOrNull(moduleName)?.let {
+            creator(DecoratableFunctionsImpl(api, it))
+        }
     }
 
     private class DecoratableFunctionsImpl(
@@ -39,6 +44,5 @@ class DecoratableTx(
 
             private fun functionMetadata(name: String) = module.call(name)
         }
-
     }
 }
