@@ -7,6 +7,8 @@ interface ChainConfiguration {
     val runtime: RuntimeSnapshot
 
     suspend fun chainProperties(): ChainProperties
+
+    suspend fun genesisHash(): String
 }
 
 interface ChainProperties {

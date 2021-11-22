@@ -32,7 +32,7 @@ class DecoratableApiSample {
         val gson = Gson()
         val jsonCodec = GsonCodec(gson)
 
-        val socketService = SocketService(gson, StdoutLogger())
+        val socketService = SocketService(gson)
         socketService.start("wss://pub.elara.patract.io/polkadot")
 
         val types = getFileContentFromResources("polkadot.json")
@@ -42,6 +42,9 @@ class DecoratableApiSample {
             jsonCodec = jsonCodec,
             typesJsons = listOf(types)
         )
+
+        println(api.config.chainProperties())
+        println(api.config.genesisHash())
 
         val publicKey = "0x84bdc405d139399bba3ccea5d3de23316c9deeab661f57e2f4d1720cc6649859".fromHex()
         val address = api.config.chainProperties().addressOf(publicKey)
