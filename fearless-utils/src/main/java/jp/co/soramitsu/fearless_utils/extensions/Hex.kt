@@ -16,6 +16,8 @@ fun String.requirePrefix(prefix: String) = if (startsWith(prefix)) this else pre
 
 fun String.requireHexPrefix() = requirePrefix(HEX_PREFIX)
 
+fun String.removeHexPrefix() = removePrefix("0x")
+
 fun Byte.toHex(withPrefix: Boolean = false): String {
     return byteArrayOf(this).toHexString(withPrefix)
 }

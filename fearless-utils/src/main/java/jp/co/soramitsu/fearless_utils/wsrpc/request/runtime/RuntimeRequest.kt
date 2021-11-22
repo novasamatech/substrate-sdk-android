@@ -10,3 +10,11 @@ open class RuntimeRequest(
     val params: List<Any>,
     val id: Int = nextId()
 ) : RpcRequest()
+
+fun RuntimeRequest(
+    method: String,
+    params: List<Any?>
+) = RuntimeRequest(
+    method,
+    params.filterNotNull()
+)

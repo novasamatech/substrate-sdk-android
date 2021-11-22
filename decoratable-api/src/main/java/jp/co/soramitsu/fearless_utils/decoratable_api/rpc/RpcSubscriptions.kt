@@ -11,11 +11,13 @@ class RpcSubscription0<R>(
     moduleName: String,
     callName: String,
     socketService: SocketService,
-    binder: (SubscriptionChange) -> R,
+    rpcBindingContext: RpcBindingContext,
+    binder: RpcSubscriptionBinding<R>,
 ) : RpcSubscriptionBase<R>(
     moduleName,
     callName,
     socketService,
+    rpcBindingContext,
     binder
 ) {
 
@@ -24,15 +26,17 @@ class RpcSubscription0<R>(
     }
 }
 
-class RpcSubscriptionList<A : Any, R>(
+class RpcSubscriptionList<A, R>(
     moduleName: String,
     callName: String,
     socketService: SocketService,
-    binder: (SubscriptionChange) -> R,
+    rpcBindingContext: RpcBindingContext,
+    binder: RpcSubscriptionBinding<R>,
 ) : RpcSubscriptionBase<R>(
     moduleName,
     callName,
     socketService,
+    rpcBindingContext,
     binder
 ) {
 
@@ -45,15 +49,17 @@ class RpcSubscriptionList<A : Any, R>(
     }
 }
 
-class RpcSubscription1<A : Any, R>(
+class RpcSubscription1<A, R>(
     moduleName: String,
     callName: String,
     socketService: SocketService,
-    binder: (SubscriptionChange) -> R,
+    rpcBindingContext: RpcBindingContext,
+    binder: RpcSubscriptionBinding<R>,
 ) : RpcSubscriptionBase<R>(
     moduleName,
     callName,
     socketService,
+    rpcBindingContext,
     binder
 ) {
 
@@ -66,15 +72,17 @@ abstract class RpcSubscriptionBase<R>(
     private val moduleName: String,
     private val callName: String,
     private val socketService: SocketService,
-    private val binder: (SubscriptionChange) -> R,
+    private val rpcBindingContext: RpcBindingContext,
+    private val binder: RpcSubscriptionBinding<R>,
 ) {
 
-    protected fun subscribe(params: List<Any>): Flow<R> {
+    protected fun subscribe(params: List<Any?>): Flow<R> {
         val method = "${moduleName}_${callName}"
 
         val request = RuntimeRequest(method, params)
 
+        // TODO add handling for rpc errors
         return socketService.subscriptionFlow(request)
-            .map { binder(it) }
+            .map { binder(rpcBindingContext, it) }
     }
 }

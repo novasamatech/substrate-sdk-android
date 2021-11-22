@@ -9,6 +9,12 @@ class GsonCodec(private val gson: Gson): JsonCodec {
         return gson.fromJson(source, argumentClass)
     }
 
+    override fun <T> fromParsedHierarchy(hierarchy: Any?, argumentClass: Class<T>): T {
+        val tree = gson.toJsonTree(hierarchy)
+
+        return gson.fromJson(tree, argumentClass)
+    }
+
     override fun <T> toJson(value: T): String {
         return gson.toJson(value)
     }
