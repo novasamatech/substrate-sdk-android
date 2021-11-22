@@ -3,6 +3,7 @@ package jp.co.soramitsu.fearless_utils.decoratable_api.rpc
 import jp.co.soramitsu.fearless_utils.json.JsonCodec
 import jp.co.soramitsu.fearless_utils.json.fromParsedHierarchy
 import jp.co.soramitsu.fearless_utils.wsrpc.subscription.response.SubscriptionChange
+import java.math.BigInteger
 
 interface RpcBindingContext {
 
@@ -45,6 +46,15 @@ interface DecoratableRPCModule {
 private val TO_STRING: RpcCallBinding<String> = { it.toString() }
 private val TO_OPTIONAL_STRING: RpcCallBinding<String?> = { it?.toString() }
 
+// Some Json parsers may parse integers as Double
+private val TO_NUMBER: RpcCallBinding<BigInteger> = {
+    when(it) {
+        is Double -> it.toInt().toBigInteger()
+        is Int -> it.toBigInteger()
+        else -> it.toString().toBigInteger()
+    }
+}
+
 @Suppress("unused")
 val DecoratableRPCModule.Decorator.asString
     get() = TO_STRING
@@ -52,6 +62,10 @@ val DecoratableRPCModule.Decorator.asString
 @Suppress("unused")
 val DecoratableRPCModule.Decorator.asOptionalString
     get() = TO_OPTIONAL_STRING
+
+@Suppress("unused")
+val DecoratableRPCModule.Decorator.asNumber
+    get() = TO_NUMBER
 
 @Suppress("unused")
 inline fun <reified T> DecoratableRPCModule.Decorator.asJson(): RpcCallBinding<T> = {
