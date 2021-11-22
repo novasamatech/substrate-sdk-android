@@ -5,6 +5,7 @@ import jp.co.soramitsu.fearless_utils.decoratable_api.SubstrateApi
 import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.chain.chain
 import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.chain.getFinalizedHead
 import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.chain.getHeader
+import jp.co.soramitsu.fearless_utils.decoratable_api.tx.mortality.MortalityConstructor
 import jp.co.soramitsu.fearless_utils.gson_codec.GsonCodec
 import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.staking.historyDepth
 import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.staking.staking
@@ -43,8 +44,8 @@ class DecoratableApiSample {
             typesJsons = listOf(types)
         )
 
-        val header = api.rpc.chain.getHeader(null)
-        println(header)
+       val mortality = MortalityConstructor.constructMortality(api)
+        print(mortality)
 
         api.query.staking.historyDepth.subscribe()
             .onEach { println(it) }

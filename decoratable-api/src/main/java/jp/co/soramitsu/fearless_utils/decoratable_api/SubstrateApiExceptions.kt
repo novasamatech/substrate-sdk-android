@@ -10,3 +10,7 @@ class SubstrateApiException(override val message: String): Exception(message) {
 fun SubstrateApiException.Companion.moduleNotFound(moduleName: String): Nothing {
     throw SubstrateApiException("Module $moduleName not found")
 }
+
+fun SubstrateApiException.Companion.constantNotFound(constantName: String): Nothing {
+    throw SubstrateApiException("Constant $constantName not found")
+}

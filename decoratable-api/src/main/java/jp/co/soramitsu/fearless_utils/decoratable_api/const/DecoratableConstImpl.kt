@@ -15,11 +15,12 @@ internal class DecoratableConstImpl(
         creator: DecoratableConstantsModule.() -> R
     ): R? {
         return runtime.metadata.moduleOrNull(moduleName)?.let {
-            creator(DecoratableConstantsModuleImpl(it))
+            creator(DecoratableConstantsModuleImpl(runtime, it))
         }
     }
 
     private class DecoratableConstantsModuleImpl(
+        private val runtime: RuntimeSnapshot,
         private val module: Module
     ) : DecoratableConstantsModule {
 
@@ -28,7 +29,7 @@ internal class DecoratableConstImpl(
 
                 override fun <R> constant(name: String, binding: ConstantsBinding<R>): Constant<R> {
                     return decorateInternal(name) {
-                        Constant(module.constant(name), binding)
+                        Constant(runtime, module.constant(name), binding)
                     }
                 }
             }

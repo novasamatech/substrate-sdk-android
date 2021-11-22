@@ -15,7 +15,7 @@ import kotlin.math.pow
 sealed class Era {
     object Immortal : Era()
 
-    class Mortal(val period: Int, val phase: Int) : Era()
+    data class Mortal(val period: Int, val phase: Int) : Era()
 
     companion object {
         /**

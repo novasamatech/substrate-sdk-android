@@ -63,6 +63,13 @@ fun Module.event(name: String): Event = eventOrNull(name) ?: throw NoSuchElement
 
 fun Module.eventOrNull(name: String): Event? = events?.get(name)
 
+fun Module.constantOrNull(name: String) = constants[name]
+
+/**
+ * @throws NoSuchElementException if event was not found
+ */
+fun Module.constant(name: String) = constantOrNull(name) ?: throw NoSuchElementException()
+
 /**
  * Constructs a key for storage with no arguments.
  * This either fill be a full key for [StorageEntryType.Plain] entries,
