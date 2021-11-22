@@ -1,5 +1,6 @@
 package jp.co.soramitsu.fearless_utils.encrypt.keypair.substrate
 
+import jp.co.soramitsu.fearless_utils.encrypt.EncryptionType
 import jp.co.soramitsu.fearless_utils.encrypt.junction.Junction
 import jp.co.soramitsu.fearless_utils.encrypt.junction.JunctionType
 import jp.co.soramitsu.fearless_utils.encrypt.keypair.Keypair
@@ -11,7 +12,8 @@ import jp.co.soramitsu.fearless_utils.scale.dataType.toByteArray
 class KeypairWithSeed(
     val seed: ByteArray,
     override val privateKey: ByteArray,
-    override val publicKey: ByteArray
+    override val publicKey: ByteArray,
+    override val encryptionType: EncryptionType
 ) : Keypair
 
 abstract class OtherSubstrateKeypairFactory(

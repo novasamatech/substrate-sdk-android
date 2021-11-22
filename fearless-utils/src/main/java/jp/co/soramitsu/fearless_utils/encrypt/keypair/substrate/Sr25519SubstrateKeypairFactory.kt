@@ -1,5 +1,6 @@
 package jp.co.soramitsu.fearless_utils.encrypt.keypair.substrate
 
+import jp.co.soramitsu.fearless_utils.encrypt.EncryptionType
 import jp.co.soramitsu.fearless_utils.encrypt.Sr25519
 import jp.co.soramitsu.fearless_utils.encrypt.junction.Junction
 import jp.co.soramitsu.fearless_utils.encrypt.junction.JunctionType
@@ -10,7 +11,10 @@ class Sr25519Keypair(
     override val privateKey: ByteArray,
     override val publicKey: ByteArray,
     val nonce: ByteArray
-) : Keypair
+) : Keypair {
+
+    override val encryptionType: EncryptionType = EncryptionType.SR25519
+}
 
 internal object Sr25519SubstrateKeypairFactory : KeypairFactory<Sr25519Keypair> {
     override fun deriveFromSeed(seed: ByteArray): Sr25519Keypair {

@@ -1,5 +1,6 @@
 package jp.co.soramitsu.fearless_utils.encrypt.json.coders.content.secretCoder
 
+import jp.co.soramitsu.fearless_utils.encrypt.EncryptionType
 import jp.co.soramitsu.fearless_utils.encrypt.MultiChainEncryption
 import jp.co.soramitsu.fearless_utils.encrypt.json.coders.content.JsonContentDecoder
 import jp.co.soramitsu.fearless_utils.encrypt.json.coders.content.JsonSecretCoder
@@ -24,7 +25,8 @@ object EthereumJsonSecretCoder : JsonSecretCoder {
             multiChainEncryption = MultiChainEncryption.Ethereum,
             keypair = BaseKeypair(
                 privateKey = privateKey,
-                publicKey = ECDSAUtils.derivePublicKey(privateKey)
+                publicKey = ECDSAUtils.derivePublicKey(privateKey),
+                encryptionType = EncryptionType.ECDSA
             )
         )
     }

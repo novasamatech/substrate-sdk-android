@@ -1,5 +1,6 @@
 package jp.co.soramitsu.fearless_utils.encrypt.keypair.substrate
 
+import jp.co.soramitsu.fearless_utils.encrypt.EncryptionType
 import jp.co.soramitsu.fearless_utils.encrypt.SecurityProviders
 import net.i2p.crypto.eddsa.EdDSAKey
 import net.i2p.crypto.eddsa.spec.EdDSANamedCurveTable
@@ -26,11 +27,12 @@ internal object Ed25519SubstrateKeypairFactory : OtherSubstrateKeypairFactory("E
 
         return KeypairWithSeed(
             seed = seed,
-            private.copyOfRange(
+            privateKey = private.copyOfRange(
                 ED25519_PRIVATE_KEY_PREFIX.length / 2,
                 private.size
             ),
-            public.copyOfRange(ED25519_PUBLIC_KEY_PREFIX.length / 2, public.size)
+            publicKey = public.copyOfRange(ED25519_PUBLIC_KEY_PREFIX.length / 2, public.size),
+            encryptionType = EncryptionType.ED25519
         )
     }
 }
