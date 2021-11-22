@@ -93,3 +93,6 @@ object SS58Encoder {
 
     fun String.addressByteOrNull() = extractAddressByteOrNull(this)
 }
+
+val SS58Encoder.DEFAULT_PREFIX: Short
+    get() = 42.toShort()

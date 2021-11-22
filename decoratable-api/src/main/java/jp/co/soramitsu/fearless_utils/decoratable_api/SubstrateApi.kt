@@ -1,6 +1,8 @@
 package jp.co.soramitsu.fearless_utils.decoratable_api
 
 import jp.co.soramitsu.fearless_utils.coroutines_adapter.create
+import jp.co.soramitsu.fearless_utils.decoratable_api.config.ChainConfiguration
+import jp.co.soramitsu.fearless_utils.decoratable_api.config.ChainConfigurationImpl
 import jp.co.soramitsu.fearless_utils.decoratable_api.const.DecoratableConst
 import jp.co.soramitsu.fearless_utils.decoratable_api.const.DecoratableConstImpl
 import jp.co.soramitsu.fearless_utils.decoratable_api.query.DecoratableQuery
@@ -23,6 +25,8 @@ interface SubstrateApi {
     val rpc: DecoratableRPC
 
     val const: DecoratableConst
+
+    val config: ChainConfiguration
 }
 
 fun SubstrateApi(
@@ -34,6 +38,7 @@ fun SubstrateApi(
     override val tx: DecoratableTx = DecoratableTxImpl(this, runtime)
     override val rpc: DecoratableRPC = DecoratableRPC(jsonCodec, socketService)
     override val const: DecoratableConst = DecoratableConstImpl(runtime)
+    override val config: ChainConfiguration = ChainConfigurationImpl(this, runtime)
 }
 
 
