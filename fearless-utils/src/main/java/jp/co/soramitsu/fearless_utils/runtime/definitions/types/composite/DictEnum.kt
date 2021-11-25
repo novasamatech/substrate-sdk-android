@@ -63,11 +63,16 @@ open class DictEnum(
         return entryOf(name).value.value.skipAliasesOrNull()?.value
     }
 
+    fun variantOrNull(name: String): Entry<TypeReference>? {
+        return entryOrNull(name)?.value
+    }
+
     override val isFullyResolved: Boolean
         get() = elements.values.all { it.value.isResolved() }
 
-    protected fun entryOf(name: String) = elements.entries.find { (_, value) -> value.name == name }
-        ?: elementNotFound(name)
+    private fun entryOrNull(name: String) = elements.entries.find { (_, value) -> value.name == name }
+
+    protected fun entryOf(name: String) = entryOrNull(name) ?: elementNotFound(name)
 
     private fun elementNotFound(name: String): Nothing {
         throw EncodeDecodeException("No $name in ${names()}")

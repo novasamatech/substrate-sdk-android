@@ -68,6 +68,12 @@ class ExtrinsicBuilder(
         return this
     }
 
+    fun call(callInstance: GenericCall.Instance): ExtrinsicBuilder {
+        calls.add(callInstance)
+
+        return this
+    }
+
     fun reset(): ExtrinsicBuilder {
         calls.clear()
 

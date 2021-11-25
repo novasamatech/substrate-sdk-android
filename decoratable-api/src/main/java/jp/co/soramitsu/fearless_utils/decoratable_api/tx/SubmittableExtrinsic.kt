@@ -4,31 +4,38 @@ import jp.co.soramitsu.fearless_utils.encrypt.keypair.Keypair
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.GenericCall
 import jp.co.soramitsu.fearless_utils.decoratable_api.SubstrateApi
 import jp.co.soramitsu.fearless_utils.decoratable_api.config.ss58AddressOf
+import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.chain.chain
+import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.chain.getRuntimeVersion
+import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.system.accountNextIndex
+import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.system.system
 import jp.co.soramitsu.fearless_utils.decoratable_api.tx.mortality.MortalityConstructor
+import jp.co.soramitsu.fearless_utils.encrypt.MultiChainEncryption
+import jp.co.soramitsu.fearless_utils.extensions.fromHex
+import jp.co.soramitsu.fearless_utils.runtime.extrinsic.ExtrinsicBuilder
 
 class SubmittableExtrinsic(
-    call: GenericCall.Instance,
+    private val call: GenericCall.Instance,
     private val api: SubstrateApi,
 ) : GenericCall.Instance by call {
 
     suspend fun sign(keypair: Keypair): String {
-        val chainProperties = api.config.chainProperties()
-        val address = chainProperties.ss58AddressOf(keypair.publicKey)
+        val address = api.options.accountIdentifierConstructor.address(keypair)
 
         val mortality = MortalityConstructor.constructMortality(api)
+        val runtimeVersion = api.rpc.chain.getRuntimeVersion()
 
-       /* val extrinsicBuilder = ExtrinsicBuilder(
-            runtime = api.config.runtime,
+        return ExtrinsicBuilder(
+            runtime = api.chainState.runtime,
             keypair = keypair,
             nonce = api.rpc.system.accountNextIndex(address),
-            runtimeVersion =,
-            genesisHash = api.config.genesisHash().fromHex(),
+            runtimeVersion = runtimeVersion,
+            genesisHash = api.chainState.genesisHash().fromHex(),
             multiChainEncryption = MultiChainEncryption.Substrate(keypair.encryptionType),
-            accountIdentifier = ,
+            accountIdentifier = api.options.accountIdentifierConstructor.id(keypair),
             blockHash = mortality.blockHash.fromHex(),
             era = mortality.era
-        )*/
-
-        TODO()
+        )
+            .call(call)
+            .build(useBatchAll = true)
     }
 }

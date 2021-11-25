@@ -1,11 +1,8 @@
 package jp.co.soramitsu.fearless_utils.decoratable_api.rpc.chain
 
-import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.DecoratableRPC
-import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.DecoratableRPCModule
-import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.RpcCall1
-import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.asJson
-import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.asString
+import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.*
 import jp.co.soramitsu.fearless_utils.extensions.removeHexPrefix
+import jp.co.soramitsu.fearless_utils.wsrpc.request.runtime.chain.RuntimeVersion
 import java.math.BigInteger
 
 interface ChainRpc : DecoratableRPCModule
@@ -30,7 +27,6 @@ val ChainRpc.getHeader: RpcCall1<String?, SignedBlock.Block.Header>
         call1("getHeader", asJson())
     }
 
-
 data class SignedBlock(val block: Block, val justification: Any?) {
     data class Block(val extrinsics: List<String>, val header: Header) {
         data class Header(private val number: String, val parentHash: String?) {
@@ -39,3 +35,8 @@ data class SignedBlock(val block: Block, val justification: Any?) {
         }
     }
 }
+
+val ChainRpc.getRuntimeVersion: RpcCall0<RuntimeVersion>
+    get() = with(decorator) {
+        call0("getRuntimeVersion", asJson())
+    }

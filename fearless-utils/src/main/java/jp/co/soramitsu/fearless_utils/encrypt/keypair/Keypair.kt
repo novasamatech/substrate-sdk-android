@@ -1,8 +1,12 @@
 package jp.co.soramitsu.fearless_utils.encrypt.keypair
 
 import jp.co.soramitsu.fearless_utils.encrypt.EncryptionType
+import jp.co.soramitsu.fearless_utils.extensions.copyLast
+import jp.co.soramitsu.fearless_utils.extensions.toHexString
 import jp.co.soramitsu.fearless_utils.hash.Hasher.blake2b256
+import jp.co.soramitsu.fearless_utils.hash.Hasher.keccak256
 import jp.co.soramitsu.fearless_utils.ss58.SS58Encoder.toAddress
+import java.security.Key
 import java.security.KeyPair
 
 interface Keypair {
@@ -24,6 +28,20 @@ fun Keypair.substrateAccountId(): ByteArray {
     } else {
         publicKey
     }
+}
+
+fun Keypair.ethereumAccountId(): ByteArray {
+    val decompressed = if (publicKey.size == 64) {
+        publicKey
+    } else {
+        ECDSAUtils.decompressed(publicKey)
+    }
+
+    return decompressed.keccak256().copyLast(20)
+}
+
+fun Keypair.ethereumAddress(): String {
+    return ethereumAccountId().toHexString(withPrefix = true)
 }
 
 fun Keypair.ss58Address(format: Short) = publicKey.toAddress(format)

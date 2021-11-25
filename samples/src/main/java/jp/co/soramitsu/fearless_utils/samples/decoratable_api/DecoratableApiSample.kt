@@ -9,7 +9,6 @@ import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.staking.his
 import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.staking.staking
 import jp.co.soramitsu.fearless_utils.wsrpc.SocketService
 import jp.co.soramitsu.fearless_utils.wsrpc.logging.Logger
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -42,13 +41,11 @@ class DecoratableApiSample {
             typesJsons = listOf(types)
         )
 
-        println(api.config.chainProperties())
-        println(api.config.genesisHash())
+        println(api.chainState.properties())
+        println(api.chainState.genesisHash())
 
         val account = Keyring.sampleAccount().getOrThrow()
-        val address = api.config.chainProperties().ss58AddressOf(account)
-
-        println(address)
+        val address = api.chainState.properties().ss58AddressOf(account)
 
         api.query.staking.historyDepth.subscribe()
 //            .onEach { println(it) }
