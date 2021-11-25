@@ -9,13 +9,13 @@ buildscript {
         minVersion = 21
         targetVersion = 28
 
-        kotlinVersion = '1.4.31'
+        kotlinVersion = '1.6.0'
+        coroutinesVersion = '1.5.2'
 
         supportVersion = '1.0.0'
         constraintVersion = '1.1.3'
 
         rxJavaVersion = '2.2.7'
-        coroutinesVersion = '1.4.2'
 
         gsonVersion = '2.8.2'
 

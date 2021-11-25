@@ -10,3 +10,9 @@ interface SeedFactory {
 
     fun deriveSeed(mnemonicWords: String, password: String?): Result
 }
+
+fun SeedFactory.deriveSeed32(mnemonicWords: String, password: String?) = cropSeedTo32Bytes(deriveSeed(mnemonicWords, password))
+
+private fun cropSeedTo32Bytes(seedResult: SeedFactory.Result): SeedFactory.Result {
+    return SeedFactory.Result(seed = seedResult.seed.copyOfRange(0, 32), seedResult.mnemonic)
+}
