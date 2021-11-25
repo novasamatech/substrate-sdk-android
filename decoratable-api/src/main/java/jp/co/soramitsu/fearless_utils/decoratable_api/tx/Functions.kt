@@ -31,6 +31,23 @@ class Function1<A1>(
     }
 }
 
+class Function2<A1, A2>(
+    module: Module,
+    function: MetadataFunction,
+    api: SubstrateApi,
+) : FunctionBase(
+    module, function, api
+) {
+    operator fun invoke(arg1: A1, arg2: A2): SubmittableExtrinsic {
+        require(function.arguments.size == 2)
+
+        return createExtrinsic(mapOf(
+            function.arguments[0].name to arg1,
+            function.arguments[1].name to arg2
+        ))
+    }
+}
+
 abstract class FunctionBase(
     private val module: Module,
     protected val function: MetadataFunction,

@@ -6,8 +6,8 @@ import jp.co.soramitsu.fearless_utils.extensions.toHexString
 import jp.co.soramitsu.fearless_utils.hash.Hasher.blake2b256
 import jp.co.soramitsu.fearless_utils.hash.Hasher.keccak256
 import jp.co.soramitsu.fearless_utils.ss58.SS58Encoder.toAddress
-import java.security.Key
-import java.security.KeyPair
+
+typealias PublicKey = ByteArray
 
 interface Keypair {
     val privateKey: ByteArray
@@ -22,26 +22,27 @@ class BaseKeypair(
     override val encryptionType: EncryptionType
 ) : Keypair
 
-fun Keypair.substrateAccountId(): ByteArray {
-   return if (publicKey.size > 32) {
-        publicKey.blake2b256()
+fun PublicKey.substrateAccountId(): ByteArray {
+    return if (size > 32) {
+        blake2b256()
     } else {
-        publicKey
+        this
     }
 }
 
-fun Keypair.ethereumAccountId(): ByteArray {
-    val decompressed = if (publicKey.size == 64) {
-        publicKey
+fun PublicKey.ethereumAccountId(): ByteArray {
+    val decompressed = if (size == 64) {
+        this
     } else {
-        ECDSAUtils.decompressed(publicKey)
+        ECDSAUtils.decompressed(this)
     }
 
     return decompressed.keccak256().copyLast(20)
 }
 
-fun Keypair.ethereumAddress(): String {
-    return ethereumAccountId().toHexString(withPrefix = true)
-}
+fun PublicKey.ethereumAddress(): String = ethereumAccountId().toHexString(withPrefix = true)
 
+fun Keypair.substrateAccountId() = publicKey.substrateAccountId()
+fun Keypair.ethereumAccountId() = publicKey.ethereumAccountId()
+fun Keypair.ethereumAddress(): String = publicKey.ethereumAddress()
 fun Keypair.ss58Address(format: Short) = publicKey.toAddress(format)

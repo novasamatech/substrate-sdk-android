@@ -2,11 +2,16 @@ package jp.co.soramitsu.fearless_utils.samples.decoratable_api
 
 import com.google.gson.Gson
 import jp.co.soramitsu.fearless_utils.decoratable_api.SubstrateApi
-import jp.co.soramitsu.fearless_utils.decoratable_api.config.ss58AddressOf
+import jp.co.soramitsu.fearless_utils.decoratable_api.options.accountIdentifier.id
+import jp.co.soramitsu.fearless_utils.decoratable_api.tx.invoke
 import jp.co.soramitsu.fearless_utils.encrypt.Keyring
 import jp.co.soramitsu.fearless_utils.gson_codec.GsonCodec
+import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.balances.balances
+import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.balances.transfer
 import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.staking.historyDepth
 import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.staking.staking
+import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.utility.batch
+import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.utility.utility
 import jp.co.soramitsu.fearless_utils.wsrpc.SocketService
 import jp.co.soramitsu.fearless_utils.wsrpc.logging.Logger
 import kotlinx.coroutines.flow.collect
@@ -41,11 +46,15 @@ class DecoratableApiSample {
             typesJsons = listOf(types)
         )
 
-        println(api.chainState.properties())
-        println(api.chainState.genesisHash())
-
         val account = Keyring.sampleAccount().getOrThrow()
-        val address = api.chainState.properties().ss58AddressOf(account)
+        val accountId = api.options.accountIdentifierConstructor.id(account)
+
+        val txHash = api.tx.utility.batch(
+            api.tx.balances.transfer(accountId, 123.toBigInteger()),
+            api.tx.balances.transfer(accountId, 123.toBigInteger()),
+        )
+            .signAndSend(account)
+        println(txHash)
 
         api.query.staking.historyDepth.subscribe()
 //            .onEach { println(it) }

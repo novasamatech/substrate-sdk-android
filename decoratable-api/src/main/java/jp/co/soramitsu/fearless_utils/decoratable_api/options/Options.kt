@@ -10,21 +10,21 @@ class Options(
 ) {
 
     class Factory(
-        private val accountIdConstructorFactory: AccountIdentifierConstructor.Factory
+        private val accountIdConstructorFactory: AccountIdentifierConstructor.Factory,
     ) {
 
         fun build(api: SubstrateApi) = Options(
             accountIdentifierConstructor = accountIdConstructorFactory.create(api)
         )
     }
-    
+
     companion object // extensions
 }
 
 fun Options.Companion.substrate() = Options.Factory(
-    accountIdConstructorFactory = AccountIdentifierConstructor.defaultSubstrate()
+    accountIdConstructorFactory = AccountIdentifierConstructor.defaultSubstrate(),
 )
 
 fun Options.Companion.ethereum() = Options.Factory(
-    accountIdConstructorFactory = AccountIdentifierConstructor.ethereum()
+    accountIdConstructorFactory = AccountIdentifierConstructor.ethereum(),
 )
