@@ -1,5 +1,7 @@
-package jp.co.soramitsu.fearless_utils.koltinx_serialization_scale
+package jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.encode
 
+import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.Scale
+import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.encodeToDynamicStructure
 import org.junit.Assert
 
 open class EncodeTest {

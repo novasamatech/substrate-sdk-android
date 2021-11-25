@@ -1,4 +1,4 @@
-package jp.co.soramitsu.fearless_utils.koltinx_serialization_scale
+package jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.encode
 
 import org.junit.Test
 

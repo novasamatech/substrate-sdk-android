@@ -1,6 +1,6 @@
 @file:UseSerializers(BigIntegerSerializer::class)
 
-package jp.co.soramitsu.fearless_utils.koltinx_serialization_scale
+package jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.encode
 
 import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.serializers.BigIntegerSerializer
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
