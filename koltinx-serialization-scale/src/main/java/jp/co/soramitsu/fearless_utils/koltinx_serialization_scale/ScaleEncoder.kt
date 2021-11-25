@@ -53,6 +53,13 @@ class StructEncoder(
         result[tag] = number
     }
 
+    override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
+        return StructEncoder(
+            serializersModule = serializersModule,
+            consumer = { result[popTag()] = it }
+        )
+    }
+
     override fun encodeTaggedString(tag: String, value: String) {
         result[tag] = value
     }
