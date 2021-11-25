@@ -1,45 +1,63 @@
 package jp.co.soramitsu.fearless_utils.koltinx_serialization_scale
 
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.AbstractEncoder
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.encoding.CompositeEncoder
+import kotlinx.serialization.internal.NamedValueEncoder
 import kotlinx.serialization.modules.SerializersModule
 import java.math.BigInteger
 
-internal object BigIntegerSerializer : KSerializer<BigInteger> {
-    override fun deserialize(decoder: Decoder): BigInteger {
-        TODO("Not yet implemented")
-    }
+@OptIn(ExperimentalSerializationApi::class)
+sealed interface ScaleEncoder {
 
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Number", PrimitiveKind.STRING)
-
-    override fun serialize(encoder: Encoder, value: BigInteger) {
-        require(encoder is ScaleEncoder)
-
-        encoder.encodeNumber(value)
-    }
+    fun encodeNumber(number: BigInteger)
 }
+
+typealias AnyConsumer = (Any?) -> Unit
+
 
 @OptIn(ExperimentalSerializationApi::class)
-sealed class ScaleEncoder(override val serializersModule: SerializersModule) : AbstractEncoder() {
+class RootEncoder(override val serializersModule: SerializersModule) : ScaleEncoder, AbstractEncoder() {
 
-    abstract fun encodeNumber(number: BigInteger)
-}
-
-class RootEncoder(serializersModule: SerializersModule): ScaleEncoder(serializersModule) {
-
-     var result: Any? = null
+    var result: Any? = null
 
     override fun encodeNumber(number: BigInteger) {
-       result = number
+        result = number
     }
 
     override fun encodeString(value: String) {
         result = value
+    }
+
+    override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
+        return StructEncoder(
+            serializersModule = serializersModule,
+            consumer = { result = it }
+        )
+    }
+}
+
+@OptIn(InternalSerializationApi::class)
+class StructEncoder(
+    override val serializersModule: SerializersModule,
+    private val consumer: AnyConsumer
+) : NamedValueEncoder(), ScaleEncoder {
+
+    var result: MutableMap<String, Any?> = mutableMapOf()
+
+    override fun encodeNumber(number: BigInteger) {
+        val tag = popTag()
+
+        result[tag] = number
+    }
+
+    override fun encodeTaggedString(tag: String, value: String) {
+        result[tag] = value
+    }
+
+    override fun endEncode(descriptor: SerialDescriptor) {
+        consumer(result)
     }
 }

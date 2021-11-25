@@ -2,7 +2,7 @@ package jp.co.soramitsu.fearless_utils.koltinx_serialization_scale
 
 import org.junit.Test
 
-class ScaleTest : EncodeTest() {
+class PrimitivesTest : EncodeTest() {
 
     @Test
     fun `should encode number`() = runEncodeTest(

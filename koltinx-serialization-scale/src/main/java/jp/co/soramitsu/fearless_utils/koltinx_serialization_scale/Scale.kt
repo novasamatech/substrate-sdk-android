@@ -1,5 +1,6 @@
 package jp.co.soramitsu.fearless_utils.koltinx_serialization_scale
 
+import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.serializers.BigIntegerSerializer
 import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.internal.NamedValueEncoder
@@ -24,15 +25,11 @@ public inline fun <reified T> DynamicStructureFormat.decodeFromDynamicStructure(
     decodeFromDynamicStructure(serializersModule.serializer(), dynamicStructure)
 
 
-private val scaleSerializers = SerializersModule {
-    contextual(BigInteger::class, BigIntegerSerializer)
-}
-
 @OptIn(ExperimentalSerializationApi::class)
 sealed class Scale(
     serializersModules: SerializersModule
 ) : DynamicStructureFormat {
-    override val serializersModule: SerializersModule = scaleSerializers + serializersModules
+    override val serializersModule: SerializersModule = serializersModules
 
     companion object Default : Scale(EmptySerializersModule)
 
