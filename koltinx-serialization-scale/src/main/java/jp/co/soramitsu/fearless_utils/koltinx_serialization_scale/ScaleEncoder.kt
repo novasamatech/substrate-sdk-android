@@ -1,5 +1,6 @@
 package jp.co.soramitsu.fearless_utils.koltinx_serialization_scale
 
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -23,18 +24,18 @@ class RootEncoder(override val serializersModule: SerializersModule) : ScaleEnco
 
     var result: Any? = null
 
-    override fun encodeNumber(number: BigInteger) {
-        result = number
-    }
+    override fun encodeNumber(number: BigInteger) = putElement(number)
+    override fun encodeString(value: String) = putElement(value)
+    override fun encodeBoolean(value: Boolean) = putElement(value)
 
-    override fun encodeString(value: String) {
+    private fun putElement(value: Any?) {
         result = value
     }
 
     override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
         return StructEncoder(
             serializersModule = serializersModule,
-            consumer = { result = it }
+            consumer = ::putElement
         )
     }
 }
@@ -47,24 +48,22 @@ class StructEncoder(
 
     var result: MutableMap<String, Any?> = mutableMapOf()
 
-    override fun encodeNumber(number: BigInteger) {
-        val tag = popTag()
-
-        result[tag] = number
-    }
-
     override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
         return StructEncoder(
             serializersModule = serializersModule,
-            consumer = { result[popTag()] = it }
+            consumer = ::putElement
         )
     }
 
-    override fun encodeTaggedString(tag: String, value: String) {
-        result[tag] = value
-    }
+    override fun encodeTaggedString(tag: String, value: String) = putElement(value, tag)
+    override fun encodeTaggedBoolean(tag: String, value: Boolean) = putElement(value, tag)
+    override fun encodeNumber(number: BigInteger) = putElement(number)
 
     override fun endEncode(descriptor: SerialDescriptor) {
-        consumer(result)
+        consumer(Struct.Instance(result))
+    }
+
+    private fun putElement(element: Any?, tag: String = popTag()) {
+        result[tag] = element
     }
 }

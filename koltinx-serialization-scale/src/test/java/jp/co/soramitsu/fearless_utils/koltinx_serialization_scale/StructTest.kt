@@ -3,13 +3,14 @@
 package jp.co.soramitsu.fearless_utils.koltinx_serialization_scale
 
 import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.serializers.BigIntegerSerializer
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 import org.junit.Test
 import java.math.BigInteger
 
 
-class StructTest: EncodeTest() {
+class StructTest : EncodeTest() {
 
     @Test
     fun `should encode stuct`() {
@@ -19,10 +20,12 @@ class StructTest: EncodeTest() {
 
         runEncodeTest(
             value = Test(BigInteger.ZERO, "123", BigInteger.TEN),
-            expected = mapOf(
-                "a" to BigInteger.ZERO,
-                "b" to "123",
-                "c" to BigInteger.TEN
+            expected = Struct.Instance(
+                mapOf(
+                    "a" to BigInteger.ZERO,
+                    "b" to "123",
+                    "c" to BigInteger.TEN
+                )
             )
         )
     }
@@ -33,7 +36,7 @@ class StructTest: EncodeTest() {
         @Serializable
         class Inner(
             val b: String,
-            val c: BigInteger
+            val c: Boolean
         )
 
         @Serializable
@@ -48,17 +51,21 @@ class StructTest: EncodeTest() {
                 a = BigInteger.ZERO,
                 inner = Inner(
                     b = "123",
-                    c = BigInteger.ONE
+                    c = true
                 ),
                 d = "321"
             ),
-            expected = mapOf(
-                "a" to BigInteger.ZERO,
-                "inner" to mapOf(
-                    "b" to "123",
-                    "c" to BigInteger.ONE
-                ),
-                "d" to "321"
+            expected = Struct.Instance(
+                mapOf(
+                    "a" to BigInteger.ZERO,
+                    "inner" to Struct.Instance(
+                        mapOf(
+                            "b" to "123",
+                            "c" to true
+                        )
+                    ),
+                    "d" to "321"
+                )
             )
         )
     }

@@ -37,4 +37,6 @@ dependencies {
 
     testImplementation jUnitDep
     testImplementation mockitoDep
+
+    implementation project(':fearless-utils')
 }

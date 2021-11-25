@@ -14,6 +14,7 @@ import java.math.BigInteger
 @OptIn(ExperimentalSerializationApi::class)
 @Serializer(forClass = BigInteger::class)
 object BigIntegerSerializer : KSerializer<BigInteger> {
+
     override fun deserialize(decoder: Decoder): BigInteger {
         TODO("Not yet implemented")
     }
