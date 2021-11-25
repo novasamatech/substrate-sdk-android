@@ -71,7 +71,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:3.6.0'
         classpath 'org.mozilla.rust-android-gradle:plugin:0.9.0'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.31"
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.0'
         classpath 'io.github.gradle-nexus:publish-plugin:1.1.0'
     }
 }
