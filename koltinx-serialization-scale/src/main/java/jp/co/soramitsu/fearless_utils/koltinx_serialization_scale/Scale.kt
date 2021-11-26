@@ -2,14 +2,13 @@ package jp.co.soramitsu.fearless_utils.koltinx_serialization_scale
 
 import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.serializers.BigIntegerSerializer
 import kotlinx.serialization.*
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.internal.NamedValueEncoder
 import kotlinx.serialization.modules.EmptySerializersModule
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.plus
+import kotlinx.serialization.modules.serializersModuleOf
 import java.math.BigInteger
 
-interface DynamicStructureFormat: SerialFormat {
+interface DynamicStructureFormat : SerialFormat {
 
     fun <T> encodeToDynamicStructure(serializer: SerializationStrategy<T>, value: T): Any?
 
@@ -25,11 +24,13 @@ public inline fun <reified T> DynamicStructureFormat.decodeFromDynamicStructure(
     decodeFromDynamicStructure(serializersModule.serializer(), dynamicStructure)
 
 
+private val defaultSerializers = serializersModuleOf(BigInteger::class, BigIntegerSerializer)
+
 @OptIn(ExperimentalSerializationApi::class)
 sealed class Scale(
     serializersModules: SerializersModule
 ) : DynamicStructureFormat {
-    override val serializersModule: SerializersModule = serializersModules
+    override val serializersModule: SerializersModule = defaultSerializers + serializersModules
 
     companion object Default : Scale(EmptySerializersModule)
 
@@ -41,7 +42,9 @@ sealed class Scale(
     }
 
     override fun <T> decodeFromDynamicStructure(deserializer: DeserializationStrategy<T>, dynamicStructure: Any?): T {
-        TODO("Not yet implemented")
+        val decoder = RootDecoder(serializersModule, dynamicStructure)
+
+        return decoder.decodeSerializableValue(deserializer)
     }
 }
 

@@ -18,28 +18,6 @@ sealed interface ScaleEncoder {
 
 typealias AnyConsumer = (Any?) -> Unit
 
-
-//@OptIn(ExperimentalSerializationApi::class)
-//class RootEncoder(override val serializersModule: SerializersModule) : ScaleEncoder, AbstractEncoder() {
-//
-//    var result: Any? = null
-//
-//    override fun encodeNumber(number: BigInteger) = putElement(number)
-//    override fun encodeString(value: String) = putElement(value)
-//    override fun encodeBoolean(value: Boolean) = putElement(value)
-//
-//    private fun putElement(value: Any?) {
-//        result = value
-//    }
-//
-//    override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
-//        return StructEncoder(
-//            serializersModule = serializersModule,
-//            consumer = ::putElement
-//        )
-//    }
-//}
-
 private const val ROOT_TAG = "ROOT"
 
 @OptIn(ExperimentalSerializationApi::class)

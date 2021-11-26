@@ -1,5 +1,6 @@
 package jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.serializers
 
+import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.ScaleDecoder
 import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.ScaleEncoder
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
@@ -16,7 +17,9 @@ import java.math.BigInteger
 object BigIntegerSerializer : KSerializer<BigInteger> {
 
     override fun deserialize(decoder: Decoder): BigInteger {
-        TODO("Not yet implemented")
+        require(decoder is ScaleDecoder)
+
+        return decoder.decodeNumber()
     }
 
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Number", PrimitiveKind.STRING)

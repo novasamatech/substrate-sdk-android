@@ -15,4 +15,10 @@ class PrimitivesTest : EncodeTest() {
         value = "123",
         expected = "123"
     )
+
+    @Test
+    fun `should encode boolean`() = runEncodeTest(
+        value = true,
+        expected = true
+    )
 }
