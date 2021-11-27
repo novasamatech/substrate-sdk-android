@@ -14,6 +14,8 @@ import java.math.BigInteger
 sealed interface ScaleDecoder {
 
     fun decodeNumber(): BigInteger
+
+    fun decodeAsIs(): Any?
 }
 
 private const val ROOT_TAG = "ROOT"
@@ -52,6 +54,8 @@ abstract class BaseCompositeDecoder(
     override fun decodeTaggedString(tag: String): String = getElement(tag).cast()
     override fun decodeTaggedBoolean(tag: String): Boolean = getElement(tag).cast()
     override fun decodeNumber(): BigInteger = getElement(popTag()).cast()
+
+    override fun decodeAsIs() = getElement(popTag())
 
     override fun beginStructure(descriptor: SerialDescriptor): CompositeDecoder {
         val decoder = when (descriptor.kind) {

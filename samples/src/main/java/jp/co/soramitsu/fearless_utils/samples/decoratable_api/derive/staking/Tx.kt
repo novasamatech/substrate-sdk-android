@@ -2,10 +2,7 @@ package jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.staking
 
 import jp.co.soramitsu.fearless_utils.decoratable_api.SubstrateApiException
 import jp.co.soramitsu.fearless_utils.decoratable_api.moduleNotFound
-import jp.co.soramitsu.fearless_utils.decoratable_api.tx.DecoratableFunctions
-import jp.co.soramitsu.fearless_utils.decoratable_api.tx.DecoratableTx
-import jp.co.soramitsu.fearless_utils.decoratable_api.tx.Function0
-import jp.co.soramitsu.fearless_utils.decoratable_api.tx.Function1
+import jp.co.soramitsu.fearless_utils.decoratable_api.tx.*
 import java.math.BigInteger
 
 interface StakingFunctions : DecoratableFunctions

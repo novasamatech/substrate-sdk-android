@@ -4,9 +4,11 @@ import jp.co.soramitsu.fearless_utils.decoratable_api.SubstrateApi
 import jp.co.soramitsu.fearless_utils.decoratable_api.options.accountIdentifier.AccountIdentifierConstructor
 import jp.co.soramitsu.fearless_utils.decoratable_api.options.accountIdentifier.defaultSubstrate
 import jp.co.soramitsu.fearless_utils.decoratable_api.options.accountIdentifier.ethereum
+import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.Scale
 
 class Options(
-    val accountIdentifierConstructor: AccountIdentifierConstructor
+    val accountIdentifierConstructor: AccountIdentifierConstructor,
+    val scale: Scale = ApiScale()
 ) {
 
     class Factory(

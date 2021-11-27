@@ -6,6 +6,7 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Generic
 import jp.co.soramitsu.fearless_utils.decoratable_api.tx.DecoratableFunctions
 import jp.co.soramitsu.fearless_utils.decoratable_api.tx.DecoratableTx
 import jp.co.soramitsu.fearless_utils.decoratable_api.tx.Function1
+import jp.co.soramitsu.fearless_utils.decoratable_api.tx.function1
 
 interface UtilityFunctions : DecoratableFunctions
 

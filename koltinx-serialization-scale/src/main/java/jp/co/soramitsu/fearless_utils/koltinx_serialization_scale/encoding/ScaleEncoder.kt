@@ -20,6 +20,8 @@ sealed interface ScaleEncoder {
     fun encodeNumber(number: BigInteger)
 
     fun encodeByteArray(bytes: ByteArray)
+
+    fun encodeAny(any: Any?)
 }
 
 typealias AnyConsumer = (Any?) -> Unit
@@ -69,6 +71,9 @@ abstract class BaseCompositeEncoder(
     override fun encodeTaggedBoolean(tag: String, value: Boolean) = putElement(value, tag)
     override fun encodeNumber(number: BigInteger) = putElement(number, popTag())
     override fun encodeByteArray(bytes: ByteArray) = putElement(bytes, popTag())
+    override fun encodeAny(any: Any?) = putElement(any, popTag())
+
+    override fun composeName(parentName: String, childName: String) = childName
 
     override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
         val consumer: AnyConsumer = createConsumer()
@@ -86,7 +91,7 @@ abstract class BaseCompositeEncoder(
         if (serializer.descriptor == byteArraySerializer.descriptor) {
             encodeByteArray(value as ByteArray)
         } else {
-            encodeSealed(serializer, value, createConsumer())
+            encodePolymorphically(serializer, value, createConsumer())
         }
     }
 

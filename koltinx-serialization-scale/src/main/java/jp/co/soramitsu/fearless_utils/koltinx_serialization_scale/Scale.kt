@@ -6,7 +6,9 @@ import kotlinx.serialization.*
 import kotlinx.serialization.modules.EmptySerializersModule
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.plus
+import java.lang.reflect.Type
 import java.math.BigInteger
+import kotlin.reflect.KType
 
 interface DynamicStructureFormat : SerialFormat {
 
@@ -20,6 +22,13 @@ public inline fun <reified T> DynamicStructureFormat.encodeToDynamicStructure(va
     encodeToDynamicStructure(serializersModule.serializer(), value)
 
 @OptIn(ExperimentalSerializationApi::class)
+public fun <T> DynamicStructureFormat.encodeToDynamicStructure(type: KType, value: T?): Any? = if(value == null) {
+    null
+} else {
+    encodeToDynamicStructure(serializersModule.serializer(type), value)
+}
+
+@OptIn(ExperimentalSerializationApi::class)
 public inline fun <reified T> DynamicStructureFormat.decodeFromDynamicStructure(dynamicStructure: Any?): T =
     decodeFromDynamicStructure(serializersModule.serializer(), dynamicStructure)
 
@@ -29,7 +38,7 @@ private val defaultSerializers = SerializersModule {
 }
 
 @OptIn(ExperimentalSerializationApi::class)
-sealed class Scale(
+open class Scale(
     serializersModules: SerializersModule
 ) : DynamicStructureFormat {
     override val serializersModule: SerializersModule = defaultSerializers + serializersModules

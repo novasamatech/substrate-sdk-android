@@ -2,7 +2,7 @@ package jp.co.soramitsu.fearless_utils.samples.decoratable_api
 
 import com.google.gson.Gson
 import jp.co.soramitsu.fearless_utils.decoratable_api.SubstrateApi
-import jp.co.soramitsu.fearless_utils.decoratable_api.options.accountIdentifier.id
+import jp.co.soramitsu.fearless_utils.decoratable_api.options.accountIdentifier.identifier
 import jp.co.soramitsu.fearless_utils.decoratable_api.tx.invoke
 import jp.co.soramitsu.fearless_utils.encrypt.Keyring
 import jp.co.soramitsu.fearless_utils.gson_codec.GsonCodec
@@ -10,6 +10,7 @@ import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.balances.ba
 import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.balances.transfer
 import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.staking.historyDepth
 import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.staking.staking
+import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.types.MultiAddress
 import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.utility.batch
 import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.utility.utility
 import jp.co.soramitsu.fearless_utils.wsrpc.SocketService
@@ -47,14 +48,15 @@ class DecoratableApiSample {
         )
 
         val account = Keyring.sampleAccount().getOrThrow()
-        val accountId = api.options.accountIdentifierConstructor.id(account)
+        val accountId = api.options.accountIdentifierConstructor.identifier(account).accountId
+        val targetAddress = MultiAddress.Id(accountId)
 
-        val txHash = api.tx.utility.batch(
-            api.tx.balances.transfer(accountId, 123.toBigInteger()),
-            api.tx.balances.transfer(accountId, 123.toBigInteger()),
+        val feeInfo = api.tx.utility.batch(
+            api.tx.balances.transfer(targetAddress, 123.toBigInteger()),
+            api.tx.balances.transfer(targetAddress, 123.toBigInteger()),
         )
-            .signAndSend(account)
-        println(txHash)
+            .paymentInfo(account)
+        println(feeInfo.partialFee)
 
         api.query.staking.historyDepth.subscribe()
 //            .onEach { println(it) }

@@ -4,7 +4,7 @@ import jp.co.soramitsu.fearless_utils.encrypt.keypair.Keypair
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.GenericCall
 import jp.co.soramitsu.fearless_utils.decoratable_api.SubstrateApi
 import jp.co.soramitsu.fearless_utils.decoratable_api.options.accountIdentifier.address
-import jp.co.soramitsu.fearless_utils.decoratable_api.options.accountIdentifier.id
+import jp.co.soramitsu.fearless_utils.decoratable_api.options.accountIdentifier.identifier
 import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.author.author
 import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.author.submitExtrinsic
 import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.balances.FeeInfo
@@ -41,7 +41,7 @@ class SubmittableExtrinsic(
             runtimeVersion = runtimeVersion,
             genesisHash = api.chainState.genesisHash().fromHex(),
             multiChainEncryption = MultiChainEncryption.Substrate(sender.encryptionType),
-            accountIdentifier = api.options.accountIdentifierConstructor.id(sender),
+            accountIdentifier = api.options.accountIdentifierConstructor.identifier(sender).forEncoding,
             blockHash = mortality.blockHash.fromHex(),
             era = mortality.era
         )
