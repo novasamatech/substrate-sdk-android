@@ -27,7 +27,7 @@ open class DictEnum(
             )
     )
 
-    class Entry<out T>(val name: String, val value: T)
+    data class Entry<out T>(val name: String, val value: T)
 
     override fun decode(scaleCodecReader: ScaleCodecReader, runtime: RuntimeSnapshot): Entry<Any?> {
         val typeIndex = scaleCodecReader.readByte().toUByte().toInt()

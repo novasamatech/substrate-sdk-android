@@ -1,10 +1,9 @@
 package jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.serializers
 
 import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.ScaleDecoder
-import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.ScaleEncoder
+import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.encoding.ScaleEncoder
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.Serializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -13,7 +12,6 @@ import kotlinx.serialization.encoding.Encoder
 import java.math.BigInteger
 
 @OptIn(ExperimentalSerializationApi::class)
-@Serializer(forClass = BigInteger::class)
 object BigIntegerSerializer : KSerializer<BigInteger> {
 
     override fun deserialize(decoder: Decoder): BigInteger {

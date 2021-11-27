@@ -31,6 +31,22 @@ class StructTest : EncodeTest() {
     }
 
     @Test
+    fun `should encode stuct with single field`() {
+
+        @Serializable
+        class Test(val a: String)
+
+        runEncodeTest(
+            value = Test("123"),
+            expected = Struct.Instance(
+                mapOf(
+                    "a" to "123",
+                )
+            )
+        )
+    }
+
+    @Test
     fun `should encode nested stuct`() {
 
         @Serializable

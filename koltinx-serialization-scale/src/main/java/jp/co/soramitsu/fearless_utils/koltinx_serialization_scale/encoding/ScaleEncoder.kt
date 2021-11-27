@@ -1,10 +1,14 @@
-package jp.co.soramitsu.fearless_utils.koltinx_serialization_scale
+package jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.encoding
 
+import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.serializers.byteArraySerializer
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEnum
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.StructureKind
+import kotlinx.serialization.encoding.AbstractEncoder
 import kotlinx.serialization.encoding.CompositeEncoder
 import kotlinx.serialization.internal.NamedValueEncoder
 import kotlinx.serialization.modules.SerializersModule
@@ -14,16 +18,22 @@ import java.math.BigInteger
 sealed interface ScaleEncoder {
 
     fun encodeNumber(number: BigInteger)
+
+    fun encodeByteArray(bytes: ByteArray)
 }
 
 typealias AnyConsumer = (Any?) -> Unit
 
 private const val ROOT_TAG = "ROOT"
 
-@OptIn(ExperimentalSerializationApi::class)
-class RootEncoder(serializersModule: SerializersModule) : BaseCompositeEncoder(serializersModule, consumer = {}) {
 
-    var result: Any? = null
+@OptIn(ExperimentalSerializationApi::class)
+open class SingleValueEncoder(serializersModule: SerializersModule, consumer: AnyConsumer = {}) : BaseCompositeEncoder(serializersModule, consumer) {
+
+    private var result: Any? = null
+
+    // to prevent failing requirement in putElement for nested context
+    override fun composeName(parentName: String, childName: String) = parentName
 
     init {
         pushTag(ROOT_TAG)
@@ -38,6 +48,14 @@ class RootEncoder(serializersModule: SerializersModule) : BaseCompositeEncoder(s
     override fun getCurrent(): Any? = result
 }
 
+@OptIn(ExperimentalSerializationApi::class)
+class ObjectEncoder(override val serializersModule: SerializersModule, private val consumer: AnyConsumer) : AbstractEncoder() {
+
+    override fun endStructure(descriptor: SerialDescriptor) {
+        consumer.invoke(null)
+    }
+}
+
 @OptIn(InternalSerializationApi::class, ExperimentalSerializationApi::class)
 abstract class BaseCompositeEncoder(
     override val serializersModule: SerializersModule,
@@ -50,21 +68,63 @@ abstract class BaseCompositeEncoder(
     override fun encodeTaggedString(tag: String, value: String) = putElement(value, tag)
     override fun encodeTaggedBoolean(tag: String, value: Boolean) = putElement(value, tag)
     override fun encodeNumber(number: BigInteger) = putElement(number, popTag())
+    override fun encodeByteArray(bytes: ByteArray) = putElement(bytes, popTag())
 
     override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
-        val consumer: AnyConsumer = { putElement(it, popTag()) }
-
+        val consumer: AnyConsumer = createConsumer()
         val encoder = when (descriptor.kind) {
             StructureKind.LIST -> CollectionEncoder(serializersModule, consumer)
             StructureKind.CLASS -> StructEncoder(serializersModule, consumer)
+            StructureKind.OBJECT -> ObjectEncoder(serializersModule, consumer)
             else -> throw IllegalArgumentException("Unknown structure kind: ${descriptor.kind}")
         }
 
         return encoder
     }
 
+    override fun <T> encodeSerializableValue(serializer: SerializationStrategy<T>, value: T) {
+        if (serializer.descriptor == byteArraySerializer.descriptor) {
+            encodeByteArray(value as ByteArray)
+        } else {
+            encodeSealed(serializer, value, createConsumer())
+        }
+    }
+
+    fun result() = getCurrent()
+
     override fun endEncode(descriptor: SerialDescriptor) {
+        consumer(result())
+    }
+
+    protected open fun createConsumer(): AnyConsumer = { putElement(it, popTag()) }
+}
+
+@ExperimentalSerializationApi
+class EnumEncoder(
+    serializersModule: SerializersModule,
+    private val consumer: AnyConsumer,
+    private val variantName: String
+) : SingleValueEncoder(serializersModule, consumer) {
+
+    override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
+        if (descriptor.kind is StructureKind.CLASS && descriptor.elementsCount == 1) {
+            return SingleValueEncoder(serializersModule, createConsumer())
+        }
+
+        return super.beginStructure(descriptor)
+    }
+
+    /**
+     * EnumEncoder is either
+     */
+    override fun createConsumer(): AnyConsumer = {
+        putElement(it, popTag())
+
         consumer(getCurrent())
+    }
+
+    override fun getCurrent(): Any {
+        return DictEnum.Entry(variantName, super.getCurrent())
     }
 }
 
