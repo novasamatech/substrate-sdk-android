@@ -39,12 +39,6 @@ class SocketService(
     fun started() = stateContainer.getState() !is State.Disconnected
 
     /**
-     * Returns the current state of the socket as for [SocketStateMachine]
-     */
-    val state
-        get() = stateContainer.getState()
-
-    /**
      * Initiate new connection to the given url.
      * Only has effect when called from [SocketStateMachine.State.Disconnected] state.
      * Meaning, this is the first method that should be called after create [SocketService] instance
