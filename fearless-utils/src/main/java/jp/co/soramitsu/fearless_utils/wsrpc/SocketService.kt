@@ -6,7 +6,7 @@ import com.neovisionaries.ws.client.WebSocketState
 import jp.co.soramitsu.fearless_utils.wsrpc.exception.ConnectionClosedException
 import jp.co.soramitsu.fearless_utils.wsrpc.logging.Logger
 import jp.co.soramitsu.fearless_utils.wsrpc.mappers.nonNull
-import jp.co.soramitsu.fearless_utils.wsrpc.mappers.string
+import jp.co.soramitsu.fearless_utils.wsrpc.mappers.stringIdMapper
 import jp.co.soramitsu.fearless_utils.wsrpc.recovery.Reconnector
 import jp.co.soramitsu.fearless_utils.wsrpc.request.DeliveryType
 import jp.co.soramitsu.fearless_utils.wsrpc.request.RequestExecutor
@@ -37,6 +37,12 @@ class SocketService(
     private val stateContainer = ObservableState(initialState = State.Disconnected)
 
     fun started() = stateContainer.getState() !is State.Disconnected
+
+    /**
+     * Returns the current state of the socket as for [SocketStateMachine]
+     */
+    val state
+        get() = stateContainer.getState()
 
     /**
      * Initiate new connection to the given url.
@@ -100,7 +106,13 @@ class SocketService(
         return executeRequest(
             request,
             DeliveryType.ON_RECONNECT,
-            SubscribedCallback(request.id, unsubscribeMethod, callback)
+            SubscribedCallback(
+                initiatorId = request.id,
+                unsubscribeMethod = unsubscribeMethod,
+                subscriptionCallback = callback,
+                gson = jsonMapper,
+                onSubscribed = ::updateState
+            )
         )
     }
 
@@ -258,15 +270,17 @@ class SocketService(
         fun cancel()
     }
 
-    inner class SubscribedCallback(
+    class SubscribedCallback(
         private val initiatorId: Int,
         private val unsubscribeMethod: String,
-        private val subscriptionCallback: ResponseListener<SubscriptionChange>
+        private val subscriptionCallback: ResponseListener<SubscriptionChange>,
+        private val gson: Gson,
+        private val onSubscribed: (Event.Subscribed) -> Unit
     ) : ResponseListener<RpcResponse> {
 
         override fun onNext(response: RpcResponse) {
             val id = try {
-                string().nonNull().map(response, jsonMapper)
+                stringIdMapper().nonNull().map(response, gson)
             } catch (e: Exception) {
                 subscriptionCallback.onError(e)
 
@@ -276,7 +290,7 @@ class SocketService(
             val subscription =
                 RespondableSubscription(id, initiatorId, unsubscribeMethod, subscriptionCallback)
 
-            updateState(Event.Subscribed(subscription))
+            onSubscribed(Event.Subscribed(subscription))
         }
 
         override fun onError(throwable: Throwable) {
