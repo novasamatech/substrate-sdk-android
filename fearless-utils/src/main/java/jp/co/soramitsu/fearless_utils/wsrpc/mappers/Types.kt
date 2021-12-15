@@ -26,7 +26,7 @@ inline fun <reified T> pojoList() = POJOCollectionMapper(T::class.java)
 object StringIdMapper : NullableMapper<String>() {
 
     override fun mapNullable(rpcResponse: RpcResponse, jsonMapper: Gson): String? {
-        return when(val result = rpcResponse.result) {
+        return when (val result = rpcResponse.result) {
             is Double -> result.toLong().toString()
             else -> result?.toString()
         }
