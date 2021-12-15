@@ -1,7 +1,7 @@
 buildscript {
     ext {
         // App version
-        versionName = '1.1.5'
+        versionName = '1.1.6'
         versionCode = 1
 
         // SDK and tools
@@ -28,7 +28,7 @@ buildscript {
         apacheXercesVersion = '2.9.0'
 
         junitVersion = '4.12'
-        mockitoVersion = '2.23.0'
+        mockitoVersion = '3.12.4'
         wsVersion = '2.10'
         xxHashVersion = '1.7.1'
         svgVersion = '1.4'
