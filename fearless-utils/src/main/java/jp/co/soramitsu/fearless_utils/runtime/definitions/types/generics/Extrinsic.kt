@@ -19,6 +19,11 @@ private const val TYPE_SIGNATURE = "ExtrinsicSignature"
 
 object Extrinsic : Type<Extrinsic.Instance>("ExtrinsicsDecoder") {
 
+    fun signatureType(runtime: RuntimeSnapshot): Type<*> {
+        return runtime.typeRegistry[TYPE_SIGNATURE]
+            ?: requiredTypeNotFound(TYPE_SIGNATURE)
+    }
+
     class Instance(
         val signature: Signature?,
         val call: GenericCall.Instance
@@ -102,11 +107,6 @@ object Extrinsic : Type<Extrinsic.Instance>("ExtrinsicsDecoder") {
     private fun addressType(runtime: RuntimeSnapshot): Type<*> {
         return runtime.typeRegistry[TYPE_ADDRESS]
             ?: requiredTypeNotFound(TYPE_ADDRESS)
-    }
-
-    private fun signatureType(runtime: RuntimeSnapshot): Type<*> {
-        return runtime.typeRegistry[TYPE_SIGNATURE]
-            ?: requiredTypeNotFound(TYPE_SIGNATURE)
     }
 
     private fun requiredTypeNotFound(name: String): Nothing {

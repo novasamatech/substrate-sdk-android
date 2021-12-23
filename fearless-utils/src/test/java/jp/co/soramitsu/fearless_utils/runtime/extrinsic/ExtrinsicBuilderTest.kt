@@ -10,6 +10,7 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.fromHex
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Era
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Extrinsic
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.multiAddressFromId
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.toHexUntyped
 import jp.co.soramitsu.fearless_utils.ss58.SS58Encoder.toAccountId
 import jp.co.soramitsu.fearless_utils.wsrpc.request.runtime.chain.RuntimeVersion
 import org.junit.Assert.assertEquals
@@ -80,6 +81,26 @@ class ExtrinsicBuilderTest {
         val encoded = builder.build()
 
         assertEquals(extrinsicInHex, encoded)
+    }
+
+    @Test
+    fun `should build extrinsic signature`() {
+        val extrinsicInHex =
+            "0x41028400fdc41550fb5186d71cae699c31731b3e1baa10680c7bd6b3831a6d222cf4d16800080bfe8bc67f44b498239887dc5679523cfcb1d20fd9ec9d6bae0a385cca118d2cb7ef9f4674d52a810feb32932d7c6fe3e05ce9e06cd72cf499c8692206410ab5038800040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402"
+
+        val expectedSignature =  Extrinsic.fromHex(runtime, extrinsicInHex).signature!!.signature
+        val expectedSignatureHex = Extrinsic.signatureType(runtime).toHexUntyped(runtime, expectedSignature)
+
+        val builder = createExtrinsicBuilder()
+
+        builder.transfer(
+            recipientAccountId = "340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c63".fromHex(),
+            amount = BigInteger("10000000000")
+        )
+
+        val actualSignature = builder.buildSignature()
+
+        assertEquals(expectedSignatureHex, actualSignature)
     }
 
     @Test
