@@ -79,6 +79,9 @@ fun Type<*>.bytesOrNull(runtime: RuntimeSnapshot, value: Any?): ByteArray? {
 fun <I> Type<I>.toHex(runtime: RuntimeSnapshot, value: I) =
     toByteArray(runtime, value).toHexString(withPrefix = true)
 
+fun Type<*>.toHexUntyped(runtime: RuntimeSnapshot, value: Any?) =
+    bytes(runtime, value).toHexString(withPrefix = true)
+
 fun <I> Type<I>.toHexOrNull(runtime: RuntimeSnapshot, value: I) =
     toByteArrayOrNull(runtime, value)?.toHexString(withPrefix = true)
 

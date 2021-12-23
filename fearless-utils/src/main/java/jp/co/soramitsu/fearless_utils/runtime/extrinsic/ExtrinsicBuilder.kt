@@ -16,6 +16,7 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.SignedE
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.new
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.instances.SignatureInstanceConstructor
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.toHex
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.toHexUntyped
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.useScaleWriter
 import jp.co.soramitsu.fearless_utils.runtime.metadata.call
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module
@@ -91,6 +92,17 @@ class ExtrinsicBuilder(
         )
 
         return Extrinsic.toHex(runtime, extrinsic)
+    }
+
+    fun buildSignature(
+        useBatchAll: Boolean = false
+    ): String {
+        val call = maybeWrapInBatch(useBatchAll)
+        val multiSignature = buildSignature(call)
+
+        val signatureType = Extrinsic.signatureType(runtime)
+
+        return signatureType.toHexUntyped(runtime, multiSignature)
     }
 
     private fun maybeWrapInBatch(useBatchAll: Boolean): GenericCall.Instance {
