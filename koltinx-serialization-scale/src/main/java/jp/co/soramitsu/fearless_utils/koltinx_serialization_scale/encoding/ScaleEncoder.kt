@@ -77,14 +77,13 @@ abstract class BaseCompositeEncoder(
 
     override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
         val consumer: AnyConsumer = createConsumer()
-        val encoder = when (descriptor.kind) {
+
+        return when (descriptor.kind) {
             StructureKind.LIST -> CollectionEncoder(serializersModule, consumer)
             StructureKind.CLASS -> StructEncoder(serializersModule, consumer)
             StructureKind.OBJECT -> ObjectEncoder(serializersModule, consumer)
             else -> throw IllegalArgumentException("Unknown structure kind: ${descriptor.kind}")
         }
-
-        return encoder
     }
 
     override fun <T> encodeSerializableValue(serializer: SerializationStrategy<T>, value: T) {

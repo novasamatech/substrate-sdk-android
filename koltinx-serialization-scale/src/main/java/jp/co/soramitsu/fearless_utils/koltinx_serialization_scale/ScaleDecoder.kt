@@ -58,13 +58,12 @@ abstract class BaseCompositeDecoder(
     override fun decodeAsIs() = getElement(popTag())
 
     override fun beginStructure(descriptor: SerialDescriptor): CompositeDecoder {
-        val decoder = when (descriptor.kind) {
+
+        return when (descriptor.kind) {
             StructureKind.LIST -> CollectionDecoder(serializersModule, currentObject().cast())
             StructureKind.CLASS -> StructDecoder(serializersModule, currentObject().cast())
             else -> throw IllegalArgumentException("Unknown structure kind: ${descriptor.kind}")
         }
-
-        return decoder
     }
 }
 
