@@ -22,9 +22,21 @@ private val KEYPAIR = BaseKeypair(
     privateKey = "f3923eea431177cd21906d4308aea61c037055fb00575cae687217c6d8b2397f".fromHex()
 )
 
+private const val SINGLE_TRANSFER_EXTRINSIC = "0x41028400fdc41550fb5186d71cae699c31731b3e1baa10680c7bd6b3831a6d222cf4d16800080bfe8bc67f44b498239887dc5679523cfcb1d20fd9ec9d6bae0a385cca118d2cb7ef9f4674d52a810feb32932d7c6fe3e05ce9e06cd72cf499c8692206410ab5038800040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402"
+private val TRANSFER_CALL_BYTES = "0x040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402".fromHex()
+private const val EXTRINSIC_SIGNATURE = "0x00080bfe8bc67f44b498239887dc5679523cfcb1d20fd9ec9d6bae0a385cca118d2cb7ef9f4674d52a810feb32932d7c6fe3e05ce9e06cd72cf499c8692206410a"
+
+private fun ExtrinsicBuilder.testSingleTransfer(): ExtrinsicBuilder {
+    return transfer(
+        recipientAccountId = "340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c63".fromHex(),
+        amount = BigInteger("10000000000")
+    )
+}
+
 class ExtrinsicBuilderTest {
 
     val runtime = RealRuntimeProvider.buildRuntime("westend")
+
 
     @Test
     fun `should build single sora transfer extrinsic`() {
@@ -67,50 +79,42 @@ class ExtrinsicBuilderTest {
     }
 
     @Test
-    fun `should build single transfer extrinsic`() {
-        val extrinsicInHex =
-            "0x41028400fdc41550fb5186d71cae699c31731b3e1baa10680c7bd6b3831a6d222cf4d16800080bfe8bc67f44b498239887dc5679523cfcb1d20fd9ec9d6bae0a385cca118d2cb7ef9f4674d52a810feb32932d7c6fe3e05ce9e06cd72cf499c8692206410ab5038800040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402"
+    fun `should build extrinsic from raw call bytes`() {
+        val extrinsic = createExtrinsicBuilder()
+            .build(TRANSFER_CALL_BYTES)
 
-        val builder = createExtrinsicBuilder()
-
-        builder.transfer(
-            recipientAccountId = "340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c63".fromHex(),
-            amount = BigInteger("10000000000")
-        )
-
-        val encoded = builder.build()
-
-        assertEquals(extrinsicInHex, encoded)
+        assertEquals(SINGLE_TRANSFER_EXTRINSIC, extrinsic)
     }
 
     @Test
-    fun `should build extrinsic signature`() {
-        val extrinsicInHex =
-            "0x41028400fdc41550fb5186d71cae699c31731b3e1baa10680c7bd6b3831a6d222cf4d16800080bfe8bc67f44b498239887dc5679523cfcb1d20fd9ec9d6bae0a385cca118d2cb7ef9f4674d52a810feb32932d7c6fe3e05ce9e06cd72cf499c8692206410ab5038800040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402"
+    fun `should build single transfer extrinsic`() {
+        val encoded = createExtrinsicBuilder()
+            .testSingleTransfer()
+            .build()
 
-        val expectedSignature =  Extrinsic.fromHex(runtime, extrinsicInHex).signature!!.signature
-        val expectedSignatureHex = Extrinsic.signatureType(runtime).toHexUntyped(runtime, expectedSignature)
+        assertEquals(SINGLE_TRANSFER_EXTRINSIC, encoded)
+    }
 
-        val builder = createExtrinsicBuilder()
+    @Test
+    fun `should build extrinsic signature from call instance`() {
+        val actualSignature = createExtrinsicBuilder()
+            .testSingleTransfer()
+            .buildSignature()
 
-        builder.transfer(
-            recipientAccountId = "340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c63".fromHex(),
-            amount = BigInteger("10000000000")
-        )
+        assertEquals(EXTRINSIC_SIGNATURE, actualSignature)
+    }
 
-        val actualSignature = builder.buildSignature()
+    @Test
+    fun `should build extrinsic signature from raw call bytes`() {
+        val extrinsic = createExtrinsicBuilder()
+            .buildSignature(TRANSFER_CALL_BYTES)
 
-        assertEquals(expectedSignatureHex, actualSignature)
+        assertEquals(EXTRINSIC_SIGNATURE, extrinsic)
     }
 
     @Test
     fun `should replace call`() {
-        val extrinsicInHex =
-            "0x41028400fdc41550fb5186d71cae699c31731b3e1baa10680c7bd6b3831a6d222cf4d16800080bfe8bc67f44b498239887dc5679523cfcb1d20fd9ec9d6bae0a385cca118d2cb7ef9f4674d52a810feb32932d7c6fe3e05ce9e06cd72cf499c8692206410ab5038800040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402"
-
-        val correctAmount = "10000000000".toBigInteger()
         val wrongAMount = "123".toBigInteger()
-
         val recipientAccountId = "340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c63".fromHex()
 
         val encoded = createExtrinsicBuilder()
@@ -119,18 +123,14 @@ class ExtrinsicBuilderTest {
                 amount = wrongAMount
             )
             .reset()
-            .transfer(
-                recipientAccountId = recipientAccountId,
-                amount = correctAmount
-            )
+            .testSingleTransfer()
             .build()
 
-        assertEquals(extrinsicInHex, encoded)
+        assertEquals(SINGLE_TRANSFER_EXTRINSIC, encoded)
     }
 
     @Test
     fun `should build batch extrinsic`() {
-
         val extrinsicInHex =
             "0xf1028400fdc41550fb5186d71cae699c31731b3e1baa10680c7bd6b3831a6d222cf4d168005b94d4436372ba74895936695e97d543358219e77f3e827f77b2e26f53413363a5dd098e172a51308e7d35aa6c03c5f171c4b43732db61c3d86b62d83e626b07b5038800100008040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402"
 
