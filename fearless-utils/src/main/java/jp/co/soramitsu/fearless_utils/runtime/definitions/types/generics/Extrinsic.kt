@@ -88,10 +88,10 @@ object Extrinsic :
             is EncodingInstance.CallRepresentation.Bytes -> value.callRepresentation.bytes
         }
 
-        encodeCallBytes(scaleCodecWriter, runtime, value.signature, callBytes)
+        encode(scaleCodecWriter, runtime, value.signature, callBytes)
     }
 
-    private fun encodeCallBytes(
+    private fun encode(
         scaleCodecWriter: ScaleCodecWriter,
         runtime: RuntimeSnapshot,
         signature: Signature?,
