@@ -6,6 +6,7 @@ import jp.co.soramitsu.fearless_utils.extensions.toHexString
 import jp.co.soramitsu.fearless_utils.runtime.RealRuntimeProvider
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEnum
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.fromHex
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Extrinsic.EncodingInstance.*
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.instances.AddressInstanceConstructor
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.instances.SignatureInstanceConstructor
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.toHex
@@ -72,7 +73,7 @@ class ExtrinsicTest {
             value = SignatureWrapper.Sr25519(signatureInHex.fromHex())
         )
 
-        val extrinsic = Extrinsic.Instance(
+        val extrinsic = Extrinsic.EncodingInstance(
             signature = Extrinsic.Signature.new(
                 accountIdentifier = AddressInstanceConstructor.constructInstance(
                     typeRegistry = runtime.typeRegistry,
