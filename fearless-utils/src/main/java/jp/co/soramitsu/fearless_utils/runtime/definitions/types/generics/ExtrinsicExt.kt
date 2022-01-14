@@ -38,3 +38,23 @@ fun multiAddressFromId(addressId: ByteArray): DictEnum.Entry<ByteArray> {
         value = addressId
     )
 }
+
+fun Extrinsic.EncodingInstance(
+    signature: Extrinsic.Signature?,
+    call: GenericCall.Instance
+): Extrinsic.EncodingInstance {
+    return Extrinsic.EncodingInstance(
+        signature,
+        Extrinsic.EncodingInstance.CallRepresentation.Instance(call)
+    )
+}
+
+fun Extrinsic.EncodingInstance(
+    signature: Extrinsic.Signature?,
+    callBytes: ByteArray
+): Extrinsic.EncodingInstance {
+    return Extrinsic.EncodingInstance(
+        signature,
+        Extrinsic.EncodingInstance.CallRepresentation.Bytes(callBytes)
+    )
+}
