@@ -46,6 +46,15 @@ object AdditionalExtras : ExtrinsicPayloadExtras(
     const val TX_VERSION = _TX_VERSION
 }
 
+class CustomExtras(
+    extrasMapping: Map<String, Type<*>>
+): ExtrinsicPayloadExtras(
+    name = "CustomExtras",
+    extrasMapping = extrasMapping
+)
+
+class SignedExtra(val type: Type<*>, val value: Any?)
+
 open class ExtrinsicPayloadExtras(
     name: String,
     private val extrasMapping: Map<String, Type<*>>

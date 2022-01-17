@@ -7,14 +7,8 @@ import jp.co.soramitsu.fearless_utils.encrypt.keypair.Keypair
 import jp.co.soramitsu.fearless_utils.hash.Hasher.blake2b256
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.RuntimeType
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.AdditionalExtras
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Era
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Extrinsic
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.*
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Extrinsic.EncodingInstance.CallRepresentation
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.ExtrinsicPayloadExtrasInstance
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.GenericCall
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.SignedExtras
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.new
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.instances.SignatureInstanceConstructor
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.toHex
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.toHexUntyped
@@ -40,6 +34,7 @@ class ExtrinsicBuilder(
     private val blockHash: ByteArray = genesisHash,
     private val era: Era = Era.Immortal,
     private val tip: BigInteger = DEFAULT_TIP,
+    private val customSignedExtensions: Map<String, SignedExtra> = emptyMap(),
     private val signatureConstructor: RuntimeType.InstanceConstructor<SignatureWrapper> = SignatureInstanceConstructor
 ) {
 
@@ -165,6 +160,15 @@ class ExtrinsicBuilder(
             AdditionalExtras.TX_VERSION to runtimeVersion.transactionVersion.toBigInteger()
         )
 
+        val customExtrasTypes = customSignedExtensions.mapValues { (_, signedExtra) ->
+            signedExtra.type
+        }
+        val customExtrasInstance = CustomExtras(customExtrasTypes)
+
+        val customExtrasValues = customSignedExtensions.mapValues { (_, signedExtra) ->
+            signedExtra.value
+        }
+
         val payloadBytes = useScaleWriter {
             when (callRepresentation) {
                 is CallRepresentation.Instance ->
@@ -176,6 +180,7 @@ class ExtrinsicBuilder(
 
             SignedExtras.encode(this, runtime, signedExtrasInstance)
             AdditionalExtras.encode(this, runtime, additionalExtrasInstance)
+            customExtrasInstance.encode(this, runtime, customExtrasValues)
         }
 
         val messageToSign = if (payloadBytes.size > PAYLOAD_HASH_THRESHOLD) {
