@@ -112,7 +112,7 @@ fun v13Preset(): TypePreset = typePreset {
     type(Bytes)
     type(BitVec)
 
-    type(Extrinsic)
+    type(Extrinsic.Default)
 
     type(CallBytes) // seems to be unused in runtime
     type(EraType)
