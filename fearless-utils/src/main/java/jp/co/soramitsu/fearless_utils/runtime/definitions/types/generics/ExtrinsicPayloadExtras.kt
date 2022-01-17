@@ -48,7 +48,7 @@ object AdditionalExtras : ExtrinsicPayloadExtras(
 
 class CustomExtras(
     extrasMapping: Map<String, Type<*>>
-): ExtrinsicPayloadExtras(
+) : ExtrinsicPayloadExtras(
     name = "CustomExtras",
     extrasMapping = extrasMapping
 )
