@@ -44,10 +44,7 @@ class MetadataTest {
 
     @Test
     fun `should decode metadata with NMap`() {
-        val inHex = getFileContentFromResources("statemine_metadata")
-
-        val metadataReader = RuntimeMetadataReader.read(inHex)
-        val metadata = VersionedRuntimeBuilder.buildMetadata(metadataReader, typeRegistry)
+        val metadata = RealRuntimeProvider.buildRuntimeV14("statemine").metadata
 
         assertInstance<StorageEntryType.NMap>(metadata.module("Assets").storage("Approvals").type)
     }
