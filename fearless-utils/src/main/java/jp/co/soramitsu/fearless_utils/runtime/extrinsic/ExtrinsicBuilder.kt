@@ -12,10 +12,10 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Additio
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Era
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Extrinsic
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Extrinsic.EncodingInstance.CallRepresentation
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.ExtrinsicPayloadExtras
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.ExtrinsicPayloadExtrasInstance
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.GenericCall
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.SignedExtras
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.create
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.new
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.instances.SignatureInstanceConstructor
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.toHex
@@ -31,7 +31,7 @@ private val DEFAULT_TIP = BigInteger.ZERO
 
 private const val PAYLOAD_HASH_THRESHOLD = 256
 
-class SignedExtension(val name: String, val type: Type<*>, val value: Any?)
+class SignedExtension(val name: String, val type: Type<*>)
 
 class ExtrinsicBuilder(
     val runtime: RuntimeSnapshot,
@@ -44,13 +44,13 @@ class ExtrinsicBuilder(
     private val blockHash: ByteArray = genesisHash,
     private val era: Era = Era.Immortal,
     private val tip: BigInteger = DEFAULT_TIP,
-    private val customSignedExtensions: List<SignedExtension> = emptyList(),
+    private val customSignedExtensions: Map<SignedExtension, Any?> = emptyMap(),
     private val signatureConstructor: RuntimeType.InstanceConstructor<SignatureWrapper> = SignatureInstanceConstructor
 ) {
 
     private val calls = mutableListOf<GenericCall.Instance>()
 
-    private val extrinsicType = createExtrinsicType()
+    private val extrinsicType = Extrinsic.create(customSignedExtensions.keys)
 
     fun call(
         moduleIndex: Int,
@@ -192,17 +192,6 @@ class ExtrinsicBuilder(
         return signatureConstructor.constructInstance(runtime.typeRegistry, signatureWrapper)
     }
 
-    private fun createExtrinsicType(): Extrinsic {
-        val customSignedExtensionTypes = customSignedExtensions.associateBy(
-            keySelector = { it.name },
-            valueTransform = { it.type }
-        )
-
-        val allSignedExtensions = SignedExtras.default.extras + customSignedExtensionTypes
-
-        return Extrinsic(ExtrinsicPayloadExtras(allSignedExtensions))
-    }
-
     private fun wrapInBatch(useBatchAll: Boolean): GenericCall.Instance {
         val batchModule = runtime.metadata.module("Utility")
         val batchFunctionName = if (useBatchAll) "batch_all" else "batch"
@@ -224,10 +213,7 @@ class ExtrinsicBuilder(
             SignedExtras.NONCE to nonce
         )
 
-        val custom = customSignedExtensions.associateBy(
-            keySelector = { it.name },
-            valueTransform = { it.value }
-        )
+        val custom = customSignedExtensions.mapKeys { (extension, _) -> extension.name }
 
         return default + custom
     }
