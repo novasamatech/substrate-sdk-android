@@ -22,9 +22,12 @@ private val KEYPAIR = BaseKeypair(
     privateKey = "f3923eea431177cd21906d4308aea61c037055fb00575cae687217c6d8b2397f".fromHex()
 )
 
-private const val SINGLE_TRANSFER_EXTRINSIC = "0x41028400fdc41550fb5186d71cae699c31731b3e1baa10680c7bd6b3831a6d222cf4d16800080bfe8bc67f44b498239887dc5679523cfcb1d20fd9ec9d6bae0a385cca118d2cb7ef9f4674d52a810feb32932d7c6fe3e05ce9e06cd72cf499c8692206410ab5038800040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402"
-private val TRANSFER_CALL_BYTES = "0x040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402".fromHex()
-private const val EXTRINSIC_SIGNATURE = "0x00080bfe8bc67f44b498239887dc5679523cfcb1d20fd9ec9d6bae0a385cca118d2cb7ef9f4674d52a810feb32932d7c6fe3e05ce9e06cd72cf499c8692206410a"
+private const val SINGLE_TRANSFER_EXTRINSIC =
+    "0x41028400fdc41550fb5186d71cae699c31731b3e1baa10680c7bd6b3831a6d222cf4d16800080bfe8bc67f44b498239887dc5679523cfcb1d20fd9ec9d6bae0a385cca118d2cb7ef9f4674d52a810feb32932d7c6fe3e05ce9e06cd72cf499c8692206410ab5038800040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402"
+private val TRANSFER_CALL_BYTES =
+    "0x040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402".fromHex()
+private const val EXTRINSIC_SIGNATURE =
+    "0x00080bfe8bc67f44b498239887dc5679523cfcb1d20fd9ec9d6bae0a385cca118d2cb7ef9f4674d52a810feb32932d7c6fe3e05ce9e06cd72cf499c8692206410a"
 
 private fun ExtrinsicBuilder.testSingleTransfer(): ExtrinsicBuilder {
     return transfer(
@@ -114,7 +117,8 @@ class ExtrinsicBuilderTest {
     @Test
     fun `should replace call`() {
         val wrongAMount = "123".toBigInteger()
-        val recipientAccountId = "340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c63".fromHex()
+        val recipientAccountId =
+            "340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c63".fromHex()
 
         val encoded = createExtrinsicBuilder()
             .transfer(
@@ -172,14 +176,8 @@ class ExtrinsicBuilderTest {
             "0x45028400fdc41550fb5186d71cae699c31731b3e1baa10680c7bd6b3831a6d222cf4d1680045ba1f9d291fff7dddf36f7ec060405d5e87ac8fab8832cfcc66858e6975141748ce89c41bda6c3a84204d3c6f929b928702168ca38bbed69b172044b599a10ab5038800000a0000bcc5ecf679ebd776866a04c212a4ec5dc45cefab57d7aa858c389844e212693f0700e40b5402"
 
         val chargeAssetTxPayment = SignedExtension(
-            name= "ChargeAssetTxPayment",
-            type = runtime.typeRegistry["pallet_asset_tx_payment.ChargeAssetTxPayment"]!!,
-            value = Struct.Instance(
-                mapOf(
-                    "tip" to BigInteger.ZERO,
-                    "assetId" to null
-                )
-            )
+            name = "ChargeAssetTxPayment",
+            type = runtime.typeRegistry["pallet_asset_tx_payment.ChargeAssetTxPayment"]!!
         )
 
         val builder = ExtrinsicBuilder(
@@ -191,7 +189,14 @@ class ExtrinsicBuilderTest {
             multiChainEncryption = MultiChainEncryption.Substrate(EncryptionType.ED25519),
             accountIdentifier = multiAddressFromId(KEYPAIR.publicKey),
             era = Era.Mortal(64, 59),
-            customSignedExtensions = listOf(chargeAssetTxPayment),
+            customSignedExtensions = mapOf(
+                chargeAssetTxPayment to Struct.Instance(
+                    mapOf(
+                        "tip" to BigInteger.ZERO,
+                        "assetId" to null
+                    )
+                )
+            ),
             blockHash = "0xdd7532c5c01242696001e57cded1bc1326379059300287552a9c344e5bea1070".fromHex()
         )
 
@@ -205,7 +210,7 @@ class ExtrinsicBuilderTest {
         assertEquals(extrinsicInHex, encoded)
     }
 
-    private fun createExtrinsicBuilder()  = ExtrinsicBuilder(
+    private fun createExtrinsicBuilder() = ExtrinsicBuilder(
         runtime = runtime,
         keypair = KEYPAIR,
         nonce = 34.toBigInteger(),
