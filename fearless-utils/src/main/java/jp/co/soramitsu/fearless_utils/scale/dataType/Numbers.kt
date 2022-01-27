@@ -7,6 +7,7 @@ import io.emeraldpay.polkaj.scale.ScaleCodecWriter
 import io.emeraldpay.polkaj.scale.reader.CompactBigIntReader
 import jp.co.soramitsu.fearless_utils.extensions.fromUnsignedBytes
 import jp.co.soramitsu.fearless_utils.scale.utils.CompactBigIntWriter
+import jp.co.soramitsu.fearless_utils.scale.utils.toUnsignedBytes
 import java.math.BigInteger
 import java.nio.ByteOrder
 
@@ -71,7 +72,7 @@ open class uint(val size: Int) : DataType<BigInteger>() {
     }
 
     override fun write(writer: ScaleCodecWriter, value: BigInteger) {
-        val array = value.toByteArray()
+        val array = value.toUnsignedBytes()
         val padded = ByteArray(size)
 
         val startAt = padded.size - array.size
