@@ -1,5 +1,7 @@
 package jp.co.soramitsu.fearless_utils.runtime.metadata
 
+import io.emeraldpay.polkaj.scale.ScaleCodecReader
+import jp.co.soramitsu.fearless_utils.extensions.fromHex
 import jp.co.soramitsu.fearless_utils.extensions.toHexString
 import jp.co.soramitsu.fearless_utils.hash.Hasher.xxHash128
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
@@ -110,12 +112,42 @@ fun StorageEntry.storageKey(runtime: RuntimeSnapshot, vararg keys: Any?): String
     keys.forEachIndexed { index, key ->
         val (keyType, keyHasher) = keysWithHashers[index]
 
-        val keyEncoded = keyType?.bytes(runtime, key) ?: typeNotResolved(name)
+        val keyEncoded = keyType?.bytes(runtime, key) ?: typeNotResolved(fullName)
 
         keyOutputStream.write(keyHasher.hashingFunction(keyEncoded))
     }
 
     return keyOutputStream.toByteArray().toHexString(withPrefix = true)
+}
+
+private const val MODULE_HASH_LENGTH = 16
+private const val CALL_HASH_LENGTH = MODULE_HASH_LENGTH
+
+// layout: <moduleHash><callHash><key1Hash><key1? if concat>...<keyNHash><keyN? if concat>
+fun StorageEntry.splitKey(runtime: RuntimeSnapshot, fullKey: String): List<Any?> {
+    val scaleReader = ScaleCodecReader(fullKey.fromHex())
+    val entryType = type
+
+    require(entryType is StorageEntryType.NMap) {
+        "Cannot split arguments for plain-storage key"
+    }
+
+    scaleReader.skip(MODULE_HASH_LENGTH)
+    scaleReader.skip(CALL_HASH_LENGTH)
+
+    return entryType.keys.zip(entryType.hashers).mapIndexed { index, (key, hasher) ->
+        val hashSize = when(hasher) {
+            StorageHasher.Blake2_128Concat -> 16
+            StorageHasher.Twox64Concat -> 8
+            StorageHasher.Identity -> 0
+            else -> error("Cannot extract argument with non-concat hasher")
+        }
+
+        scaleReader.skip(hashSize)
+
+        key?.decode(scaleReader, runtime)
+            ?: error("Unknown type for argument at position $index in $fullName")
+    }
 }
 
 fun StorageEntry.storageKeyOrNull(runtime: RuntimeSnapshot, vararg keys: Any?): String? {
@@ -129,6 +161,9 @@ fun Module.fullNameOf(suffix: String): String {
 fun Module.fullNameOf(withName: WithName): String {
     return "$name.${withName.name}"
 }
+
+val StorageEntry.fullName
+    get() = "$moduleName.$name"
 
 private fun typeNotResolved(entryName: String): Nothing =
     throw IllegalStateException("Cannot resolve key or value type for storage entry `$entryName`")
