@@ -4,9 +4,13 @@ import jp.co.soramitsu.fearless_utils.common.assertThrows
 import jp.co.soramitsu.fearless_utils.extensions.toHexString
 import jp.co.soramitsu.fearless_utils.hash.Hasher.xxHash128
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Null
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.BooleanType
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.DynamicByteArray
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u32
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module.StorageEntry
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module.StorageEntryType
+import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -60,6 +64,32 @@ class RuntimeMetadataExtKtTest {
         assertThrows<IllegalArgumentException> {
             storageEntry.storageKey(runtime, false, false, false, false)
         }
+    }
+
+    @Test
+    fun `should split keys`() {
+        val storageEntry = storageEntry(
+            StorageEntryType.NMap(
+                value = Null,
+                keys = listOf(BooleanType, u32, DynamicByteArray("test")),
+                hashers = listOf(
+                    StorageHasher.Identity,
+                    StorageHasher.Blake2_128Concat,
+                    StorageHasher.Twox64Concat
+                )
+            )
+        )
+
+        val a1 = true
+        val a2 = 123.toBigInteger()
+        val a3 = byteArrayOf(1, 2, 3, 4, 5)
+
+        val key = storageEntry.storageKey(runtime, a1, a2, a3)
+        val splittedArguments = storageEntry.splitKey(runtime, key)
+
+        assertEquals(a1, splittedArguments[0])
+        assertEquals(a2, splittedArguments[1])
+        assertArrayEquals(a3, splittedArguments[2] as ByteArray)
     }
 
     private fun storageEntry(storageEntryType: StorageEntryType): StorageEntry {
