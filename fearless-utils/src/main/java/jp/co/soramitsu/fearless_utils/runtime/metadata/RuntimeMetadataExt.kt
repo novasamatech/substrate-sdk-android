@@ -123,6 +123,11 @@ fun StorageEntry.storageKey(runtime: RuntimeSnapshot, vararg keys: Any?): String
 private const val MODULE_HASH_LENGTH = 16
 private const val CALL_HASH_LENGTH = MODULE_HASH_LENGTH
 
+/**
+ * Splits scale-encoded full storage key into its components (arguments)
+ * @throws IllegalStateException - in case of non-concat hasher or unknown type for some argument
+ * @throws IllegalArgumentException - in case storage has plain type
+ */
 // layout: <moduleHash><callHash><key1Hash><key1? if concat>...<keyNHash><keyN? if concat>
 fun StorageEntry.splitKey(runtime: RuntimeSnapshot, fullKey: String): List<Any?> {
     val scaleReader = ScaleCodecReader(fullKey.fromHex())
