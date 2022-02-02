@@ -136,7 +136,7 @@ fun StorageEntry.splitKey(runtime: RuntimeSnapshot, fullKey: String): List<Any?>
     scaleReader.skip(CALL_HASH_LENGTH)
 
     return entryType.keys.zip(entryType.hashers).mapIndexed { index, (key, hasher) ->
-        val hashSize = when(hasher) {
+        val hashSize = when (hasher) {
             StorageHasher.Blake2_128Concat -> 16
             StorageHasher.Twox64Concat -> 8
             StorageHasher.Identity -> 0
