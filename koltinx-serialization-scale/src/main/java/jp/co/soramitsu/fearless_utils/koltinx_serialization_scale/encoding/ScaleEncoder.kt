@@ -28,7 +28,6 @@ typealias AnyConsumer = (Any?) -> Unit
 
 private const val ROOT_TAG = "ROOT"
 
-
 @OptIn(ExperimentalSerializationApi::class)
 open class SingleValueEncoder(serializersModule: SerializersModule, consumer: AnyConsumer = {}) : BaseCompositeEncoder(serializersModule, consumer) {
 
@@ -139,7 +138,6 @@ class StructEncoder(
 ) : BaseCompositeEncoder(serializersModule, consumer) {
 
     private var result: MutableMap<String, Any?> = mutableMapOf()
-
 
     override fun putElement(element: Any?, tag: String) {
         result[tag] = element

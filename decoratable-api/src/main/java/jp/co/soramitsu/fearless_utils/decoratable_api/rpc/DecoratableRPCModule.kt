@@ -48,7 +48,7 @@ private val TO_OPTIONAL_STRING: RpcCallBinding<String?> = { it?.toString() }
 
 // Some Json parsers may parse integers as Double
 private val TO_NUMBER: RpcCallBinding<BigInteger> = {
-    when(it) {
+    when (it) {
         is Double -> it.toInt().toBigInteger()
         is Int -> it.toBigInteger()
         else -> it.toString().toBigInteger()

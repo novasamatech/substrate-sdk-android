@@ -3,7 +3,6 @@ package jp.co.soramitsu.fearless_utils.decoratable_api.rpc
 import jp.co.soramitsu.fearless_utils.coroutines_adapter.subscriptionFlow
 import jp.co.soramitsu.fearless_utils.wsrpc.SocketService
 import jp.co.soramitsu.fearless_utils.wsrpc.request.runtime.RuntimeRequest
-import jp.co.soramitsu.fearless_utils.wsrpc.subscription.response.SubscriptionChange
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -77,7 +76,7 @@ abstract class RpcSubscriptionBase<R>(
 ) {
 
     protected fun subscribe(params: List<Any?>): Flow<R> {
-        val method = "${moduleName}_${callName}"
+        val method = "${moduleName}_$callName"
 
         val request = RuntimeRequest(method, params)
 

@@ -3,7 +3,6 @@ package jp.co.soramitsu.fearless_utils.wsrpc
 import com.google.gson.Gson
 import com.neovisionaries.ws.client.WebSocketFactory
 import com.neovisionaries.ws.client.WebSocketState
-import jp.co.soramitsu.fearless_utils.json.JsonCodec
 import jp.co.soramitsu.fearless_utils.wsrpc.exception.ConnectionClosedException
 import jp.co.soramitsu.fearless_utils.wsrpc.logging.Logger
 import jp.co.soramitsu.fearless_utils.wsrpc.logging.NoOpLogger

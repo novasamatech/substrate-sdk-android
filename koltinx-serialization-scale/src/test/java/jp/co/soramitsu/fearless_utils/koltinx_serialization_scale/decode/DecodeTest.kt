@@ -7,7 +7,7 @@ import org.junit.Assert
 
 open class DecodeTest {
 
-    inline fun <reified T> runtDecodeTest(
+    inline fun <reified T> runDecodeTest(
         raw: Any?,
         expected: T
     ) {

@@ -2,7 +2,11 @@ package jp.co.soramitsu.fearless_utils.decoratable_api.options.accountIdentifier
 
 import jp.co.soramitsu.fearless_utils.decoratable_api.SubstrateApi
 import jp.co.soramitsu.fearless_utils.decoratable_api.config.ss58AddressOf
-import jp.co.soramitsu.fearless_utils.encrypt.keypair.*
+import jp.co.soramitsu.fearless_utils.encrypt.keypair.Keypair
+import jp.co.soramitsu.fearless_utils.encrypt.keypair.PublicKey
+import jp.co.soramitsu.fearless_utils.encrypt.keypair.ethereumAccountId
+import jp.co.soramitsu.fearless_utils.encrypt.keypair.ethereumAddress
+import jp.co.soramitsu.fearless_utils.encrypt.keypair.substrateAccountId
 import jp.co.soramitsu.fearless_utils.runtime.AccountId
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.getOrThrow
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEnum
@@ -82,5 +86,3 @@ fun AccountIdentifierConstructor.Companion.defaultSubstrate(
 fun AccountIdentifierConstructor.Companion.ethereum() = AccountIdentifierConstructor.Factory {
     EthereumAccountIdentifierConstructor()
 }
-
-

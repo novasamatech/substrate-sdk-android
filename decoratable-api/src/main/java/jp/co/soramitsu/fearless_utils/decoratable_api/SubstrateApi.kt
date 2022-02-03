@@ -10,9 +10,6 @@ import jp.co.soramitsu.fearless_utils.decoratable_api.query.DecoratableQuery
 import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.DecoratableRPC
 import jp.co.soramitsu.fearless_utils.decoratable_api.tx.DecoratableTx
 import jp.co.soramitsu.fearless_utils.decoratable_api.tx.DecoratableTxImpl
-import jp.co.soramitsu.fearless_utils.decoratable_api.options.accountIdentifier.AccountIdentifierConstructor
-import jp.co.soramitsu.fearless_utils.decoratable_api.options.accountIdentifier.defaultSubstrate
-import jp.co.soramitsu.fearless_utils.decoratable_api.options.accountIdentifier.ethereum
 import jp.co.soramitsu.fearless_utils.decoratable_api.options.substrate
 import jp.co.soramitsu.fearless_utils.json.JsonCodec
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeFactory
@@ -49,7 +46,6 @@ fun SubstrateApi(
     override val chainState: ChainState = ChainStateImpl(this, runtime)
     override val options: Options = options.build(this)
 }
-
 
 suspend fun SubstrateApi(
     socketService: SocketService,

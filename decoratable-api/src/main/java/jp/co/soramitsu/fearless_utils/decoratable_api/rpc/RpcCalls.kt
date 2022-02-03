@@ -66,7 +66,6 @@ class RpcCall1<A, R>(
     }
 }
 
-
 abstract class RpcCallBase<R>(
     private val moduleName: String,
     private val callName: String,
@@ -76,7 +75,7 @@ abstract class RpcCallBase<R>(
 ) {
 
     protected suspend fun performCall(params: List<Any?>): R {
-        val method = "${moduleName}_${callName}"
+        val method = "${moduleName}_$callName"
 
         val request = RuntimeRequest(method, params)
         val rpcResponse = socketService.executeAsync(request)
@@ -84,4 +83,3 @@ abstract class RpcCallBase<R>(
         return binder(rpcBindingContext, rpcResponse.resultOrThrow())
     }
 }
-

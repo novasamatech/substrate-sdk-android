@@ -4,9 +4,7 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Generic
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module.MetadataFunction
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module.Module
 import jp.co.soramitsu.fearless_utils.decoratable_api.SubstrateApi
-import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.Scale
 import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.encodeToDynamicStructure
-import java.lang.reflect.Type
 import kotlin.reflect.KType
 
 class Function0(
@@ -24,15 +22,17 @@ class Function1<A1>(
     function: MetadataFunction,
     api: SubstrateApi,
     private val a1Type: KType,
-    ) : FunctionBase(
+) : FunctionBase(
     module, function, api
 ) {
     operator fun invoke(argument: A1): SubmittableExtrinsic {
         require(function.arguments.size == 1)
 
-        return createExtrinsic(mapOf(
-            function.arguments.first().name to api.options.scale.encodeToDynamicStructure(a1Type, argument)
-        ))
+        return createExtrinsic(
+            mapOf(
+                function.arguments.first().name to api.options.scale.encodeToDynamicStructure(a1Type, argument)
+            )
+        )
     }
 }
 
@@ -50,10 +50,12 @@ class Function2<A1, A2>(
 
         val scale = api.options.scale
 
-        return createExtrinsic(mapOf(
-            function.arguments[0].name to scale.encodeToDynamicStructure(a1Type, arg1),
-            function.arguments[1].name to  scale.encodeToDynamicStructure(a2Type, arg2),
-        ))
+        return createExtrinsic(
+            mapOf(
+                function.arguments[0].name to scale.encodeToDynamicStructure(a1Type, arg1),
+                function.arguments[1].name to scale.encodeToDynamicStructure(a2Type, arg2),
+            )
+        )
     }
 }
 

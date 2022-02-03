@@ -21,7 +21,7 @@ object Keyring {
         derivationPath: String? = null,
     ): Result<Keypair> {
         return runCatching {
-            when(multiChainEncryption) {
+            when (multiChainEncryption) {
                 is MultiChainEncryption.Ethereum -> {
                     val decodedDerivationPath = derivationPath?.let(BIP32JunctionDecoder::decode)
                     val seed = EthereumSeedFactory.deriveSeed(mnemonicPhrase, password = decodedDerivationPath?.password).seed

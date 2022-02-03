@@ -12,7 +12,19 @@ sealed class Project {
 @Serializable
 class OwnedProject(override val name: String, val owner: String) : Project()
 
+@Serializable
+object SingletonObject: Project() {
+    override val name: String
+        get() = "123"
+
+}
+
 fun main() {
-    val data: Project = OwnedProject("kotlinx.coroutines", "kotlin")
-    println(Json.encodeToJsonElement(data)) // Serializing data of compile-time type Project
+    val data: Project = SingletonObject
+
+    val json = Json.encodeToString(data)
+
+    val decoded = Json.decodeFromString<Project>(json)
+
+    print(decoded)
 }

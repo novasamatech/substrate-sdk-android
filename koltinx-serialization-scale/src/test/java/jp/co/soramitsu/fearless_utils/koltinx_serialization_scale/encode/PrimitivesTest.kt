@@ -1,5 +1,8 @@
 package jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.encode
 
+import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.Scale
+import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.encodeToDynamicStructure
+import org.junit.Assert.assertArrayEquals
 import org.junit.Test
 
 class PrimitivesTest : EncodeTest() {
@@ -21,4 +24,12 @@ class PrimitivesTest : EncodeTest() {
         value = true,
         expected = true
     )
+
+    @Test
+    fun `should encode byteArray`() {
+        val value = byteArrayOf(0, 1, 2, 3)
+        val result = Scale.encodeToDynamicStructure(value)
+
+        assertArrayEquals(value, result as ByteArray)
+    }
 }

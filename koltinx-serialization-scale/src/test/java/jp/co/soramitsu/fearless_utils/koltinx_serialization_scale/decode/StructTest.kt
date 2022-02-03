@@ -18,7 +18,7 @@ class StructTest : DecodeTest() {
         @Serializable
         data class Test(val a: BigInteger, val b: String, val c: BigInteger)
 
-        runtDecodeTest(
+        runDecodeTest(
             expected = Test(BigInteger.ZERO, "123", BigInteger.TEN),
             raw = Struct.Instance(
                 mapOf(
@@ -46,7 +46,7 @@ class StructTest : DecodeTest() {
             val d: String
         )
 
-        runtDecodeTest(
+        runDecodeTest(
             expected = Outer(
                 a = BigInteger.ZERO,
                 inner = Inner(

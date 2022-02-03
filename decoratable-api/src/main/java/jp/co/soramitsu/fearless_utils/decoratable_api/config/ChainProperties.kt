@@ -7,12 +7,10 @@ import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.system.properties
 import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.system.system
 import jp.co.soramitsu.fearless_utils.decoratable_api.util.ext.lazyAsync
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.Type
 import jp.co.soramitsu.fearless_utils.ss58.DEFAULT_PREFIX
 import jp.co.soramitsu.fearless_utils.ss58.SS58Encoder
 import kotlinx.coroutines.GlobalScope
 import java.math.BigInteger
-import java.security.KeyPair
 import jp.co.soramitsu.fearless_utils.decoratable_api.config.ChainProperties as IChainProperties
 
 private const val DEFAULT_SYMBOL = "DEV"
@@ -46,5 +44,3 @@ class ChainStateImpl(
         override val tokenSymbol: String
     ) : IChainProperties
 }
-
-

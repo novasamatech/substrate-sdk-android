@@ -7,6 +7,6 @@ class NoOpLogger : Logger {
     }
 
     override fun log(throwable: Throwable?) {
-       // pass
+        // pass
     }
 }

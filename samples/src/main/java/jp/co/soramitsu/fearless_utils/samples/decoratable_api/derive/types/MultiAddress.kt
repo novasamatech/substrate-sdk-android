@@ -7,7 +7,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 import java.math.BigInteger
 
-
 @Serializable
 sealed class MultiAddress {
 

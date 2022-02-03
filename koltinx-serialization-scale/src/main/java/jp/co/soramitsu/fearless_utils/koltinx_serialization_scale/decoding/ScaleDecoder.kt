@@ -1,6 +1,8 @@
-package jp.co.soramitsu.fearless_utils.koltinx_serialization_scale
+package jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.decoding
 
+import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.serializers.byteArraySerializer
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
+import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -13,6 +15,8 @@ import java.math.BigInteger
 @OptIn(ExperimentalSerializationApi::class)
 sealed interface ScaleDecoder {
 
+    fun decodeByteArray(): ByteArray
+
     fun decodeNumber(): BigInteger
 
     fun decodeAsIs(): Any?
@@ -21,24 +25,35 @@ sealed interface ScaleDecoder {
 private const val ROOT_TAG = "ROOT"
 
 @OptIn(ExperimentalSerializationApi::class)
-class RootDecoder(
+open class SingleValueDecoder(
     serializersModule: SerializersModule,
     private val value: Any?,
 ) : BaseCompositeDecoder(serializersModule, value) {
 
+    var elementDecoded = false
+
     init {
         pushTag(ROOT_TAG)
     }
+
+    // to prevent failing requirement in putElement for nested context
+    override fun composeName(parentName: String, childName: String) = parentName
 
     override fun getElement(tag: String): Any? {
         require(tag === ROOT_TAG)
         return value
     }
 
-    override fun decodeElementIndex(descriptor: SerialDescriptor): Int = 0
+    override fun decodeElementIndex(descriptor: SerialDescriptor): Int {
+        if (elementDecoded) return CompositeDecoder.DECODE_DONE
+
+        elementDecoded = true
+
+        return 0
+    }
 }
 
-private inline fun <reified R> Any?.cast(): R = this as? R
+inline fun <reified R> Any?.cast(): R = this as? R
     ?: throw IllegalArgumentException("Expected ${R::class.qualifiedName}, got ${this?.let { it::class.qualifiedName }}")
 
 @OptIn(InternalSerializationApi::class, ExperimentalSerializationApi::class)
@@ -54,6 +69,7 @@ abstract class BaseCompositeDecoder(
     override fun decodeTaggedString(tag: String): String = getElement(tag).cast()
     override fun decodeTaggedBoolean(tag: String): Boolean = getElement(tag).cast()
     override fun decodeNumber(): BigInteger = getElement(popTag()).cast()
+    override fun decodeByteArray(): ByteArray = getElement(popTag()).cast()
 
     override fun decodeAsIs() = getElement(popTag())
 
@@ -62,8 +78,32 @@ abstract class BaseCompositeDecoder(
         return when (descriptor.kind) {
             StructureKind.LIST -> CollectionDecoder(serializersModule, currentObject().cast())
             StructureKind.CLASS -> StructDecoder(serializersModule, currentObject().cast())
+            StructureKind.OBJECT -> this
             else -> throw IllegalArgumentException("Unknown structure kind: ${descriptor.kind}")
         }
+    }
+
+    override fun <T> decodeSerializableValue(deserializer: DeserializationStrategy<T>): T {
+        return if (deserializer.descriptor == byteArraySerializer.descriptor) {
+            decodeByteArray() as T
+        } else {
+            decodePolymorphically(currentObject().cast(), deserializer)
+        }
+    }
+}
+
+@ExperimentalSerializationApi
+class EnumEncoder(
+    serializersModule: SerializersModule,
+    private val variantValue: Any?,
+) : SingleValueDecoder(serializersModule, variantValue) {
+
+    override fun beginStructure(descriptor: SerialDescriptor): CompositeDecoder {
+        if (descriptor.kind is StructureKind.CLASS && descriptor.elementsCount == 1) {
+            return SingleValueDecoder(serializersModule, variantValue)
+        }
+
+        return super.beginStructure(descriptor)
     }
 }
 
@@ -87,7 +127,6 @@ class StructDecoder(
         }
         return CompositeDecoder.DECODE_DONE
     }
-
 }
 
 class CollectionDecoder(

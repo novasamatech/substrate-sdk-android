@@ -21,4 +21,4 @@ val TimestampConst.minimumPeriodOrNull
     get() = decorator.numberConstant("MinimumPeriod")
 
 val TimestampConst.minimumPeriod
-    get() =  minimumPeriodOrNull ?: SubstrateApiException.constantNotFound("MinimumPeriod")
+    get() = minimumPeriodOrNull ?: SubstrateApiException.constantNotFound("MinimumPeriod")

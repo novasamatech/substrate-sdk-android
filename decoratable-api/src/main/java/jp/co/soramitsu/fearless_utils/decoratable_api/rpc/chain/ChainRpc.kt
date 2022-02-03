@@ -1,6 +1,11 @@
 package jp.co.soramitsu.fearless_utils.decoratable_api.rpc.chain
 
-import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.*
+import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.DecoratableRPC
+import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.DecoratableRPCModule
+import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.RpcCall0
+import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.RpcCall1
+import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.asJson
+import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.asString
 import jp.co.soramitsu.fearless_utils.extensions.removeHexPrefix
 import jp.co.soramitsu.fearless_utils.wsrpc.request.runtime.chain.RuntimeVersion
 import java.math.BigInteger

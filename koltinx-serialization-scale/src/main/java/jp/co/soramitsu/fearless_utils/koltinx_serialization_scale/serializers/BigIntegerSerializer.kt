@@ -1,6 +1,6 @@
 package jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.serializers
 
-import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.ScaleDecoder
+import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.decoding.ScaleDecoder
 import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.encoding.ScaleEncoder
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer

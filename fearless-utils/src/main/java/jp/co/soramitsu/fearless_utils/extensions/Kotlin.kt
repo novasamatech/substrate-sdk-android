@@ -80,7 +80,6 @@ internal fun String.snakeCaseToCamelCase(): String {
 
 internal fun ByteArray.copyLast(n: Int) = copyOfRange(fromIndex = size - n, size)
 
-
 @ExperimentalUnsignedTypes
 /**
  * Unsafe to overflow

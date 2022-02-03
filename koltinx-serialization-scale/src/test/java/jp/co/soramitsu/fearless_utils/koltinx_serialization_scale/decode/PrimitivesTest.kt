@@ -8,19 +8,19 @@ import org.junit.Test
 class PrimitivesTest : DecodeTest() {
 
     @Test
-    fun `should decode number`() = runtDecodeTest(
+    fun `should decode number`() = runDecodeTest(
         raw = 123.toBigInteger(),
         expected = 123.toBigInteger()
     )
 
     @Test
-    fun `should decode string`() = runtDecodeTest(
+    fun `should decode string`() = runDecodeTest(
         raw = "123",
         expected = "123"
     )
 
     @Test
-    fun `should decode boolean`() = runtDecodeTest(
+    fun `should decode boolean`() = runDecodeTest(
         raw = true,
         expected = true
     )

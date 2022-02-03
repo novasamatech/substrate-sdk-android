@@ -1,6 +1,6 @@
 package jp.co.soramitsu.fearless_utils.decoratable_api.util.scale.serializers
 
-import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.ScaleDecoder
+import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.decoding.ScaleDecoder
 import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.encoding.ScaleEncoder
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -11,7 +11,7 @@ import kotlinx.serialization.encoding.Encoder
 import java.lang.IllegalArgumentException
 import kotlin.reflect.KClass
 
-open class AsIsSerializer<T: Any>(private val tClass: KClass<T>) : KSerializer<T> {
+open class AsIsSerializer<T : Any>(private val tClass: KClass<T>) : KSerializer<T> {
 
     override fun deserialize(decoder: Decoder): T {
         require(decoder is ScaleDecoder)

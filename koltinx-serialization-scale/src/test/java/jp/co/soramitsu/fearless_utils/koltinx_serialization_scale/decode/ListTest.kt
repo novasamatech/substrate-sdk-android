@@ -1,16 +1,13 @@
 package jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.decode
 
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
-import jp.co.soramitsu.fearless_utils.scale.dataType.list
 import kotlinx.serialization.Serializable
 import org.junit.Test
-import java.math.BigInteger
-import kotlin.math.exp
 
 class ListTest: DecodeTest() {
 
     @Test
-    fun `should encode list of primitives`() = runtDecodeTest(
+    fun `should encode list of primitives`() = runDecodeTest(
         expected = listOf("1", "2", "3"),
         raw = listOf("1", "2", "3")
     )
@@ -21,7 +18,7 @@ class ListTest: DecodeTest() {
         @Serializable
         data class Entry(val a: String, val b: Boolean)
 
-        runtDecodeTest(
+        runDecodeTest(
             expected = listOf(
                 Entry("1", true),
                 Entry("2", false)
@@ -39,7 +36,7 @@ class ListTest: DecodeTest() {
         @Serializable
         data class Entry(val a: String, val b: List<String>)
 
-        runtDecodeTest(
+        runDecodeTest(
             expected = Entry("1", listOf("1", "2", "3")),
             raw = Struct.Instance(
                 mapOf(
