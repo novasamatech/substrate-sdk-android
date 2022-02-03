@@ -6,6 +6,7 @@ import jp.co.soramitsu.fearless_utils.runtime.metadata.module.Module
 import jp.co.soramitsu.fearless_utils.decoratable_api.Decoratable
 import jp.co.soramitsu.fearless_utils.decoratable_api.SubstrateApi
 import jp.co.soramitsu.fearless_utils.runtime.metadata.moduleOrNull
+import kotlin.reflect.KType
 
 interface DecoratableTx {
 
@@ -36,15 +37,15 @@ internal class DecoratableTxImpl(
                 }
             }
 
-            override fun <A1> function1(name: String): Function1<A1> {
+            override fun <A1> function1(name: String, a1Type: KType): Function1<A1> {
                 return decorateInternal(name) {
-                    Function1(module, functionMetadata(name), api)
+                    Function1(module, functionMetadata(name), api, a1Type)
                 }
             }
 
-            override fun <A1, A2> function2(name: String): Function2<A1, A2> {
+            override fun <A1, A2> function2(name: String, a1Type: KType, a2Type: KType): Function2<A1, A2> {
                 return decorateInternal(name) {
-                    Function2(module, functionMetadata(name), api)
+                    Function2(module, functionMetadata(name), api, a1Type, a2Type)
                 }
             }
 

@@ -19,14 +19,25 @@ fun <S : Schema<S>> scaleCollection(schema: S) = ScaleCollectionMapper(schema)
 
 inline fun <reified T> pojo() = POJOMapper(T::class.java)
 
+internal fun stringIdMapper() = StringIdMapper
+
 fun string() = StringMapper
 
 inline fun <reified T> pojoList() = POJOCollectionMapper(T::class.java)
 
 object StringMapper : NullableMapper<String>() {
-
     override fun mapNullable(rpcResponse: RpcResponse, jsonMapper: Gson): String? {
         return rpcResponse.result?.toString()
+    }
+}
+
+object StringIdMapper : NullableMapper<String>() {
+
+    override fun mapNullable(rpcResponse: RpcResponse, jsonMapper: Gson): String? {
+        return when (val result = rpcResponse.result) {
+            is Double -> result.toLong().toString()
+            else -> result?.toString()
+        }
     }
 }
 

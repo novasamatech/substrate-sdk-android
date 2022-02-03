@@ -36,15 +36,15 @@ class SignedExtrasTest {
 
     @Test
     fun `should encode full set of extras`() {
-        extrinsicContainsExtras(SignedExtras.ERA, SignedExtras.NONCE, SignedExtras.TIP)
+        extrinsicContainsExtras(SignedExtras.MORTALITY, SignedExtras.NONCE, SignedExtras.TIP)
 
         val extras = mapOf(
             SignedExtras.TIP to BigInteger.ONE,
             SignedExtras.NONCE to BigInteger.TEN,
-            SignedExtras.ERA to Era.Immortal
+            SignedExtras.MORTALITY to Era.Immortal
         )
 
-        val encoded = SignedExtras.toHex(runtime, extras)
+        val encoded = SignedExtras.default.toHex(runtime, extras)
 
         assertEquals("0x002804", encoded)
     }
@@ -56,10 +56,10 @@ class SignedExtrasTest {
         val extras = mapOf(
             SignedExtras.TIP to BigInteger.ONE,
             SignedExtras.NONCE to BigInteger.TEN,
-            SignedExtras.ERA to Era.Immortal // CheckMortality is unused
+            SignedExtras.MORTALITY to Era.Immortal // CheckMortality is unused
         )
 
-        val encoded = SignedExtras.toHex(runtime, extras)
+        val encoded = SignedExtras.default.toHex(runtime, extras)
 
         assertEquals("0x2804", encoded)
     }
@@ -72,10 +72,10 @@ class SignedExtrasTest {
         val extras = mapOf(
             SignedExtras.TIP to BigInteger.ONE,
             SignedExtras.NONCE to BigInteger.TEN,
-            SignedExtras.ERA to Era.Immortal
+            SignedExtras.MORTALITY to Era.Immortal
         )
 
-        val encoded = SignedExtras.toHex(runtime, extras)
+        val encoded = SignedExtras.default.toHex(runtime, extras)
 
         assertEquals("0x", encoded)
     }
@@ -89,17 +89,17 @@ class SignedExtrasTest {
         )
 
         assertThrows<EncodeDecodeException> {
-            SignedExtras.toHex(runtime, extras)
+            SignedExtras.default.toHex(runtime, extras)
         }
     }
 
     @Test
     fun `should decode full set of extras`() {
-        extrinsicContainsExtras(SignedExtras.ERA, SignedExtras.NONCE, SignedExtras.TIP)
+        extrinsicContainsExtras(SignedExtras.MORTALITY, SignedExtras.NONCE, SignedExtras.TIP)
 
         val inHex = "0x002804"
 
-        val decoded = SignedExtras.fromHex(runtime, inHex)
+        val decoded = SignedExtras.default.fromHex(runtime, inHex)
 
         assertEquals(decoded.size, 3)
     }
@@ -110,7 +110,7 @@ class SignedExtrasTest {
 
         val inHex = "0x2804"
 
-        val decoded = SignedExtras.fromHex(runtime, inHex)
+        val decoded = SignedExtras.default.fromHex(runtime, inHex)
 
         assertEquals(decoded.size, 2)
     }
@@ -121,7 +121,7 @@ class SignedExtrasTest {
 
         val inHex = "0x"
 
-        val decoded = SignedExtras.fromHex(runtime, inHex)
+        val decoded = SignedExtras.default.fromHex(runtime, inHex)
 
         assertEquals(decoded.size, 0)
     }

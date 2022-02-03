@@ -30,7 +30,9 @@ class TypeReference(var value: Type<*>?) {
     private fun isInRecursion() = resolutionInProgress
 }
 
-abstract class Type<InstanceType>(val name: String) {
+typealias Type<I> = RuntimeType<I, I>
+
+abstract class RuntimeType<ENCODE, DECODE>(val name: String) {
 
     interface InstanceConstructor<I> {
 
@@ -42,7 +44,7 @@ abstract class Type<InstanceType>(val name: String) {
     /**
      * @throws EncodeDecodeException
      */
-    abstract fun decode(scaleCodecReader: ScaleCodecReader, runtime: RuntimeSnapshot): InstanceType
+    abstract fun decode(scaleCodecReader: ScaleCodecReader, runtime: RuntimeSnapshot): DECODE
 
     /**
      * @throws EncodeDecodeException
@@ -50,9 +52,12 @@ abstract class Type<InstanceType>(val name: String) {
     abstract fun encode(
         scaleCodecWriter: ScaleCodecWriter,
         runtime: RuntimeSnapshot,
-        value: InstanceType
+        value: ENCODE
     )
 
+    /**
+     * Checks whether [instance] is valid object to perform **encoding** using this type
+     */
     abstract fun isValidInstance(instance: Any?): Boolean
 
     /**
@@ -69,6 +74,6 @@ abstract class Type<InstanceType>(val name: String) {
             throw EncodeDecodeException(message)
         }
 
-        encode(scaleCodecWriter, runtime, value as InstanceType)
+        encode(scaleCodecWriter, runtime, value as ENCODE)
     }
 }

@@ -13,8 +13,8 @@ internal class DecoratableConstImpl(
     override fun <R : DecoratableConstantsModule> decorate(
         moduleName: String,
         creator: DecoratableConstantsModule.() -> R
-    ): R? {
-        return runtime.metadata.moduleOrNull(moduleName)?.let {
+    ): R? = decorateInternal(moduleName) {
+        runtime.metadata.moduleOrNull(moduleName)?.let {
             creator(DecoratableConstantsModuleImpl(runtime, it))
         }
     }

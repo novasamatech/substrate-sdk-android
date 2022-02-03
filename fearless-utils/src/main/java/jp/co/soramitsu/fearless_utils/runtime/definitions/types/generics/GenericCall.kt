@@ -19,17 +19,19 @@ object GenericCall : Type<GenericCall.Instance>("GenericCall") {
         val module: Module
         val function: MetadataFunction
         val arguments: Map<String, Any?>
+
+        class Default(
+            override val module: Module,
+            override val function: MetadataFunction,
+            override val arguments: Map<String, Any?>
+        ) : Instance
     }
 
     fun Instance(
         module: Module,
         function: MetadataFunction,
         arguments: Map<String, Any?>
-    ) = object : Instance {
-        override val module: Module = module
-        override val function: MetadataFunction = function
-        override val arguments: Map<String, Any?> = arguments
-    }
+    ) = Instance.Default(module, function, arguments)
 
     private val indexCoder = tuple(uint8, uint8)
 

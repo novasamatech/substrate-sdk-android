@@ -18,6 +18,7 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Vec
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Bytes
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Null
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.Compact
+import jp.co.soramitsu.fearless_utils.runtime.definitions.v14.TypesParserV14.pathNameIfWhitelisted
 import jp.co.soramitsu.fearless_utils.runtime.definitions.v14.typeMapping.SiTypeMapping
 import jp.co.soramitsu.fearless_utils.runtime.definitions.v14.typeMapping.default
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.LookupSchema
@@ -69,8 +70,9 @@ object TypesParserV14 {
     }
 
     private fun parseParams(params: Params) {
-        for (type in params.types) {
-            val constructedType = parseParam(params, type) ?: continue
+        // first stage - parsing according to standard rules
+        params.types.forEach { type ->
+            val constructedType = parseParam(params, type) ?: return@forEach
             params.typesBuilder.type(constructedType)
 
             val aliasedName = type[PortableType.id].toString()
@@ -79,24 +81,32 @@ object TypesParserV14 {
                 params.typesBuilder.alias(alias = aliasedName, original = constructedType.name)
             }
         }
+
+        // second stage - overwrite from SiTypeMapping
+        // this is done after full standard resolution so SiTypeMapping's
+        // would have access to lookahead types
+        params.types.forEach { type ->
+            val name = type.name(params)
+            val fromTypeMapping = params.typeMapping.map(type, name, params.typesBuilder)
+
+            fromTypeMapping?.let { params.typesBuilder.type(it) }
+        }
+    }
+
+    private fun EncodableStruct<PortableType>.name(
+        parsingParams: Params
+    ): String {
+        return pathNameIfWhitelisted(whitelist = parsingParams.uniquePathNames)
+            ?: get(PortableType.id).toString()
     }
 
     private fun parseParam(params: Params, portableType: EncodableStruct<PortableType>): Type<*>? {
         val typesBuilder = params.typesBuilder
 
-        val name = portableType.pathNameIfWhitelisted(whitelist = params.uniquePathNames)
-            ?: portableType[PortableType.id].toString()
-
+        val name = portableType.name(params)
         val type = portableType[PortableType.type]
-        val def = type[RegistryType.def]
 
-        val fromTypeMapping = params.typeMapping.map(portableType, name, params.typesBuilder)
-
-        if (fromTypeMapping != null) {
-            return fromTypeMapping
-        }
-
-        return when (def) {
+        return when (val def = type[RegistryType.def]) {
             is EncodableStruct<*> -> {
                 when (def.schema) {
                     is TypeDefComposite -> {

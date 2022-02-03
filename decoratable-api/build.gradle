@@ -36,8 +36,9 @@ dependencies {
 
     implementation wsDep
 
-    implementation project(':coroutines-adapter')
-    implementation project(':fearless-utils')
+    api project(':coroutines-adapter')
+    api project(':koltinx-serialization-scale')
+    api project(':fearless-utils')
 
     testImplementation jUnitDep
     testImplementation mockitoDep
