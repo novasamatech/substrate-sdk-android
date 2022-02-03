@@ -11,7 +11,10 @@ import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.DecoratableRPC
 import jp.co.soramitsu.fearless_utils.decoratable_api.tx.DecoratableTx
 import jp.co.soramitsu.fearless_utils.decoratable_api.tx.DecoratableTxImpl
 import jp.co.soramitsu.fearless_utils.decoratable_api.options.substrate
+import jp.co.soramitsu.fearless_utils.decoratable_api.util.binding.BindingContext
+import jp.co.soramitsu.fearless_utils.decoratable_api.util.binding.SimpleBindingContext
 import jp.co.soramitsu.fearless_utils.json.JsonCodec
+import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.Scale
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeFactory
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
 import jp.co.soramitsu.fearless_utils.wsrpc.SocketService
@@ -37,14 +40,17 @@ fun SubstrateApi(
     runtime: RuntimeSnapshot,
     jsonCodec: JsonCodec,
     socketService: SocketService,
-    options: Options.Factory
-) = object : SubstrateApi {
-    override val query: DecoratableQuery = DecoratableQuery(this, runtime)
+    optionsFactory: Options.Factory
+): SubstrateApi = object : SubstrateApi {
+    override val options: Options = optionsFactory.build(this)
+
+    val bindingContext = SimpleBindingContext(scale = options.scale, jsonCodec = jsonCodec)
+
+    override val query: DecoratableQuery = DecoratableQuery(this, bindingContext, runtime)
     override val tx: DecoratableTx = DecoratableTxImpl(this, runtime)
-    override val rpc: DecoratableRPC = DecoratableRPC(jsonCodec, socketService)
     override val const: DecoratableConst = DecoratableConstImpl(runtime)
     override val chainState: ChainState = ChainStateImpl(this, runtime)
-    override val options: Options = options.build(this)
+    override val rpc: DecoratableRPC = DecoratableRPC(bindingContext, socketService)
 }
 
 suspend fun SubstrateApi(

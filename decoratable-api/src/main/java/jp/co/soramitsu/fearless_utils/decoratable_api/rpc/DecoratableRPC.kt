@@ -1,23 +1,24 @@
 package jp.co.soramitsu.fearless_utils.decoratable_api.rpc
 
-import jp.co.soramitsu.fearless_utils.json.JsonCodec
-import jp.co.soramitsu.fearless_utils.wsrpc.SocketService
 import jp.co.soramitsu.fearless_utils.decoratable_api.Decoratable
+import jp.co.soramitsu.fearless_utils.decoratable_api.util.binding.AnyBinding
+import jp.co.soramitsu.fearless_utils.decoratable_api.util.binding.BindingContext
+import jp.co.soramitsu.fearless_utils.wsrpc.SocketService
 
 class DecoratableRPC(
-    override val jsonCodec: JsonCodec,
+    private val bindingContext: BindingContext,
     private val socketService: SocketService,
-) : Decoratable(), RpcBindingContext {
+) : Decoratable() {
 
     fun <R : DecoratableRPCModule> decorate(
         moduleName: String,
         creator: DecoratableRPCModule.() -> R
     ): R = decorateInternal(moduleName) {
-        creator(DecoratableRPCModuleImpl(this, moduleName, socketService))
+        creator(DecoratableRPCModuleImpl(bindingContext, moduleName, socketService))
     }
 
     private class DecoratableRPCModuleImpl(
-        private val rpcBindingContext: RpcBindingContext,
+        private val rpcBindingContext: BindingContext,
         private val moduleName: String,
         private val socketService: SocketService,
     ) : DecoratableRPCModule {
@@ -25,7 +26,7 @@ class DecoratableRPC(
         override val decorator: DecoratableRPCModule.Decorator =
             object : DecoratableRPCModule.Decorator, Decoratable() {
 
-                override fun <R> call0(callName: String, binder: RpcCallBinding<R>): RpcCall0<R> {
+                override fun <R> call0(callName: String, binder: AnyBinding<R>): RpcCall0<R> {
                     return decorateInternal(callName) {
                         RpcCall0(moduleName, callName, socketService, rpcBindingContext, binder)
                     }
@@ -33,7 +34,7 @@ class DecoratableRPC(
 
                 override fun <A, R> call1(
                     callName: String,
-                    binder: RpcCallBinding<R>
+                    binder: AnyBinding<R>
                 ): RpcCall1<A, R> {
                     return decorateInternal(callName) {
                         RpcCall1(moduleName, callName, socketService, rpcBindingContext, binder)
@@ -42,7 +43,7 @@ class DecoratableRPC(
 
                 override fun <A, R> callList(
                     callName: String,
-                    binder: RpcCallBinding<R>
+                    binder: AnyBinding<R>
                 ): RpcCallList<A, R> {
                     return decorateInternal(callName) {
                         RpcCallList(

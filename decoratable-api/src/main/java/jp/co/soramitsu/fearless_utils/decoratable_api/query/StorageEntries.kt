@@ -4,6 +4,8 @@ import jp.co.soramitsu.fearless_utils.decoratable_api.SubstrateApi
 import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.state.getStorage
 import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.state.state
 import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.state.subscribeStorage
+import jp.co.soramitsu.fearless_utils.decoratable_api.util.binding.AnyBinding
+import jp.co.soramitsu.fearless_utils.decoratable_api.util.binding.BindingContext
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.fromHex
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module.StorageEntry
@@ -11,16 +13,12 @@ import jp.co.soramitsu.fearless_utils.runtime.metadata.storageKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class StorageQuery<R>(
-    val key: String,
-    val binder: (Any?) -> R
-)
-
 abstract class StorageEntryBase<R>(
     protected val runtime: RuntimeSnapshot,
     protected val storageEntryMetadata: StorageEntry,
     private val api: SubstrateApi,
-    val binder: (Any?) -> R,
+    private val bindingContext: BindingContext,
+    val binder: AnyBinding<R>,
 ) {
 
     protected suspend fun query(key: String): R? {
@@ -28,7 +26,7 @@ abstract class StorageEntryBase<R>(
 
         val decoded = storageEntryMetadata.type.value!!.fromHex(runtime, result)
 
-        return binder(decoded)
+        return binder(bindingContext, decoded)
     }
 
     protected fun subscribe(key: String): Flow<R?> {
@@ -39,7 +37,7 @@ abstract class StorageEntryBase<R>(
                 change?.let {
                     val decoded = storageEntryMetadata.type.value!!.fromHex(runtime, change)
 
-                    binder(decoded)
+                    binder(bindingContext, decoded)
                 }
             }
     }
@@ -49,8 +47,9 @@ class PlainStorageEntry<R>(
     runtime: RuntimeSnapshot,
     storageEntryMetadata: StorageEntry,
     api: SubstrateApi,
-    binder: (Any?) -> R,
-) : StorageEntryBase<R>(runtime, storageEntryMetadata, api, binder) {
+    bindingContext: BindingContext,
+    binder: AnyBinding<R>,
+) : StorageEntryBase<R>(runtime, storageEntryMetadata, api, bindingContext, binder) {
 
     suspend operator fun invoke(): R? {
         return query(storageEntryMetadata.storageKey())
@@ -63,8 +62,9 @@ class SingleMapStorageEntry<K, R>(
     runtime: RuntimeSnapshot,
     storageEntryMetadata: StorageEntry,
     api: SubstrateApi,
-    binder: (Any?) -> R,
-) : StorageEntryBase<R>(runtime, storageEntryMetadata, api, binder) {
+    bindingContext: BindingContext,
+    binder: AnyBinding<R>,
+) : StorageEntryBase<R>(runtime, storageEntryMetadata, api, bindingContext, binder) {
 
     suspend operator fun invoke(key: K): R? {
         return query(storageEntryMetadata.storageKey(runtime, key))

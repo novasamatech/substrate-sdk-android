@@ -1,6 +1,8 @@
 package jp.co.soramitsu.fearless_utils.decoratable_api.rpc
 
 import jp.co.soramitsu.fearless_utils.coroutines_adapter.executeAsync
+import jp.co.soramitsu.fearless_utils.decoratable_api.util.binding.AnyBinding
+import jp.co.soramitsu.fearless_utils.decoratable_api.util.binding.BindingContext
 import jp.co.soramitsu.fearless_utils.wsrpc.SocketService
 import jp.co.soramitsu.fearless_utils.wsrpc.request.runtime.RuntimeRequest
 import jp.co.soramitsu.fearless_utils.wsrpc.response.resultOrThrow
@@ -9,8 +11,8 @@ class RpcCall0<R>(
     moduleName: String,
     callName: String,
     socketService: SocketService,
-    rpcBindingContext: RpcBindingContext,
-    binder: RpcCallBinding<R>,
+    rpcBindingContext: BindingContext,
+    binder: AnyBinding<R>,
 ) : RpcCallBase<R>(
     moduleName,
     callName,
@@ -28,8 +30,8 @@ class RpcCallList<A, R>(
     moduleName: String,
     callName: String,
     socketService: SocketService,
-    rpcBindingContext: RpcBindingContext,
-    binder: RpcCallBinding<R>,
+    rpcBindingContext: BindingContext,
+    binder: AnyBinding<R>,
 ) : RpcCallBase<R>(
     moduleName,
     callName,
@@ -51,8 +53,8 @@ class RpcCall1<A, R>(
     moduleName: String,
     callName: String,
     socketService: SocketService,
-    rpcBindingContext: RpcBindingContext,
-    binder: RpcCallBinding<R>,
+    rpcBindingContext: BindingContext,
+    binder: AnyBinding<R>,
 ) : RpcCallBase<R>(
     moduleName,
     callName,
@@ -70,8 +72,8 @@ abstract class RpcCallBase<R>(
     private val moduleName: String,
     private val callName: String,
     private val socketService: SocketService,
-    private val rpcBindingContext: RpcBindingContext,
-    private val binder: RpcCallBinding<R>,
+    private val rpcBindingContext: BindingContext,
+    private val binder: AnyBinding<R>,
 ) {
 
     protected suspend fun performCall(params: List<Any?>): R {

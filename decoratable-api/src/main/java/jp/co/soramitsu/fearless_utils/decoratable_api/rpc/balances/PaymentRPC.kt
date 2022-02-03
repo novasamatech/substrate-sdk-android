@@ -3,7 +3,7 @@ package jp.co.soramitsu.fearless_utils.decoratable_api.rpc.balances
 import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.DecoratableRPC
 import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.DecoratableRPCModule
 import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.RpcCall1
-import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.asJson
+import jp.co.soramitsu.fearless_utils.decoratable_api.util.binding.Bindings.asJson
 import java.math.BigInteger
 
 interface PaymentRPC : DecoratableRPCModule
