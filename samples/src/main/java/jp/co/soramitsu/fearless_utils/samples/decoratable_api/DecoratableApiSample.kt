@@ -48,7 +48,7 @@ class DecoratableApiSample {
         )
 
         val account = Keyring.sampleAccount().getOrThrow()
-        val accountId = api.options.accountIdentifierConstructor.identifier(account).accountId
+        val accountId = api.options.accountIdentifierConstructor.identifier(account.publicKey).accountId
         val targetAddress = MultiAddress.Id(accountId)
 
         val feeInfo = api.tx.utility.batch(
