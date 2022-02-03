@@ -4,7 +4,7 @@ import jp.co.soramitsu.fearless_utils.encrypt.SignatureWrapper
 import jp.co.soramitsu.fearless_utils.encrypt.vByte
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypeRegistry
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.getOrThrow
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.Type
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.RuntimeType
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEnum
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.MultiSignature
@@ -12,7 +12,7 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.prepare
 
 private const val EXTRINSIC_SIGNATURE_TYPE = "ExtrinsicSignature"
 
-object SignatureInstanceConstructor : Type.InstanceConstructor<SignatureWrapper> {
+object SignatureInstanceConstructor : RuntimeType.InstanceConstructor<SignatureWrapper> {
 
     override fun constructInstance(typeRegistry: TypeRegistry, value: SignatureWrapper): Any {
         return when (val type = typeRegistry.getOrThrow(EXTRINSIC_SIGNATURE_TYPE)) {

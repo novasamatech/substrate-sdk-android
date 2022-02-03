@@ -2,6 +2,7 @@ package jp.co.soramitsu.fearless_utils.runtime.metadata
 
 import jp.co.soramitsu.fearless_utils.common.assertInstance
 import jp.co.soramitsu.fearless_utils.common.assertNotInstance
+import jp.co.soramitsu.fearless_utils.common.median
 import jp.co.soramitsu.fearless_utils.getFileContentFromResources
 import jp.co.soramitsu.fearless_utils.runtime.definitions.dynamic.DynamicTypeResolver
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypeRegistry
@@ -16,6 +17,7 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Tuple
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Vec
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Null
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.DynamicByteArray
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.FixedByteArray
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.UIntType
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u32
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u64
@@ -53,9 +55,8 @@ class Metadata14Test {
 
     @OptIn(ExperimentalTime::class)
     @Test
-    @Ignore
     fun `performance test`() {
-        val times = 10
+        val times = 100
 
         val inHex = getFileContentFromResources("westend_metadata_v14")
         val metadataReader = RuntimeMetadataReader.read(inHex)
@@ -68,9 +69,7 @@ class Metadata14Test {
                 )
             }.inMilliseconds
         }
-
-        println(parseTimes)
-        print(parseTimes.average())
+        println("Median: ${parseTimes.median()} ms")
     }
 
     @Test
@@ -109,7 +108,7 @@ class Metadata14Test {
         // empty variant element -> null optimization
         assertInstance<Null>(setPayeeVariant["Staked"])
         // 1 field variant element -> unwrap struct optimization
-        assertInstance<FixedArray>(setPayeeVariant["Account"])
+        assertInstance<FixedByteArray>(setPayeeVariant["Account"])
 
         // multiple null-named elements in struct does not collapse into single one
         val dustLostEventArguments = metadata.module("Balances").event("DustLost").arguments
@@ -149,12 +148,15 @@ class Metadata14Test {
             eraRewardPointsReturnType.get<Vec>("individual")?.innerType?.skipAliases()
         assertInstance<Tuple>(individualType)
         val shouldBeAccountId = individualType[0]
-        assertInstance<FixedArray>(shouldBeAccountId)
+        assertInstance<FixedByteArray>(shouldBeAccountId)
         assertEquals(32, shouldBeAccountId.length)
-        assertEquals(u8, shouldBeAccountId.innerType())
         assertEquals(u32, individualType[1])
 
-        // id-based types with empty path shold not be aliased
+        // verify FixedByteArray optimization works with lookahead types
+        val accountId = typeRegistry["sp_core.crypto.AccountId32"]
+        assertInstance<FixedByteArray>(accountId)
+
+        // id-based types with empty path should not be aliased
         val u8Primitive = typeRegistry["2"]
         assertNotInstance<Alias>(u8Primitive)
     }
