@@ -6,13 +6,13 @@ import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.Scale
 import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.decodeFromDynamicStructure
 
 interface BindingContext {
-    
+
     val scale: Scale
 
     val jsonCodec: JsonCodec
 }
 
-class SimpleBindingContext(override val scale: Scale, override val jsonCodec: JsonCodec): BindingContext
+class SimpleBindingContext(override val scale: Scale, override val jsonCodec: JsonCodec) : BindingContext
 
 typealias Binding<I, O> = BindingContext.(I) -> O
 typealias AnyBinding<O> = Binding<Any?, O>

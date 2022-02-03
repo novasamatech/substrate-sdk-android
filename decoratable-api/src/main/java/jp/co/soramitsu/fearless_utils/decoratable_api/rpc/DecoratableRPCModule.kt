@@ -2,7 +2,6 @@ package jp.co.soramitsu.fearless_utils.decoratable_api.rpc
 
 import jp.co.soramitsu.fearless_utils.decoratable_api.util.binding.AnyBinding
 import jp.co.soramitsu.fearless_utils.decoratable_api.util.binding.Binding
-import jp.co.soramitsu.fearless_utils.json.fromParsedHierarchy
 import jp.co.soramitsu.fearless_utils.wsrpc.subscription.response.SubscriptionChange
 import java.math.BigInteger
 

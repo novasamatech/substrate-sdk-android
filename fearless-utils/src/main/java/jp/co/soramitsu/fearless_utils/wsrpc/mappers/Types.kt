@@ -25,11 +25,10 @@ fun string() = StringMapper
 
 inline fun <reified T> pojoList() = POJOCollectionMapper(T::class.java)
 
-object StringMapper: NullableMapper<String>() {
+object StringMapper : NullableMapper<String>() {
     override fun mapNullable(rpcResponse: RpcResponse, jsonMapper: Gson): String? {
         return rpcResponse.result?.toString()
     }
-
 }
 
 object StringIdMapper : NullableMapper<String>() {
