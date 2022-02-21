@@ -6,7 +6,6 @@ import jp.co.soramitsu.fearless_utils.extensions.toHexString
 import jp.co.soramitsu.fearless_utils.hash.Hasher.xxHash128
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.RuntimeType
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.Type
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.bytes
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.errors.EncodeDecodeException
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module.Event
@@ -119,10 +118,8 @@ fun StorageEntry.storageKey(runtime: RuntimeSnapshot, vararg arguments: Any?): S
     // keys size can be less then dimension to retrieve by prefix
     if (arguments.size > type.dimension()) wrongEntryType()
 
-    val keysWithHashers = when (type) {
-        is StorageEntryType.Plain -> emptyList()
-        is StorageEntryType.NMap -> type.keys.zip(type.hashers)
-    }
+    val argumentsTypes = this.keys
+    val argumentsHashers = this.hashers
 
     val keyOutputStream = ByteArrayOutputStream()
 
@@ -130,11 +127,12 @@ fun StorageEntry.storageKey(runtime: RuntimeSnapshot, vararg arguments: Any?): S
     keyOutputStream.write(serviceHash())
 
     arguments.forEachIndexed { index, key ->
-        val (keyType, keyHasher) = keysWithHashers[index]
+        val argumentType = argumentsTypes[index]
+        val argumentHasher = argumentsHashers[index]
 
-        val keyEncoded = keyType?.bytes(runtime, key) ?: typeNotResolved(fullName)
+        val keyEncoded = argumentType?.bytes(runtime, key) ?: typeNotResolved(fullName)
 
-        keyOutputStream.write(keyHasher.hashingFunction(keyEncoded))
+        keyOutputStream.write(argumentHasher.hashingFunction(keyEncoded))
     }
 
     return keyOutputStream.toByteArray().toHexString(withPrefix = true)
@@ -164,12 +162,12 @@ fun StorageEntry.storageKeys(runtime: RuntimeSnapshot, keysArguments: List<List<
         keyOutputStream.write(storageHash)
 
         arguments.forEachIndexed { index, key ->
-            val keyType = argumentsTypes[index]
-            val keyHasher = argumentsHashers[index]
+            val argumentType = argumentsTypes[index]
+            val argumentHasher = argumentsHashers[index]
 
-            val keyEncoded = keyType?.bytes(runtime, key) ?: typeNotResolved(fullName)
+            val keyEncoded = argumentType?.bytes(runtime, key) ?: typeNotResolved(fullName)
 
-            keyOutputStream.write(keyHasher.hashingFunction(keyEncoded))
+            keyOutputStream.write(argumentHasher.hashingFunction(keyEncoded))
         }
 
         keyOutputStream.toByteArray().toHexString(withPrefix = true)
