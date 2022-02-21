@@ -67,6 +67,47 @@ class RuntimeMetadataExtKtTest {
     }
 
     @Test
+    fun `test storageKeys()`() {
+        val storageEntry = storageEntry(
+            StorageEntryType.NMap(
+                value = BooleanType,
+                keys = listOf(BooleanType, BooleanType),
+                hashers = listOf(
+                    StorageHasher.Identity,
+                    StorageHasher.Identity,
+                )
+            )
+        )
+
+        val arguments = listOf(
+            listOf(false, false),
+            listOf(false, true),
+            listOf(true, false),
+            listOf(true, true),
+        )
+
+        val expectedKeys = listOf(
+            PREFIX + "0000",
+            PREFIX + "0001",
+            PREFIX + "0100",
+            PREFIX + "0101",
+        )
+
+        val storageKeys = storageEntry.storageKeys(runtime, arguments)
+
+        expectedKeys.zip(storageKeys).forEach { (expected, actual) ->
+            assertEquals(expected, actual)
+        }
+
+        // should check dimensionality
+        assertThrows<IllegalArgumentException> {
+            storageEntry.storageKeys(runtime, listOf(emptyList()))
+            storageEntry.storageKeys(runtime, listOf(listOf(true)))
+            storageEntry.storageKeys(runtime, listOf(listOf(true, true, true)))
+        }
+    }
+
+    @Test
     fun `should split keys`() {
         val storageEntry = storageEntry(
             StorageEntryType.NMap(

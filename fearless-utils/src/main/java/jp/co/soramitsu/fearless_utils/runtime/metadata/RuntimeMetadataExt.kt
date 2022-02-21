@@ -5,6 +5,7 @@ import jp.co.soramitsu.fearless_utils.extensions.fromHex
 import jp.co.soramitsu.fearless_utils.extensions.toHexString
 import jp.co.soramitsu.fearless_utils.hash.Hasher.xxHash128
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.RuntimeType
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.bytes
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.errors.EncodeDecodeException
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module.Event
@@ -66,6 +67,24 @@ fun Module.event(name: String): Event = eventOrNull(name) ?: throw NoSuchElement
 fun Module.eventOrNull(name: String): Event? = events?.get(name)
 
 /**
+ * Unified representation of [StorageEntryType] argument types
+ */
+val StorageEntry.keys: List<RuntimeType<*, *>?>
+    get() = when (type) {
+        is StorageEntryType.Plain -> emptyList()
+        is StorageEntryType.NMap -> type.keys
+    }
+
+/**
+ * Unified representation of [StorageEntryType] hashers
+ */
+val StorageEntry.hashers: List<StorageHasher>
+    get() = when (type) {
+        is StorageEntryType.Plain -> emptyList()
+        is StorageEntryType.NMap -> type.hashers
+    }
+
+/**
  * Constructs a key for storage with no arguments.
  * This either fill be a full key for [StorageEntryType.Plain] entries,
  * or a prefix key for [StorageEntryType.Map] and [StorageEntryType.DoubleMap] entries
@@ -95,29 +114,64 @@ fun StorageEntryType.dimension() = when (this) {
  * @throws IllegalStateException if some of types used for encoding cannot be resolved
  * @throws EncodeDecodeException if error happened during encoding
  */
-fun StorageEntry.storageKey(runtime: RuntimeSnapshot, vararg keys: Any?): String {
+fun StorageEntry.storageKey(runtime: RuntimeSnapshot, vararg arguments: Any?): String {
     // keys size can be less then dimension to retrieve by prefix
-    if (keys.size > type.dimension()) wrongEntryType()
+    if (arguments.size > type.dimension()) wrongEntryType()
 
-    val keysWithHashers = when (type) {
-        is StorageEntryType.Plain -> emptyList()
-        is StorageEntryType.NMap -> type.keys.zip(type.hashers)
-    }
+    val argumentsTypes = this.keys
+    val argumentsHashers = this.hashers
 
     val keyOutputStream = ByteArrayOutputStream()
 
     keyOutputStream.write(moduleHash())
     keyOutputStream.write(serviceHash())
 
-    keys.forEachIndexed { index, key ->
-        val (keyType, keyHasher) = keysWithHashers[index]
+    arguments.forEachIndexed { index, key ->
+        val argumentType = argumentsTypes[index]
+        val argumentHasher = argumentsHashers[index]
 
-        val keyEncoded = keyType?.bytes(runtime, key) ?: typeNotResolved(fullName)
+        val keyEncoded = argumentType?.bytes(runtime, key) ?: typeNotResolved(fullName)
 
-        keyOutputStream.write(keyHasher.hashingFunction(keyEncoded))
+        keyOutputStream.write(argumentHasher.hashingFunction(keyEncoded))
     }
 
     return keyOutputStream.toByteArray().toHexString(withPrefix = true)
+}
+
+/**
+ * Constructs multiple keys for storage with supplied arguments.
+ * This method cannot be used to construct prefix keys, for prefix construction see [StorageEntry.storageKey]
+ *
+ * @throws IllegalArgumentException if the number of arguments is not equal to [StorageEntryType.dimension]
+ * @throws IllegalStateException if some of types used for encoding cannot be resolved
+ * @throws EncodeDecodeException if error happened during encoding
+ */
+fun StorageEntry.storageKeys(runtime: RuntimeSnapshot, keysArguments: List<List<Any?>>): List<String> {
+    val argumentsTypes = this.keys
+    val argumentsHashers = this.hashers
+
+    val moduleHash = moduleHash()
+    val storageHash = serviceHash()
+
+    return keysArguments.map { arguments ->
+        if (arguments.size != type.dimension()) wrongEntryType()
+
+        val keyOutputStream = ByteArrayOutputStream()
+
+        keyOutputStream.write(moduleHash)
+        keyOutputStream.write(storageHash)
+
+        arguments.forEachIndexed { index, key ->
+            val argumentType = argumentsTypes[index]
+            val argumentHasher = argumentsHashers[index]
+
+            val keyEncoded = argumentType?.bytes(runtime, key) ?: typeNotResolved(fullName)
+
+            keyOutputStream.write(argumentHasher.hashingFunction(keyEncoded))
+        }
+
+        keyOutputStream.toByteArray().toHexString(withPrefix = true)
+    }
 }
 
 private const val MODULE_HASH_LENGTH = 16
