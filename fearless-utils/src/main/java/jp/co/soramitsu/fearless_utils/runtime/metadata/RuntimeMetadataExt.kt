@@ -69,8 +69,8 @@ fun Module.eventOrNull(name: String): Event? = events?.get(name)
 /**
  * Unified representation of [StorageEntryType] argument types
  */
-val StorageEntry.keys : List<RuntimeType<*, *>?>
-    get() = when(type) {
+val StorageEntry.keys: List<RuntimeType<*, *>?>
+    get() = when (type) {
         is StorageEntryType.Plain -> emptyList()
         is StorageEntryType.NMap -> type.keys
     }
@@ -78,8 +78,8 @@ val StorageEntry.keys : List<RuntimeType<*, *>?>
 /**
  * Unified representation of [StorageEntryType] hashers
  */
-val StorageEntry.hashers : List<StorageHasher>
-    get() = when(type) {
+val StorageEntry.hashers: List<StorageHasher>
+    get() = when (type) {
         is StorageEntryType.Plain -> emptyList()
         is StorageEntryType.NMap -> type.hashers
     }
