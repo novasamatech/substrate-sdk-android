@@ -75,7 +75,6 @@ class RuntimeMetadataExtKtTest {
                 hashers = listOf(
                     StorageHasher.Identity,
                     StorageHasher.Identity,
-                    StorageHasher.Identity
                 )
             )
         )
