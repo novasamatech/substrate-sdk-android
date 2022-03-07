@@ -4,8 +4,8 @@ import jp.co.soramitsu.fearless_utils.encrypt.EncryptionType
 import jp.co.soramitsu.fearless_utils.encrypt.MultiChainEncryption
 import jp.co.soramitsu.fearless_utils.encrypt.keypair.BaseKeypair
 import jp.co.soramitsu.fearless_utils.extensions.fromHex
-import jp.co.soramitsu.fearless_utils.integration.transfer
 import jp.co.soramitsu.fearless_utils.runtime.RealRuntimeProvider
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEnum
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.fromHex
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Era
@@ -19,7 +19,8 @@ import java.math.BigInteger
 
 private val KEYPAIR = BaseKeypair(
     publicKey = "fdc41550fb5186d71cae699c31731b3e1baa10680c7bd6b3831a6d222cf4d168".fromHex(),
-    privateKey = "f3923eea431177cd21906d4308aea61c037055fb00575cae687217c6d8b2397f".fromHex()
+    privateKey = "f3923eea431177cd21906d4308aea61c037055fb00575cae687217c6d8b2397f".fromHex(),
+    encryptionType = EncryptionType.ED25519
 )
 
 private const val SINGLE_TRANSFER_EXTRINSIC =
@@ -28,6 +29,23 @@ private val TRANSFER_CALL_BYTES =
     "0x040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402".fromHex()
 private const val EXTRINSIC_SIGNATURE =
     "0x00080bfe8bc67f44b498239887dc5679523cfcb1d20fd9ec9d6bae0a385cca118d2cb7ef9f4674d52a810feb32932d7c6fe3e05ce9e06cd72cf499c8692206410a"
+
+private fun ExtrinsicBuilder.transfer(
+    recipientAccountId: ByteArray,
+    amount: BigInteger
+): ExtrinsicBuilder {
+    return call(
+        moduleName = "Balances",
+        callName = "transfer",
+        arguments = mapOf(
+            "dest" to DictEnum.Entry(
+                name = "Id",
+                value = recipientAccountId
+            ),
+            "value" to amount
+        )
+    )
+}
 
 private fun ExtrinsicBuilder.testSingleTransfer(): ExtrinsicBuilder {
     return transfer(
@@ -45,7 +63,8 @@ class ExtrinsicBuilderTest {
         val soraRuntime = RealRuntimeProvider.buildRuntime("sora2")
         val soraKeypair = BaseKeypair(
             privateKey = "dd9b35e3288c2e2667313532f825f60fc5e8523b16d8e3ddc0b0ff5200b4c145".fromHex(),
-            publicKey = "83ba494b62a40d20c370e5381230d74b4e8906d0334a91777baef57c9a935467".fromHex()
+            publicKey = "83ba494b62a40d20c370e5381230d74b4e8906d0334a91777baef57c9a935467".fromHex(),
+            EncryptionType.ED25519
         )
         val from = "5F3RU8neUpkZJK7QxAHJ9TGDjUiyjfufpZvaXDBEifPkeJSz"
         val to = "5EcDoG4T1SLbop4bxBjLL9VJaaytZxGXA7mLaY9y84GYpzsR"

@@ -4,13 +4,11 @@ import jp.co.soramitsu.fearless_utils.common.assertInstance
 import jp.co.soramitsu.fearless_utils.common.assertNotInstance
 import jp.co.soramitsu.fearless_utils.common.median
 import jp.co.soramitsu.fearless_utils.getFileContentFromResources
-import jp.co.soramitsu.fearless_utils.runtime.definitions.dynamic.DynamicTypeResolver
-import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypeRegistry
+import jp.co.soramitsu.fearless_utils.runtime.RealRuntimeProvider
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.unknownTypes
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.v14Preset
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Alias
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEnum
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.FixedArray
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Option
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Tuple
@@ -21,16 +19,13 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.Fixed
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.UIntType
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u32
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u64
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u8
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.skipAliases
 import jp.co.soramitsu.fearless_utils.runtime.definitions.v14.TypesParserV14
-import jp.co.soramitsu.fearless_utils.runtime.metadata.builder.VersionedRuntimeBuilder
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module.StorageEntryType
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.RuntimeMetadataSchemaV14
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.junit.MockitoJUnitRunner
@@ -74,18 +69,9 @@ class Metadata14Test {
 
     @Test
     fun `should decode metadata v14`() {
-        val inHex = getFileContentFromResources("westend_metadata_v14")
-        val metadataReader = RuntimeMetadataReader.read(inHex)
-        val typePreset = TypesParserV14.parse(
-            lookup = metadataReader.metadata[RuntimeMetadataSchemaV14.lookup],
-            typePreset = v14Preset()
-        )
-
-        val typeRegistry = TypeRegistry(
-            typePreset,
-            DynamicTypeResolver.defaultCompoundResolver()
-        )
-        val metadata = VersionedRuntimeBuilder.buildMetadata(metadataReader, typeRegistry)
+        val runtime = RealRuntimeProvider.buildRuntimeV14("westend")
+        val metadata = runtime.metadata
+        val typeRegistry = runtime.typeRegistry
 
         val accountReturnEntry = metadata.module("System").storage("Account").type
         assertInstance<StorageEntryType.NMap>(accountReturnEntry)

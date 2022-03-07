@@ -94,6 +94,8 @@ dependencies {
 
     testImplementation jUnitDep
     testImplementation mockitoDep
+    testImplementation project(':gson-codec')
+    testImplementation coroutinesDep
 
     androidTestImplementation androidTestRunnerDep
     androidTestImplementation androidTestRulesDep
