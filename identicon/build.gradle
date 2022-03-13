@@ -2,12 +2,14 @@ plugins {
     id 'com.android.library'
     id 'kotlin-android'
 }
-apply from: '../maven-publish-helper.gradle'
+apply from: '../maven-publish-android.gradle'
 
-publishing {
-    publications {
-        release(MavenPublication) {
-            artifactId 'identicon'
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                artifactId 'identicon'
+            }
         }
     }
 }

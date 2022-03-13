@@ -1,7 +1,6 @@
 plugins {
     id 'java-gradle-plugin'
     id 'org.jetbrains.kotlin.jvm' version '1.6.0'
-    id 'com.stepango.aar2jar' version "0.6"
     id "maven-publish"
 }
 
@@ -11,6 +10,7 @@ version '2.0.0'
 repositories {
     mavenCentral()
     google()
+    mavenLocal()
     maven {
         url "https://jitpack.io"
     }
@@ -35,6 +35,6 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
     implementation "com.android.tools.build:gradle:4.0.0"
 
-    implementation "io.github.nova-wallet:substrate-sdk-android:2.0.0"
+    implementation "io.github.nova-wallet.substrate-sdk-android:core:2.0.0"
     testImplementation 'androidx.test.ext:junit:1.1.3'
 }

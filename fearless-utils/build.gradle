@@ -1,52 +1,21 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
-apply plugin: 'kotlin-android-extensions'
-apply from: '../maven-publish-helper.gradle'
+plugins {
+    id 'java-library'
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+apply from: '../maven-publish-java.gradle'
 
 publishing {
     publications {
-        release(MavenPublication) {
+        maven(MavenPublication) {
             artifactId 'core'
         }
     }
 }
 
-android {
-    compileSdkVersion rootProject.compileVersion
-    defaultConfig {
-        minSdkVersion rootProject.minVersion
-        targetSdkVersion rootProject.targetVersion
-        versionCode rootProject.versionCode
-        versionName rootProject.versionName
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
-
-    lintOptions {
-        abortOnError false
-    }
-
-    compileOptions {
-        sourceCompatibility 1.8
-        targetCompatibility 1.8
-    }
-
-    sourceSets {
-        test {
-            java.srcDirs += "$projectDir/src/testShared/java"
-        }
-
-        androidTest {
-            java.srcDirs += "$projectDir/src/testShared/java"
-        }
-    }
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 dependencies {
@@ -67,8 +36,4 @@ dependencies {
     testImplementation mockitoDep
     testImplementation project(':gson-codec')
     testImplementation coroutinesDep
-
-    androidTestImplementation androidTestRunnerDep
-    androidTestImplementation androidTestRulesDep
-    androidTestImplementation androidJunitDep
 }

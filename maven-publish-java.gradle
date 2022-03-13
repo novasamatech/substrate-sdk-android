@@ -1,0 +1,56 @@
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+// Because the components are created only during the afterEvaluate phase, you must
+// configure your publications using the afterEvaluate() lifecycle method.
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            maven(MavenPublication) {
+                groupId "io.github.nova-wallet.substrate-sdk-android"
+
+                from components.java
+
+                version versionName
+
+                pom {
+                    signing {
+                        sign publishing.publications.maven
+                        sign configurations.archives
+                    }
+                    name = "substrate-sdk-android"
+                    description = "Nova Substrate SDK is a native Android library to help developers build native mobile apps for Substrate-based networks, e.g. Polkadot, Kusama & parachains"
+                    url = "https://github.com/nova-wallet/substrate-sdk-android"
+                    licenses {
+                        license {
+                            name = "The Apache License, Version 2.0"
+                            url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                        }
+                    }
+                    scm {
+                        connection = "scm:git:https://github.com/nova-wallet/substrate-sdk-android.git"
+                        developerConnection = "scm:git:https://github.com/nova-wallet/substrate-sdk-android.git"
+                        url = "https://github.com/nova-wallet/substrate-sdk-android"
+                    }
+                    developers {
+                        developer {
+                            id = "valentun"
+                            name = "Valentun Sergeev"
+                            email = "valentun@novawallet.io"
+                        }
+                    }
+                }
+            }
+        }
+
+        repositories {
+            maven {
+                credentials {
+                    username = ossrhUsername
+                    password = ossrhPassword
+                }
+            }
+        }
+    }
+}

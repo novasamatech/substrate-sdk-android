@@ -2,7 +2,7 @@ plugins {
     id 'com.android.library'
     id 'kotlin-android'
 }
-apply from: '../maven-publish-helper.gradle'
+apply from: '../maven-publish-android.gradle'
 apply plugin: 'org.mozilla.rust-android-gradle.rust-android'
 
 publishing {
@@ -36,6 +36,8 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
+    ndkVersion "21.3.6528147"
 }
 
 cargo {
