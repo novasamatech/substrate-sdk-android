@@ -21,15 +21,6 @@ repositories {
     jcenter()
 }
 
-sourceSets.main.java.srcDir new File(buildDir, 'generated/substrate')
-idea {
-    module {
-        // Marks the already(!) added srcDir as "generated"
-        generatedSourceDirs += file('build/generated/substrate')
-        sourceDirs += file('build/generated/substrate')
-    }
-}
-
 
 gradlePlugin {
     plugins {
@@ -43,8 +34,13 @@ gradlePlugin {
 }
 
 dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation "com.android.tools.build:gradle:7.1.2"
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
     implementation "io.github.nova-wallet.substrate-sdk-android:core:2.0.0"
+    implementation "io.github.nova-wallet.substrate-sdk-android:coroutines-adapter:2.0.0"
+    implementation "io.github.nova-wallet.substrate-sdk-android:gson-codec:2.0.0"
 
     implementation("com.squareup:kotlinpoet:1.10.2")
 

@@ -14,12 +14,19 @@ publishing {
 }
 
 java {
+    withSourcesJar()
+
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
+configurations {
+    releaseJars
+}
+
 dependencies {
     api fileTree(dir: 'libs', include: ['*.jar'])
+    releaseJars fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation spoungyCastleBcPixDep
     implementation spoungyCastleBcPgDep
@@ -31,9 +38,12 @@ dependencies {
     implementation apacheXercesDep
     implementation xxHashDep
 
-
     testImplementation jUnitDep
     testImplementation mockitoDep
     testImplementation project(':gson-codec')
     testImplementation coroutinesDep
+}
+
+jar {
+    from configurations.releaseJars.collect { it.isDirectory() ? it : zipTree(it) }
 }

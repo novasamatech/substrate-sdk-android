@@ -4,7 +4,7 @@ import com.squareup.kotlinpoet.*
 
 class Codegen {
 
-    fun test(outputDir: java.io.File) {
+    fun generate(outputDir: java.io.File) {
         val greeterClass = ClassName("io.github.nova_wallet.substrate_sdk_android.codegen", "Greeter")
         val file = FileSpec.builder("io.github.nova_wallet.substrate_sdk_android.codegen", "HelloWorld")
             .addType(

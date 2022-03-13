@@ -3,7 +3,7 @@ package jp.co.soramitsu.fearless_utils.gson_codec
 import com.google.gson.Gson
 import jp.co.soramitsu.fearless_utils.json.JsonCodec
 
-class GsonCodec(private val gson: Gson) : JsonCodec {
+class GsonCodec(val gson: Gson) : JsonCodec {
 
     override fun <T> fromJson(source: String, argumentClass: Class<T>): T {
         return gson.fromJson(source, argumentClass)
