@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package jp.co.soramitsu.fearless_utils.keyring
+package jp.co.soramitsu.fearless_utils.utils
 
 import jp.co.soramitsu.fearless_utils.exceptions.AddressFormatException
 import java.io.UnsupportedEncodingException

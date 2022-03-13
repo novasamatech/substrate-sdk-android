@@ -1,9 +1,9 @@
 package jp.co.soramitsu.fearless_utils.keyring.json.coders.type.cryptor
 
+import jp.co.soramitsu.fearless_utils.extensions.copyBytes
 import jp.co.soramitsu.fearless_utils.keyring.json.coders.type.JsonCryptor
 import jp.co.soramitsu.fearless_utils.keyring.json.coders.type.JsonTypeDecoder
 import jp.co.soramitsu.fearless_utils.keyring.json.coders.type.JsonTypeEncoder
-import jp.co.soramitsu.fearless_utils.keyring.json.copyBytes
 import jp.co.soramitsu.fearless_utils.keyring.xsalsa20poly1305.SecretBox
 
 private val NONCE_OFFSET = 0

@@ -1,6 +1,5 @@
 package jp.co.soramitsu.fearless_utils.keyring.xsalsa20poly1305
 
-import java8.util.Optional
 import java.util.Arrays
 
 /*

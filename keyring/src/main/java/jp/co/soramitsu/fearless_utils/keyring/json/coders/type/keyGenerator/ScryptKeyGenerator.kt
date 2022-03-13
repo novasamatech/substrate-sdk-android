@@ -1,11 +1,11 @@
 package jp.co.soramitsu.fearless_utils.keyring.json.coders.type.keyGenerator
 
+import jp.co.soramitsu.fearless_utils.extensions.copyBytes
 import jp.co.soramitsu.fearless_utils.keyring.json.asLittleEndianBytes
 import jp.co.soramitsu.fearless_utils.keyring.json.asLittleEndianInt
 import jp.co.soramitsu.fearless_utils.keyring.json.coders.type.JsonEncryptionKeyGenerator
 import jp.co.soramitsu.fearless_utils.keyring.json.coders.type.JsonTypeDecoder
 import jp.co.soramitsu.fearless_utils.keyring.json.coders.type.JsonTypeEncoder
-import jp.co.soramitsu.fearless_utils.keyring.json.copyBytes
 import org.bouncycastle.crypto.generators.SCrypt
 import java.security.SecureRandom
 import java.util.Random

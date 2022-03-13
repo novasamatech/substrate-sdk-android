@@ -10,7 +10,6 @@ import jp.co.soramitsu.fearless_utils.decoratable_api.query.DecoratableQuery
 import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.DecoratableRPC
 import jp.co.soramitsu.fearless_utils.decoratable_api.tx.DecoratableTx
 import jp.co.soramitsu.fearless_utils.decoratable_api.tx.DecoratableTxImpl
-import jp.co.soramitsu.fearless_utils.decoratable_api.options.substrate
 import jp.co.soramitsu.fearless_utils.decoratable_api.util.binding.SimpleBindingContext
 import jp.co.soramitsu.fearless_utils.json.JsonCodec
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeFactory
@@ -55,7 +54,7 @@ suspend fun SubstrateApi(
     socketService: SocketService,
     jsonCodec: JsonCodec,
     typesJsons: List<String>,
-    options: Options.Factory = Options.substrate()
+    options: Options.Factory
 ) = withContext(Dispatchers.Default) {
     val runtimeFactory = RuntimeFactory(jsonCodec)
 

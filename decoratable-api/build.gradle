@@ -39,6 +39,7 @@ dependencies {
     api project(':coroutines-adapter')
     api project(':koltinx-serialization-scale')
     api project(':fearless-utils')
+    api project(':keyring')
 
     testImplementation jUnitDep
     testImplementation mockitoDep

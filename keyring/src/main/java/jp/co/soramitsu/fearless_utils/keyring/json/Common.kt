@@ -9,8 +9,6 @@ fun ByteArray.asLittleEndianInt() = ByteBuffer.wrap(this)
     .order(ByteOrder.LITTLE_ENDIAN)
     .int
 
-fun ByteArray.copyBytes(from: Int, size: Int) = copyOfRange(from, from + size)
-
 fun Int.asLittleEndianBytes() = usingLittleEndian(Int.SIZE_BYTES) {
     putInt(this@asLittleEndianBytes)
 }

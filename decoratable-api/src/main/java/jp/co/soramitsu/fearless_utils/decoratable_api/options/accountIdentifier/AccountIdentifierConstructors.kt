@@ -28,20 +28,17 @@ interface AccountIdentifierConstructor {
         const val DEFAULT_ADDRESS_TYPE = "Address"
     }
 
-    suspend fun identifier(publicKey: jp.co.soramitsu.fearless_utils.keyring.keypair.PublicKey): Identifier
+    suspend fun identifier(publicKey: PublicKey): Identifier
 
-    suspend fun address(publicKey: jp.co.soramitsu.fearless_utils.keyring.keypair.PublicKey): String
+    suspend fun address(publicKey: PublicKey): String
 }
-
-suspend fun AccountIdentifierConstructor.identifier(account: jp.co.soramitsu.fearless_utils.keyring.keypair.Keypair) = identifier(account.publicKey)
-suspend fun AccountIdentifierConstructor.address(account: jp.co.soramitsu.fearless_utils.keyring.keypair.Keypair) = address(account.publicKey)
 
 class SubstrateAccountIdentifierConstructor(
     private val lookupType: String,
     private val api: SubstrateApi
 ) : AccountIdentifierConstructor {
 
-    override suspend fun identifier(publicKey: jp.co.soramitsu.fearless_utils.keyring.keypair.PublicKey): AccountIdentifierConstructor.Identifier {
+    override suspend fun identifier(publicKey: PublicKey): AccountIdentifierConstructor.Identifier {
         val typeRegistry = api.chainState.runtime.typeRegistry
         val addressType = typeRegistry.getOrThrow(lookupType)
         val accountId = publicKey.substrateAccountId()
@@ -59,20 +56,20 @@ class SubstrateAccountIdentifierConstructor(
         return AccountIdentifierConstructor.Identifier(accountId, identifierForEncoding)
     }
 
-    override suspend fun address(publicKey: jp.co.soramitsu.fearless_utils.keyring.keypair.PublicKey): String {
+    override suspend fun address(publicKey: PublicKey): String {
         return api.chainState.properties().ss58AddressOf(publicKey)
     }
 }
 
 class EthereumAccountIdentifierConstructor : AccountIdentifierConstructor {
 
-    override suspend fun identifier(publicKey: jp.co.soramitsu.fearless_utils.keyring.keypair.PublicKey): AccountIdentifierConstructor.Identifier {
+    override suspend fun identifier(publicKey: PublicKey): AccountIdentifierConstructor.Identifier {
         val accountId = publicKey.ethereumAccountId()
 
         return AccountIdentifierConstructor.Identifier(accountId = accountId, forEncoding = accountId)
     }
 
-    override suspend fun address(publicKey: jp.co.soramitsu.fearless_utils.keyring.keypair.PublicKey): String {
+    override suspend fun address(publicKey: PublicKey): String {
         return publicKey.ethereumAddress()
     }
 }
@@ -83,6 +80,6 @@ fun AccountIdentifierConstructor.Companion.defaultSubstrate(
     SubstrateAccountIdentifierConstructor(addressTypeName, api)
 }
 
-fun AccountIdentifierConstructor.Companion.ethereum() = AccountIdentifierConstructor.Factory {
+fun AccountIdentifierConstructor.Companion.Ethereum() = AccountIdentifierConstructor.Factory {
     EthereumAccountIdentifierConstructor()
 }

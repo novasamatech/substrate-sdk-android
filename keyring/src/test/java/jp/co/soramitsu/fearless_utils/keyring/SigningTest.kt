@@ -10,7 +10,7 @@ import org.junit.runner.RunWith
 import org.mockito.junit.MockitoJUnitRunner
 
 @RunWith(MockitoJUnitRunner::class)
-class SignerTest {
+class SigningTest {
 
     @Test
     fun `should sign message ED25519`() {
@@ -19,11 +19,11 @@ class SignerTest {
         val keypair = SubstrateKeypairFactory.generate(
             EncryptionType.ED25519, TestData.SEED_BYTES)
 
-        val result = Signer.sign(
+        val result = Signing.sign(
             MultiChainEncryption.Substrate(
                 EncryptionType.ED25519), messageHex.toByteArray(), keypair)
 
-        assert(Signer.verifyEd25519(messageHex.toByteArray(), result.signature, keypair.publicKey))
+        assert(Signing.verifyEd25519(messageHex.toByteArray(), result.signature, keypair.publicKey))
     }
 
     @Test
@@ -41,7 +41,7 @@ class SignerTest {
             "0400340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c6302286bee0000002d00000003000000e143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423ee143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e"
         val messageBytes = message.fromHex()
 
-        val signatureWrapper = Signer.sign(
+        val signatureWrapper = Signing.sign(
             MultiChainEncryption.Substrate(
                 EncryptionType.ECDSA), messageBytes, keypair) as SignatureWrapper.Ecdsa
 

@@ -2,9 +2,12 @@ package jp.co.soramitsu.fearless_utils.samples.decoratable_api
 
 import com.google.gson.Gson
 import jp.co.soramitsu.fearless_utils.decoratable_api.SubstrateApi
+import jp.co.soramitsu.fearless_utils.decoratable_api.options.Options
+import jp.co.soramitsu.fearless_utils.decoratable_api.options.Substrate
 import jp.co.soramitsu.fearless_utils.decoratable_api.tx.invoke
 import jp.co.soramitsu.fearless_utils.keyring.Keyring
 import jp.co.soramitsu.fearless_utils.gson_codec.GsonCodec
+import jp.co.soramitsu.fearless_utils.keyring.signing.extrinsic.signer.KeypairSigner
 import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.balances.balances
 import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.balances.transfer
 import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.staking.historyDepth
@@ -41,13 +44,15 @@ class DecoratableApiSample {
 
         val types = getFileContentFromResources("westend.json")
 
+        val account = Keyring.sampleAccount().getOrThrow()
+
         val api = SubstrateApi(
             socketService = socketService,
             jsonCodec = jsonCodec,
-            typesJsons = listOf(types)
+            typesJsons = listOf(types),
+            options = Options.Substrate(KeypairSigner(account))
         )
 
-        val account = jp.co.soramitsu.fearless_utils.keyring.Keyring.sampleAccount().getOrThrow()
         val accountId = api.options.accountIdentifierConstructor.identifier(account.publicKey).accountId
         val targetAddress = MultiAddress.Id(accountId)
 
@@ -55,7 +60,7 @@ class DecoratableApiSample {
             api.tx.balances.transfer(targetAddress, 123.toBigInteger()),
             api.tx.balances.transfer(targetAddress, 123.toBigInteger()),
         )
-            .paymentInfo(account)
+            .paymentInfo()
         println(feeInfo.partialFee)
 
         val historyDepth = api.query.staking.historyDepth()

@@ -18,7 +18,7 @@ import org.web3j.crypto.Sign
 import java.math.BigInteger
 import java.security.Signature
 
-object Signer {
+object Signing {
 
     private enum class MessageHashing(val hasher: (ByteArray) -> ByteArray) {
         SUBSTRATE(hasher = { it.blake2b256() }),
