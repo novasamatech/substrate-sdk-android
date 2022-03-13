@@ -40,8 +40,7 @@ afterEvaluate {
         publications {
             // Creates a Maven publication called "release".
             release(MavenPublication) {
-                // Temporarily override the artifactId until it is corrected in the project
-                artifactId "substrate-sdk-android"
+                groupId "io.github.nova-wallet.substrate-sdk-android"
 
                 // Applies the component for the release build variant.
                 from components.release
@@ -50,9 +49,6 @@ afterEvaluate {
 //                artifact androidJavadocsJar
                 artifact androidSourcesJar
 
-                // You can customize attributes of the publication here or in module's build.gradle file.
-                //groupId = 'com.example'
-                artifactId = 'substrate-sdk-android'
                 version = android.defaultConfig.versionName // or just '1.0'
 
                 pom {

@@ -19,6 +19,7 @@ import jp.co.soramitsu.fearless_utils.decoratable_api.tx.mortality.MortalityCons
 import jp.co.soramitsu.fearless_utils.encrypt.Keyring
 import jp.co.soramitsu.fearless_utils.encrypt.MultiChainEncryption
 import jp.co.soramitsu.fearless_utils.extensions.fromHex
+import jp.co.soramitsu.fearless_utils.runtime.AccountId
 import jp.co.soramitsu.fearless_utils.runtime.extrinsic.ExtrinsicBuilder
 
 typealias TxHash = String
@@ -28,7 +29,7 @@ class SubmittableExtrinsic(
     private val api: SubstrateApi,
 ) : GenericCall.Instance by call {
 
-    suspend fun sign(sender: Keypair): String {
+    suspend fun sign(accountId: AccountId): String {
         val address = api.options.accountIdentifierConstructor.address(sender)
 
         val mortality = MortalityConstructor.constructMortality(api)

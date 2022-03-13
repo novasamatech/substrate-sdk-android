@@ -1,4 +1,4 @@
-package jp.co.soramitsu.fearless_utils.icon
+package jp.co.soramitsu.fearless_utils.identicon
 
 data class Circle(
     val x: Double,

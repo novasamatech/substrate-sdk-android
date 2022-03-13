@@ -1,0 +1,44 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+}
+apply from: '../maven-publish-helper.gradle'
+
+publishing {
+    publications {
+        release(MavenPublication) {
+            artifactId 'identicon'
+        }
+    }
+}
+
+android {
+    compileSdkVersion rootProject.compileVersion
+    defaultConfig {
+        minSdkVersion rootProject.minVersion
+        targetSdkVersion rootProject.targetVersion
+        versionCode rootProject.versionCode
+        versionName rootProject.versionName
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+    implementation svgDep
+
+    implementation project(":fearless-utils")
+}

@@ -8,7 +8,7 @@ apply from: '../maven-publish-helper.gradle'
 publishing {
     publications {
         release(MavenPublication) {
-            groupId 'io.github.nova-wallet'
+            artifactId 'core'
         }
     }
 }
@@ -48,6 +48,8 @@ android {
             java.srcDirs += "$projectDir/src/testShared/java"
         }
     }
+
+    ndkVersion "21.3.6528147"
 }
 
 cargo {
@@ -81,7 +83,6 @@ dependencies {
     implementation spoungyCastleBcPixDep
     implementation spoungyCastleBcPgDep
     implementation ed25519Dep
-    implementation svgDep
     implementation bip39Dep
     implementation secureStringDep
     api wsDep

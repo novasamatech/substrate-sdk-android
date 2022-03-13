@@ -1,8 +1,8 @@
-package jp.co.soramitsu.fearless_utils.icon
+package jp.co.soramitsu.fearless_utils.identicon
 
 import android.graphics.drawable.PictureDrawable
 import com.caverock.androidsvg.SVG
-import org.spongycastle.jcajce.provider.digest.Blake2b
+import jp.co.soramitsu.fearless_utils.hash.Hasher.blake2b512
 import java.lang.RuntimeException
 import java.lang.StringBuilder
 import kotlin.math.floor
@@ -67,8 +67,8 @@ class IconGenerator {
 
         val totalFreq = SCHEMES.fold(0) { summ, schema -> summ + schema.frequency }
 
-        val zeroHash = Blake2b.Blake2b512().digest(ByteArray(32) { 0 })
-        val idHash = Blake2b.Blake2b512().digest(id).mapIndexed { index, byte -> (byte + 256 - zeroHash[index]) % 256 }
+        val zeroHash = ByteArray(32) { 0 }.blake2b512()
+        val idHash = id.blake2b512().mapIndexed { index, byte -> (byte + 256 - zeroHash[index]) % 256 }
 
         val sat = (floor(idHash[29].toDouble() * 70 / 256 + 26) % 80) + 30
         val d = floor((idHash[30].toDouble() + idHash[31].toDouble() * 256) % totalFreq)
