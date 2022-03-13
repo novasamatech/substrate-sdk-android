@@ -1,10 +1,8 @@
 package jp.co.soramitsu.fearless_utils.decoratable_api.tx
 
-import jp.co.soramitsu.fearless_utils.encrypt.keypair.Keypair
+import jp.co.soramitsu.fearless_utils.keyring.keypair.Keypair
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.GenericCall
 import jp.co.soramitsu.fearless_utils.decoratable_api.SubstrateApi
-import jp.co.soramitsu.fearless_utils.decoratable_api.options.accountIdentifier.address
-import jp.co.soramitsu.fearless_utils.decoratable_api.options.accountIdentifier.identifier
 import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.author.author
 import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.author.submitExtrinsic
 import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.balances.FeeInfo
@@ -14,10 +12,9 @@ import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.chain.chain
 import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.chain.getRuntimeVersion
 import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.system.accountNextIndex
 import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.system.system
-import jp.co.soramitsu.fearless_utils.decoratable_api.tx.fee.feeSigner
 import jp.co.soramitsu.fearless_utils.decoratable_api.tx.mortality.MortalityConstructor
-import jp.co.soramitsu.fearless_utils.encrypt.Keyring
-import jp.co.soramitsu.fearless_utils.encrypt.MultiChainEncryption
+import jp.co.soramitsu.fearless_utils.keyring.Keyring
+import jp.co.soramitsu.fearless_utils.keyring.MultiChainEncryption
 import jp.co.soramitsu.fearless_utils.extensions.fromHex
 import jp.co.soramitsu.fearless_utils.runtime.AccountId
 import jp.co.soramitsu.fearless_utils.runtime.extrinsic.ExtrinsicBuilder
@@ -41,7 +38,7 @@ class SubmittableExtrinsic(
             nonce = api.rpc.system.accountNextIndex(address),
             runtimeVersion = runtimeVersion,
             genesisHash = api.chainState.genesisHash().fromHex(),
-            multiChainEncryption = MultiChainEncryption.Substrate(sender.encryptionType),
+            multiChainEncryption = jp.co.soramitsu.fearless_utils.keyring.MultiChainEncryption.Substrate(sender.encryptionType),
             accountIdentifier = api.options.accountIdentifierConstructor.identifier(sender).forEncoding,
             blockHash = mortality.blockHash.fromHex(),
             era = mortality.era
@@ -51,7 +48,7 @@ class SubmittableExtrinsic(
     }
 
     suspend fun paymentInfo(
-        sender: Keypair = Keyring.feeSigner()
+        sender: jp.co.soramitsu.fearless_utils.keyring.keypair.Keypair = jp.co.soramitsu.fearless_utils.keyring.Keyring.feeSigner()
     ): FeeInfo {
         val tx = sign(sender)
 
@@ -59,7 +56,7 @@ class SubmittableExtrinsic(
     }
 
     suspend fun signAndSend(
-        sender: Keypair
+        sender: jp.co.soramitsu.fearless_utils.keyring.keypair.Keypair
     ): TxHash {
         val tx = sign(sender)
 

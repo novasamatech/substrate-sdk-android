@@ -1,14 +1,13 @@
 package jp.co.soramitsu.fearless_utils.ss58
 
-import jp.co.soramitsu.fearless_utils.encrypt.Base58
-import jp.co.soramitsu.fearless_utils.encrypt.json.copyBytes
+import jp.co.soramitsu.fearless_utils.keyring.Base58
+import jp.co.soramitsu.fearless_utils.keyring.json.copyBytes
 import jp.co.soramitsu.fearless_utils.exceptions.AddressFormatException
 import jp.co.soramitsu.fearless_utils.extensions.shl
 import jp.co.soramitsu.fearless_utils.extensions.shr
 import jp.co.soramitsu.fearless_utils.hash.Hasher.blake2b256
 import jp.co.soramitsu.fearless_utils.hash.Hasher.blake2b512
 import java.lang.Exception
-import kotlin.experimental.and
 import kotlin.experimental.or
 
 object SS58Encoder {
@@ -17,7 +16,7 @@ object SS58Encoder {
     private const val PREFIX_SIZE = 2
     private const val PUBLIC_KEY_SIZE = 32
 
-    private val base58 = Base58()
+    private val base58 = jp.co.soramitsu.fearless_utils.keyring.Base58()
 
     @OptIn(ExperimentalUnsignedTypes::class)
     private fun getPrefixLenIdent(decodedByteArray: ByteArray): Pair<Int, Short> {

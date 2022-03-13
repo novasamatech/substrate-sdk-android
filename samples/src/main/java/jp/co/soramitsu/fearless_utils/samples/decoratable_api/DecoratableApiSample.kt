@@ -3,7 +3,7 @@ package jp.co.soramitsu.fearless_utils.samples.decoratable_api
 import com.google.gson.Gson
 import jp.co.soramitsu.fearless_utils.decoratable_api.SubstrateApi
 import jp.co.soramitsu.fearless_utils.decoratable_api.tx.invoke
-import jp.co.soramitsu.fearless_utils.encrypt.Keyring
+import jp.co.soramitsu.fearless_utils.keyring.Keyring
 import jp.co.soramitsu.fearless_utils.gson_codec.GsonCodec
 import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.balances.balances
 import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.balances.transfer
@@ -47,7 +47,7 @@ class DecoratableApiSample {
             typesJsons = listOf(types)
         )
 
-        val account = Keyring.sampleAccount().getOrThrow()
+        val account = jp.co.soramitsu.fearless_utils.keyring.Keyring.sampleAccount().getOrThrow()
         val accountId = api.options.accountIdentifierConstructor.identifier(account.publicKey).accountId
         val targetAddress = MultiAddress.Id(accountId)
 

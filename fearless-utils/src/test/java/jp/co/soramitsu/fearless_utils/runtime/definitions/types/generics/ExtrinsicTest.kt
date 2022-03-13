@@ -1,6 +1,6 @@
 package jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics
 
-import jp.co.soramitsu.fearless_utils.encrypt.SignatureWrapper
+import jp.co.soramitsu.fearless_utils.keyring.SignatureWrapper
 import jp.co.soramitsu.fearless_utils.extensions.fromHex
 import jp.co.soramitsu.fearless_utils.extensions.toHexString
 import jp.co.soramitsu.fearless_utils.runtime.RealRuntimeProvider
@@ -70,7 +70,7 @@ class ExtrinsicTest {
 
         val signature = SignatureInstanceConstructor.constructInstance(
             typeRegistry = runtime.typeRegistry,
-            value = SignatureWrapper.Sr25519(signatureInHex.fromHex())
+            value = jp.co.soramitsu.fearless_utils.keyring.SignatureWrapper.Sr25519(signatureInHex.fromHex())
         )
 
         val extrinsic = Extrinsic.EncodingInstance(

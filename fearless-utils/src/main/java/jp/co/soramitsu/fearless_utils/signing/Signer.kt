@@ -1,6 +1,5 @@
 package jp.co.soramitsu.fearless_utils.signing
 
-import jp.co.soramitsu.fearless_utils.encrypt.SignatureWrapper
 import jp.co.soramitsu.fearless_utils.runtime.AccountId
 
 class SignerPayloadRaw(
@@ -8,8 +7,13 @@ class SignerPayloadRaw(
     val accountId: AccountId
 )
 
+class SignerResult(
+    val signature: ByteArray,
+    val encryptionType: String
+)
+
 interface Signer {
 
-    fun signRaw(payload: SignerPayloadRaw): SignatureWrapper
+    fun signRaw(payload: SignerPayloadRaw): SignerResult
 }
 

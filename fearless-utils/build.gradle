@@ -2,7 +2,6 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-android-extensions'
-apply plugin: 'org.mozilla.rust-android-gradle.rust-android'
 apply from: '../maven-publish-helper.gradle'
 
 publishing {
@@ -48,43 +47,14 @@ android {
             java.srcDirs += "$projectDir/src/testShared/java"
         }
     }
-
-    ndkVersion "21.3.6528147"
 }
-
-cargo {
-    module = "../sr25519-java/"
-    libname = "sr25519java"
-    targets = ["arm", "arm64", "x86", "x86_64"]
-}
-
-tasks.whenTaskAdded { task ->
-    if ((task.name == 'javaPreCompileDebug' || task.name == 'javaPreCompileRelease')) {
-        task.dependsOn 'cargoBuild'
-    }
-}
-
-task deleteJar(type: Delete) {
-    delete 'libs/jars/libfearless.jar'
-}
-
-task createJar(type: Copy) {
-    from('build/intermediates/bundles/release/')
-    into('libs/jars/')
-    include('classes.jar')
-    rename('classes.jar', 'libfearless.jar')
-}
-
-createJar.dependsOn(deleteJar, build)
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    api fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation spoungyCastleBcPixDep
     implementation spoungyCastleBcPgDep
-    implementation ed25519Dep
-    implementation bip39Dep
-    implementation secureStringDep
+
     api wsDep
     implementation gsonDep
     implementation web3jDep

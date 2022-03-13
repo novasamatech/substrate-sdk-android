@@ -1,7 +1,6 @@
 package jp.co.soramitsu.fearless_utils.runtime.extrinsic
 
-import jp.co.soramitsu.fearless_utils.encrypt.MultiChainEncryption
-import jp.co.soramitsu.fearless_utils.encrypt.SignatureWrapper
+import jp.co.soramitsu.fearless_utils.keyring.SignatureWrapper
 import jp.co.soramitsu.fearless_utils.hash.Hasher.blake2b256
 import jp.co.soramitsu.fearless_utils.runtime.AccountId
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
@@ -47,7 +46,7 @@ class ExtrinsicBuilder(
     private val tip: BigInteger = DEFAULT_TIP,
     private val customSignedExtensions: Map<SignedExtension, Any?> = emptyMap(),
     private val addressConstructor: RuntimeType.InstanceConstructor<AccountId> = AddressInstanceConstructor,
-    private val signatureConstructor: RuntimeType.InstanceConstructor<SignatureWrapper> = SignatureInstanceConstructor
+    private val signatureConstructor: RuntimeType.InstanceConstructor<jp.co.soramitsu.fearless_utils.keyring.SignatureWrapper> = SignatureInstanceConstructor
 ) {
 
     private val calls = mutableListOf<GenericCall.Instance>()

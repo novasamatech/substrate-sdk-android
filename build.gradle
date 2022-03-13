@@ -24,7 +24,7 @@ buildscript {
         spoungyCastleVersion = '1.58.0.0'
         ed25519Version = '0.3.0'
         bip39version = '2019.01.27'
-        web3jVersion = '4.6.0-android'
+        web3jVersion = '4.6.0'
         apacheXercesVersion = '2.9.0'
 
         junitVersion = '4.12'

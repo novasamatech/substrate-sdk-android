@@ -1,0 +1,78 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+}
+apply from: '../maven-publish-helper.gradle'
+apply plugin: 'org.mozilla.rust-android-gradle.rust-android'
+
+publishing {
+    publications {
+        release(MavenPublication) {
+            artifactId 'keyring'
+        }
+    }
+}
+
+android {
+    compileSdkVersion rootProject.compileVersion
+    defaultConfig {
+        minSdkVersion rootProject.minVersion
+        targetSdkVersion rootProject.targetVersion
+        versionCode rootProject.versionCode
+        versionName rootProject.versionName
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+cargo {
+    module = "../sr25519-java/"
+    libname = "sr25519java"
+    targets = ["arm", "arm64", "x86", "x86_64"]
+}
+
+tasks.whenTaskAdded { task ->
+    if ((task.name == 'javaPreCompileDebug' || task.name == 'javaPreCompileRelease')) {
+        task.dependsOn 'cargoBuild'
+    }
+}
+
+task deleteJar(type: Delete) {
+    delete 'libs/jars/libfearless.jar'
+}
+
+task createJar(type: Copy) {
+    from('build/intermediates/bundles/release/')
+    into('libs/jars/')
+    include('classes.jar')
+    rename('classes.jar', 'libfearless.jar')
+}
+
+createJar.dependsOn(deleteJar, build)
+
+dependencies {
+    implementation project(":fearless-utils")
+
+    implementation spoungyCastleBcPixDep
+    implementation spoungyCastleBcPgDep
+    implementation ed25519Dep
+    implementation bip39Dep
+    implementation web3jDep
+    implementation secureStringDep
+
+    testImplementation jUnitDep
+    testImplementation mockitoDep
+}

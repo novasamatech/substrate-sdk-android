@@ -78,7 +78,7 @@ internal fun String.snakeCaseToCamelCase(): String {
     }.joinToString(separator = "")
 }
 
-internal fun ByteArray.copyLast(n: Int) = copyOfRange(fromIndex = size - n, size)
+fun ByteArray.copyLast(n: Int) = copyOfRange(fromIndex = size - n, size)
 
 @ExperimentalUnsignedTypes
 /**

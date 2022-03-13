@@ -1,8 +1,8 @@
 package jp.co.soramitsu.fearless_utils.runtime.extrinsic
 
-import jp.co.soramitsu.fearless_utils.encrypt.EncryptionType
-import jp.co.soramitsu.fearless_utils.encrypt.MultiChainEncryption
-import jp.co.soramitsu.fearless_utils.encrypt.keypair.BaseKeypair
+import jp.co.soramitsu.fearless_utils.keyring.EncryptionType
+import jp.co.soramitsu.fearless_utils.keyring.MultiChainEncryption
+import jp.co.soramitsu.fearless_utils.keyring.keypair.BaseKeypair
 import jp.co.soramitsu.fearless_utils.extensions.fromHex
 import jp.co.soramitsu.fearless_utils.runtime.RealRuntimeProvider
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEnum
@@ -17,10 +17,10 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.math.BigInteger
 
-private val KEYPAIR = BaseKeypair(
+private val KEYPAIR = jp.co.soramitsu.fearless_utils.keyring.keypair.BaseKeypair(
     publicKey = "fdc41550fb5186d71cae699c31731b3e1baa10680c7bd6b3831a6d222cf4d168".fromHex(),
     privateKey = "f3923eea431177cd21906d4308aea61c037055fb00575cae687217c6d8b2397f".fromHex(),
-    encryptionType = EncryptionType.ED25519
+    encryptionType = jp.co.soramitsu.fearless_utils.keyring.EncryptionType.ED25519
 )
 
 private const val SINGLE_TRANSFER_EXTRINSIC =
@@ -61,10 +61,10 @@ class ExtrinsicBuilderTest {
     @Test
     fun `should build single sora transfer extrinsic`() {
         val soraRuntime = RealRuntimeProvider.buildRuntime("sora2")
-        val soraKeypair = BaseKeypair(
+        val soraKeypair = jp.co.soramitsu.fearless_utils.keyring.keypair.BaseKeypair(
             privateKey = "dd9b35e3288c2e2667313532f825f60fc5e8523b16d8e3ddc0b0ff5200b4c145".fromHex(),
             publicKey = "83ba494b62a40d20c370e5381230d74b4e8906d0334a91777baef57c9a935467".fromHex(),
-            EncryptionType.ED25519
+            jp.co.soramitsu.fearless_utils.keyring.EncryptionType.ED25519
         )
         val from = "5F3RU8neUpkZJK7QxAHJ9TGDjUiyjfufpZvaXDBEifPkeJSz"
         val to = "5EcDoG4T1SLbop4bxBjLL9VJaaytZxGXA7mLaY9y84GYpzsR"
@@ -78,7 +78,8 @@ class ExtrinsicBuilderTest {
             nonce = 1.toBigInteger(),
             runtimeVersion = RuntimeVersion(1, 1),
             genesisHash = "0f751ca2d30efe3385a4001d0bfa1548471babf5095f6fe88ee4813cf724fafc".fromHex(),
-            multiChainEncryption = MultiChainEncryption.Substrate(EncryptionType.ED25519),
+            multiChainEncryption = jp.co.soramitsu.fearless_utils.keyring.MultiChainEncryption.Substrate(
+                jp.co.soramitsu.fearless_utils.keyring.EncryptionType.ED25519),
             accountIdentifier = from.toAccountId(),
             era = Era.getEraFromBlockPeriod(44866, 64),
             blockHash = "0xa532ea14451c9b4e1a9ed1c75ab67d8be659362c9d8f2206009ae8d62faf9fca".fromHex()
@@ -205,7 +206,8 @@ class ExtrinsicBuilderTest {
             nonce = 34.toBigInteger(),
             runtimeVersion = RuntimeVersion(601, 4),
             genesisHash = "48239ef607d7928874027a43a67689209727dfb3d3dc5e5b03a39bdc2eda771a".fromHex(),
-            multiChainEncryption = MultiChainEncryption.Substrate(EncryptionType.ED25519),
+            multiChainEncryption = jp.co.soramitsu.fearless_utils.keyring.MultiChainEncryption.Substrate(
+                jp.co.soramitsu.fearless_utils.keyring.EncryptionType.ED25519),
             accountIdentifier = multiAddressFromId(KEYPAIR.publicKey),
             era = Era.Mortal(64, 59),
             customSignedExtensions = mapOf(
@@ -235,7 +237,8 @@ class ExtrinsicBuilderTest {
         nonce = 34.toBigInteger(),
         runtimeVersion = RuntimeVersion(48, 4),
         genesisHash = "e143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e".fromHex(),
-        multiChainEncryption = MultiChainEncryption.Substrate(EncryptionType.ED25519),
+        multiChainEncryption = jp.co.soramitsu.fearless_utils.keyring.MultiChainEncryption.Substrate(
+            jp.co.soramitsu.fearless_utils.keyring.EncryptionType.ED25519),
         accountIdentifier = multiAddressFromId(KEYPAIR.publicKey),
         era = Era.Mortal(64, 59),
         blockHash = "0x1b876104c68b4a8924c098d61d2ad798761bb6fff55cca2885939ffc27ef5ecb".fromHex()
