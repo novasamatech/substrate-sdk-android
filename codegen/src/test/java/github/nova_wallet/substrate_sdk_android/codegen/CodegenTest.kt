@@ -7,6 +7,6 @@ internal class CodegenTest {
 
     @Test
     fun `test`() {
-        Codegen().test()
+//        Codegen().test()
     }
 }

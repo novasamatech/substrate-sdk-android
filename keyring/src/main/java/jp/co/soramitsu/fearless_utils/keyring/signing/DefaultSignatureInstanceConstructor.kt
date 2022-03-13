@@ -17,7 +17,7 @@ object DefaultSignatureInstanceConstructor : SignatureInstanceConstructor {
     override fun constructInstance(typeRegistry: TypeRegistry, value: MultiSignature): Any {
         return when (val type = typeRegistry.getOrThrow(EXTRINSIC_SIGNATURE_TYPE)) {
             is DictEnum -> { // MultiSignature
-                DictEnum.Entry(value.encryptionType, value)
+                DictEnum.Entry(value.encryptionType, value.signature)
             }
             is Struct -> { // EthereumSignature
                 require(value.encryptionType == EncryptionType.ECDSA.multiSignatureName) {

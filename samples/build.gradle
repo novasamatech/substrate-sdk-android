@@ -3,6 +3,7 @@ plugins {
     id 'kotlin-android'
     id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.0'
     id 'io.github.nova-wallet.substrate-sdk-android.codegen'
+    id "idea"
 }
 android {
     compileSdkVersion 30
@@ -15,6 +16,12 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
+
+    }
+    sourceSets {
+        main {
+            java.srcDirs += "build/generated/substrate"
+        }
     }
 
     buildTypes {

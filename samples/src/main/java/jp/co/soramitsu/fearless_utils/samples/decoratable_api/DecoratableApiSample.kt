@@ -1,6 +1,7 @@
 package jp.co.soramitsu.fearless_utils.samples.decoratable_api
 
 import com.google.gson.Gson
+import io.github.nova_wallet.substrate_sdk_android.codegen.Greeter
 import jp.co.soramitsu.fearless_utils.decoratable_api.SubstrateApi
 import jp.co.soramitsu.fearless_utils.decoratable_api.options.Options
 import jp.co.soramitsu.fearless_utils.decoratable_api.options.Substrate
@@ -38,6 +39,8 @@ class DecoratableApiSample {
     suspend fun run() {
         val gson = Gson()
         val jsonCodec = GsonCodec(gson)
+
+        print(Greeter("test").name)
 
         val socketService = SocketService(gson)
         socketService.start("wss://westend-rpc.polkadot.io")

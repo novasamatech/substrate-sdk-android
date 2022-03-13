@@ -2,6 +2,7 @@ plugins {
     id 'java-gradle-plugin'
     id 'org.jetbrains.kotlin.jvm' version '1.6.0'
     id "maven-publish"
+    id "idea"
 }
 
 group 'io.github.nova-wallet.substrate-sdk-android'
@@ -20,6 +21,16 @@ repositories {
     jcenter()
 }
 
+sourceSets.main.java.srcDir new File(buildDir, 'generated/substrate')
+idea {
+    module {
+        // Marks the already(!) added srcDir as "generated"
+        generatedSourceDirs += file('build/generated/substrate')
+        sourceDirs += file('build/generated/substrate')
+    }
+}
+
+
 gradlePlugin {
     plugins {
         substrateCodegenPlugin {
@@ -33,8 +44,9 @@ gradlePlugin {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
-    implementation "com.android.tools.build:gradle:4.0.0"
-
     implementation "io.github.nova-wallet.substrate-sdk-android:core:2.0.0"
+
+    implementation("com.squareup:kotlinpoet:1.10.2")
+
     testImplementation 'androidx.test.ext:junit:1.1.3'
 }
