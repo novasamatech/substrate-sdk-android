@@ -11,10 +11,14 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.fromHex
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Era
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Extrinsic
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.multiAddressFromId
+import jp.co.soramitsu.fearless_utils.signing.Signer
 import jp.co.soramitsu.fearless_utils.ss58.SS58Encoder.toAccountId
 import jp.co.soramitsu.fearless_utils.wsrpc.request.runtime.chain.RuntimeVersion
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.junit.MockitoJUnitRunner
 import java.math.BigInteger
 
 private val KEYPAIR = jp.co.soramitsu.fearless_utils.keyring.keypair.BaseKeypair(
@@ -54,51 +58,13 @@ private fun ExtrinsicBuilder.testSingleTransfer(): ExtrinsicBuilder {
     )
 }
 
+@RunWith(MockitoJUnitRunner::class)
 class ExtrinsicBuilderTest {
 
     val runtime = RealRuntimeProvider.buildRuntime("westend")
 
-    @Test
-    fun `should build single sora transfer extrinsic`() {
-        val soraRuntime = RealRuntimeProvider.buildRuntime("sora2")
-        val soraKeypair = jp.co.soramitsu.fearless_utils.keyring.keypair.BaseKeypair(
-            privateKey = "dd9b35e3288c2e2667313532f825f60fc5e8523b16d8e3ddc0b0ff5200b4c145".fromHex(),
-            publicKey = "83ba494b62a40d20c370e5381230d74b4e8906d0334a91777baef57c9a935467".fromHex(),
-            jp.co.soramitsu.fearless_utils.keyring.EncryptionType.ED25519
-        )
-        val from = "5F3RU8neUpkZJK7QxAHJ9TGDjUiyjfufpZvaXDBEifPkeJSz"
-        val to = "5EcDoG4T1SLbop4bxBjLL9VJaaytZxGXA7mLaY9y84GYpzsR"
-        val asset = "0200000000000000000000000000000000000000000000000000000000000000"
-        val extrinsicInHex =
-            "0xe1028483ba494b62a40d20c370e5381230d74b4e8906d0334a91777baef57c9a935467007a3855dd10d316c70dad4e4b88a857e2994017fac758f153d8f2cda5aba8cfbbbdd1cc3e73aa8b639bc6d45e151b61baa1f797370928b00d6fb7069ee6b1620f25000400140102000000000000000000000000000000000000000000000000000000000000007081dd99c361e7ccd05171ae67f7adcf2da5ea102ee65670db0d1190c7429674000014bbf08ac6020000000000000000"
-
-        val builder = ExtrinsicBuilder(
-            runtime = soraRuntime,
-            keypair = soraKeypair,
-            nonce = 1.toBigInteger(),
-            runtimeVersion = RuntimeVersion(1, 1),
-            genesisHash = "0f751ca2d30efe3385a4001d0bfa1548471babf5095f6fe88ee4813cf724fafc".fromHex(),
-            multiChainEncryption = jp.co.soramitsu.fearless_utils.keyring.MultiChainEncryption.Substrate(
-                jp.co.soramitsu.fearless_utils.keyring.EncryptionType.ED25519),
-            accountIdentifier = from.toAccountId(),
-            era = Era.getEraFromBlockPeriod(44866, 64),
-            blockHash = "0xa532ea14451c9b4e1a9ed1c75ab67d8be659362c9d8f2206009ae8d62faf9fca".fromHex()
-        )
-
-        builder.call(
-            "Assets",
-            "transfer",
-            mapOf(
-                "asset_id" to asset.fromHex(),
-                "to" to to.toAccountId(),
-                "amount" to BigInteger("200000000000000000")
-            )
-        )
-
-        val encoded = builder.build()
-
-        assertEquals(extrinsicInHex, encoded)
-    }
+    @Mock
+    lateinit var signer: Signer
 
     @Test
     fun `should build extrinsic from raw call bytes`() {
@@ -229,6 +195,13 @@ class ExtrinsicBuilderTest {
         val encoded = builder.build()
 
         assertEquals(extrinsicInHex, encoded)
+    }
+
+    private fun signerSigns(
+        message: String,
+        signature: Signer
+    ) {
+
     }
 
     private fun createExtrinsicBuilder() = ExtrinsicBuilder(

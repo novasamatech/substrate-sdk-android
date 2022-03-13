@@ -3,6 +3,10 @@ package jp.co.soramitsu.fearless_utils.runtime
 import com.google.gson.Gson
 import jp.co.soramitsu.fearless_utils.getFileContentFromResources
 import jp.co.soramitsu.fearless_utils.gson_codec.GsonCodec
+import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypeRegistry
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEnum
+import jp.co.soramitsu.fearless_utils.runtime.extrinsic.SignatureInstanceConstructor
+import jp.co.soramitsu.fearless_utils.signing.MultiSignature
 
 object RealRuntimeProvider {
 
@@ -26,3 +30,11 @@ object RealRuntimeProvider {
     private fun readDefaultJson() = getFileContentFromResources("default.json")
     private fun readNetworkJson(networkName: String) = getFileContentFromResources("${networkName}.json")
 }
+
+object TestSignatureConstructor : SignatureInstanceConstructor {
+
+    override fun constructInstance(typeRegistry: TypeRegistry, value: MultiSignature): Any? {
+        return DictEnum.Entry(value.encryptionType, value.signature)
+    }
+}
+

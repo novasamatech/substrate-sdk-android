@@ -1,6 +1,5 @@
 package jp.co.soramitsu.fearless_utils.runtime.extrinsic
 
-import jp.co.soramitsu.fearless_utils.keyring.SignatureWrapper
 import jp.co.soramitsu.fearless_utils.hash.Hasher.blake2b256
 import jp.co.soramitsu.fearless_utils.runtime.AccountId
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
@@ -16,23 +15,24 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.SignedE
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.create
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.new
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.instances.AddressInstanceConstructor
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.instances.SignatureInstanceConstructor
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.toHex
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.toHexUntyped
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.useScaleWriter
 import jp.co.soramitsu.fearless_utils.runtime.metadata.call
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module
 import jp.co.soramitsu.fearless_utils.scale.utils.directWrite
+import jp.co.soramitsu.fearless_utils.signing.MultiSignature
 import jp.co.soramitsu.fearless_utils.signing.Signer
 import jp.co.soramitsu.fearless_utils.signing.SignerPayloadRaw
 import jp.co.soramitsu.fearless_utils.wsrpc.request.runtime.chain.RuntimeVersion
 import java.math.BigInteger
 
-private val DEFAULT_TIP = BigInteger.ZERO
-
-private const val PAYLOAD_HASH_THRESHOLD = 256
+typealias SignatureInstanceConstructor = RuntimeType.InstanceConstructor<MultiSignature>
 
 class SignedExtension(val name: String, val type: Type<*>)
+
+private val DEFAULT_TIP = BigInteger.ZERO
+private const val PAYLOAD_HASH_THRESHOLD = 256
 
 class ExtrinsicBuilder(
     val runtime: RuntimeSnapshot,
@@ -40,13 +40,13 @@ class ExtrinsicBuilder(
     private val runtimeVersion: RuntimeVersion,
     private val genesisHash: ByteArray,
     private val signer: Signer,
-    private val accountId: AccountId,
+    private val origin: AccountId,
+    private val signatureConstructor: SignatureInstanceConstructor,
     private val blockHash: ByteArray = genesisHash,
     private val era: Era = Era.Immortal,
     private val tip: BigInteger = DEFAULT_TIP,
     private val customSignedExtensions: Map<SignedExtension, Any?> = emptyMap(),
-    private val addressConstructor: RuntimeType.InstanceConstructor<AccountId> = AddressInstanceConstructor,
-    private val signatureConstructor: RuntimeType.InstanceConstructor<jp.co.soramitsu.fearless_utils.keyring.SignatureWrapper> = SignatureInstanceConstructor
+    private val addressConstructor: RuntimeType.InstanceConstructor<AccountId> = AddressInstanceConstructor
 ) {
 
     private val calls = mutableListOf<GenericCall.Instance>()
@@ -131,7 +131,7 @@ class ExtrinsicBuilder(
 
         val extrinsic = Extrinsic.EncodingInstance(
             signature = Extrinsic.Signature.new(
-                accountIdentifier = addressConstructor.constructInstance(runtime.typeRegistry, accountId),
+                accountIdentifier = addressConstructor.constructInstance(runtime.typeRegistry, origin),
                 signature = multiSignature,
                 signedExtras = signedExtras
             ),
@@ -188,9 +188,9 @@ class ExtrinsicBuilder(
             payloadBytes
         }
 
-        val signatureWrapper = signer.signRaw(SignerPayloadRaw(messageToSign, accountId))
+        val multiSignature = signer.signRaw(SignerPayloadRaw(messageToSign, origin))
 
-        return signatureConstructor.constructInstance(runtime.typeRegistry, signatureWrapper)
+        return signatureConstructor.constructInstance(runtime.typeRegistry, multiSignature)
     }
 
     private fun wrapInBatch(useBatchAll: Boolean): GenericCall.Instance {

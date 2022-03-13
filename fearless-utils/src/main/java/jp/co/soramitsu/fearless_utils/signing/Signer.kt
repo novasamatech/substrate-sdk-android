@@ -4,16 +4,13 @@ import jp.co.soramitsu.fearless_utils.runtime.AccountId
 
 class SignerPayloadRaw(
     val data: ByteArray,
-    val accountId: AccountId
+    val origin: AccountId
 )
 
-class SignerResult(
-    val signature: ByteArray,
-    val encryptionType: String
-)
+class MultiSignature(val encryptionType: String, val signature: ByteArray)
 
 interface Signer {
 
-    fun signRaw(payload: SignerPayloadRaw): SignerResult
+    fun signRaw(payload: SignerPayloadRaw): MultiSignature
 }
 

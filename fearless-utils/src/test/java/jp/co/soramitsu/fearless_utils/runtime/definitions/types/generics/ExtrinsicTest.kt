@@ -1,20 +1,22 @@
 package jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics
 
-import jp.co.soramitsu.fearless_utils.keyring.SignatureWrapper
 import jp.co.soramitsu.fearless_utils.extensions.fromHex
 import jp.co.soramitsu.fearless_utils.extensions.toHexString
 import jp.co.soramitsu.fearless_utils.runtime.RealRuntimeProvider
+import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypeRegistry
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEnum
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.fromHex
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Extrinsic.EncodingInstance.*
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Extrinsic.EncodingInstance.CallRepresentation
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.instances.AddressInstanceConstructor
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.instances.SignatureInstanceConstructor
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.toHex
+import jp.co.soramitsu.fearless_utils.runtime.extrinsic.SignatureInstanceConstructor
 import jp.co.soramitsu.fearless_utils.runtime.metadata.call
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module
+import jp.co.soramitsu.fearless_utils.signing.MultiSignature
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.math.BigInteger
+
 
 class ExtrinsicTest {
 
@@ -31,7 +33,7 @@ class ExtrinsicTest {
 
         val multiSignature = decoded.signature!!.tryExtractMultiSignature()!!
 
-        assertEquals(signatureInHex, multiSignature.value.toHexString())
+        assertEquals(signatureInHex, multiSignature.signature.toHexString())
     }
 
     @Test
@@ -68,9 +70,12 @@ class ExtrinsicTest {
             SignedExtras.MORTALITY to Era.Mortal(64, 12)
         )
 
-        val signature = SignatureInstanceConstructor.constructInstance(
+        val signature = TestSignatureConstructor.constructInstance(
             typeRegistry = runtime.typeRegistry,
-            value = jp.co.soramitsu.fearless_utils.keyring.SignatureWrapper.Sr25519(signatureInHex.fromHex())
+            value = MultiSignature(
+                encryptionType = "Sr25519",
+                signature = signatureInHex.fromHex()
+            )
         )
 
         val extrinsic = Extrinsic.EncodingInstance(
