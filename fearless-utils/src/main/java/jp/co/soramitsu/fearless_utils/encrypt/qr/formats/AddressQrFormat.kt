@@ -4,7 +4,7 @@ import jp.co.soramitsu.fearless_utils.encrypt.qr.QrFormat
 
 class AddressQrFormat(
     private val addressValidator: (String) -> Boolean
-): QrFormat {
+) : QrFormat {
 
     override fun encode(payload: QrFormat.Payload): String {
         return payload.address

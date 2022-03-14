@@ -11,7 +11,7 @@ const val DELIMITER = ":"
 private const val PARTS_WITH_NAME = 4
 private const val PARTS_WITHOUT_NAME = 3
 
-class SubstrateQrFormat: QrFormat {
+class SubstrateQrFormat : QrFormat {
 
     override fun encode(payload: QrFormat.Payload): String {
         return with(payload) {

@@ -4,7 +4,7 @@ import java.lang.Exception
 
 interface QrFormat {
 
-    class InvalidFormatException(message: String): Exception(message)
+    class InvalidFormatException(message: String) : Exception(message)
 
     class Payload(
         val address: String,
