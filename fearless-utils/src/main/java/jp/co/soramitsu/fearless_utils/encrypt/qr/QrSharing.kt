@@ -1,49 +1,20 @@
 package jp.co.soramitsu.fearless_utils.encrypt.qr
 
-import jp.co.soramitsu.fearless_utils.extensions.fromHex
-import jp.co.soramitsu.fearless_utils.extensions.toHexString
+import jp.co.soramitsu.fearless_utils.extensions.tryFindNonNull
 
-private const val PREFIX = "substrate"
+class QrSharing(
+    private val decodingFormats: List<QrFormat>,
+    private val encodingFormat: QrFormat
+) {
 
-const val DELIMITER = ":"
-
-private const val PARTS_WITH_NAME = 4
-private const val PARTS_WITHOUT_NAME = 3
-
-object QrSharing {
-    class InvalidFormatException : Exception()
-
-    class Payload(
-        val address: String,
-        val publicKey: ByteArray,
-        val name: String?
-    )
-
-    fun encode(payload: Payload): String {
-        return with(payload) {
-            val publicKeyEncoded = publicKey.toHexString(withPrefix = true)
-
-            val withoutName = "$PREFIX$DELIMITER$address$DELIMITER$publicKeyEncoded"
-
-            if (name != null) "$withoutName$DELIMITER$name" else withoutName
-        }
+    fun encode(payload: QrFormat.Payload): String {
+        return encodingFormat.encode(payload)
     }
 
-    fun decode(qrContent: String): Payload {
-        val parts = qrContent.split(DELIMITER)
-
-        if (parts.size !in PARTS_WITHOUT_NAME..PARTS_WITH_NAME) throw InvalidFormatException()
-
-        val (prefix, address, publicKeyEncoded) = parts
-
-        if (prefix != PREFIX) throw InvalidFormatException()
-
-        val name = if (parts.size == PARTS_WITH_NAME) {
-            parts.last()
-        } else {
-            null
-        }
-
-        return Payload(address, publicKeyEncoded.fromHex(), name)
+    fun decode(qrContent: String): QrFormat.Payload {
+        return decodingFormats.tryFindNonNull {
+            runCatching { it.decode(qrContent) }
+                .getOrNull()
+        } ?: throw QrFormat.InvalidFormatException("Failed to decode QR code content")
     }
 }
