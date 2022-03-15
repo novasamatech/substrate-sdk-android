@@ -1,86 +1,40 @@
 package jp.co.soramitsu.fearless_utils.encrypt.qr
 
-import jp.co.soramitsu.fearless_utils.common.assertThrows
-import jp.co.soramitsu.fearless_utils.extensions.fromHex
-import org.junit.Assert.assertEquals
+import jp.co.soramitsu.fearless_utils.any
+import junit.framework.TestCase.assertEquals
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.BDDMockito.given
+import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 
 @RunWith(MockitoJUnitRunner::class)
 class QrSharingTest {
-    private val address = "FiLhWLARS32oxm4s64gmEMSppAdugsvaAx1pCjweTLGn5Rf"
-    private val publicKeyEncoded =
-        "0x8ad2a3fba73321961cd5d1b8272aa95a21e75dd5b098fb36ed996961ac7b2931"
-    private val name = "Russel"
 
-    private val publicKeyBytes = publicKeyEncoded.fromHex()
+    @Mock
+    lateinit var succeedingFormat: QrFormat
 
-    private val qrContentWithName =
-        "substrate:FiLhWLARS32oxm4s64gmEMSppAdugsvaAx1pCjweTLGn5Rf:0x8ad2a3fba73321961cd5d1b8272aa95a21e75dd5b098fb36ed996961ac7b2931:Russel"
-    private val qrContentWithoutName =
-        "substrate:FiLhWLARS32oxm4s64gmEMSppAdugsvaAx1pCjweTLGn5Rf:0x8ad2a3fba73321961cd5d1b8272aa95a21e75dd5b098fb36ed996961ac7b2931"
+    @Mock
+    lateinit var failingFormat: QrFormat
 
-    @Test
-    fun `should encode with name`() {
-        val payload = QrSharing.Payload(address, publicKeyBytes, name)
+    lateinit var qrSharing: QrSharing
 
-        val result = QrSharing.encode(payload)
+    @Before
+    fun setup() {
+        given(failingFormat.decode(any())).will { throw QrFormat.InvalidFormatException("error") }
+        given(succeedingFormat.decode(any())).willReturn(QrFormat.Payload("test"))
 
-        assertEquals(qrContentWithName, result)
+        qrSharing = QrSharing(
+            decodingFormats = listOf(failingFormat, succeedingFormat),
+            encodingFormat = succeedingFormat
+        )
     }
 
     @Test
-    fun `should encode without name`() {
-        val payload = QrSharing.Payload(address, publicKeyBytes, null)
+    fun `should decode using non failing format`() {
+        val result = qrSharing.decode("test")
 
-        val result = QrSharing.encode(payload)
-
-        assertEquals(qrContentWithoutName, result)
-    }
-
-    @Test
-    fun `should decode with name`() {
-        val result = QrSharing.decode(qrContentWithName)
-
-        assertEquals(name, result.name)
-        assertEquals(address, result.address)
-        assert(publicKeyBytes.contentEquals(result.publicKey))
-    }
-
-    @Test
-    fun `should decode without name`() {
-        val result = QrSharing.decode(qrContentWithoutName)
-
-        assertEquals(null, result.name)
-        assertEquals(address, result.address)
-        assert(publicKeyBytes.contentEquals(result.publicKey))
-    }
-
-    @Test
-    fun `should throw for wrong format`() {
-        val wrongContent = "wrong"
-
-        assertThrows<QrSharing.InvalidFormatException> {
-            QrSharing.decode(wrongContent)
-        }
-    }
-
-    @Test
-    fun `should throw for not enough args format`() {
-        val wrongContent = "substrate${DELIMITER}123"
-
-        assertThrows<QrSharing.InvalidFormatException> {
-            QrSharing.decode(wrongContent)
-        }
-    }
-
-    @Test
-    fun `should throw for too much args format`() {
-        val wrongContent = "$qrContentWithName${DELIMITER}123"
-
-        assertThrows<QrSharing.InvalidFormatException> {
-            QrSharing.decode(wrongContent)
-        }
+        assertEquals("test", result.address)
     }
 }
