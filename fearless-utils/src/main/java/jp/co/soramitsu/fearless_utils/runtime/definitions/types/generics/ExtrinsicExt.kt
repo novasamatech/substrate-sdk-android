@@ -32,7 +32,6 @@ fun Extrinsic.Companion.create(customSignedExtensions: Collection<SignedExtensio
     return Extrinsic(ExtrinsicPayloadExtras(allSignedExtensions))
 }
 
-
 fun Extrinsic.Signature.tryExtractMultiSignature(): MultiSignature? {
     val enumEntry = signature as? DictEnum.Entry<*> ?: return null
     val value = enumEntry.value as? ByteArray ?: return null

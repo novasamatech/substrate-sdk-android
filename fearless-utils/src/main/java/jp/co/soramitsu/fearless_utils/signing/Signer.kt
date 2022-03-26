@@ -13,4 +13,3 @@ interface Signer {
 
     fun signRaw(payload: SignerPayloadRaw): MultiSignature
 }
-

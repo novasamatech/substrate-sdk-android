@@ -32,7 +32,6 @@ import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.TypeDefEnum
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.TypeDefSequence
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.TypeDefVariant
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.TypeDefVariantItem
-import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.TypeParameter
 import jp.co.soramitsu.fearless_utils.scale.EncodableStruct
 
 @OptIn(ExperimentalUnsignedTypes::class)

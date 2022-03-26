@@ -18,7 +18,6 @@ fun PropertySpec.Builder.maybeMarkAsContextual(configuration: TypeCodegen.Config
         if (it::class in configuration.needsContextual) {
             addAnnotation(Contextual::class)
         }
-
     }
 
     return this

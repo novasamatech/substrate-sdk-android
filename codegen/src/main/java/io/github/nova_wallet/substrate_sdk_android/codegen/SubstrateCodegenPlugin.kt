@@ -31,10 +31,9 @@ class SubstrateCodegenPlugin : Plugin<Project> {
             it.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).java.srcDirs(codeDir)
         }
         // TODO add sources for java projects
-////        val javaConvention = project.convention.getPlugin(JavaPluginConvention::class.java)
+// //        val javaConvention = project.convention.getPlugin(JavaPluginConvention::class.java)
 //        project.convention.getPlugin(AndroidPl)
 //        val main: SourceSet = javaConvention.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
-
 
 //        main.java.srcDirs.add(codeDir)
 

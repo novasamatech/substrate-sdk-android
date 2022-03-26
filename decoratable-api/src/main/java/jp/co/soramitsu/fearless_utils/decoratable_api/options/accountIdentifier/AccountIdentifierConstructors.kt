@@ -2,7 +2,6 @@ package jp.co.soramitsu.fearless_utils.decoratable_api.options.accountIdentifier
 
 import jp.co.soramitsu.fearless_utils.decoratable_api.SubstrateApi
 import jp.co.soramitsu.fearless_utils.decoratable_api.config.ss58AddressOf
-import jp.co.soramitsu.fearless_utils.keyring.keypair.Keypair
 import jp.co.soramitsu.fearless_utils.keyring.keypair.PublicKey
 import jp.co.soramitsu.fearless_utils.keyring.keypair.ethereumAccountId
 import jp.co.soramitsu.fearless_utils.keyring.keypair.ethereumAddress

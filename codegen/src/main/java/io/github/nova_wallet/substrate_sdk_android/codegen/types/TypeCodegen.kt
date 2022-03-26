@@ -60,7 +60,7 @@ abstract class TypeCodegen<T : RuntimeType<*, *>>(
         return unfold(parentType, this, typePath)
     }
 
-    protected infix fun String.joinTypeName(child: String) = "${this}.$child"
+    protected infix fun String.joinTypeName(child: String) = "$this.$child"
 
     private fun unfold(parentType: String, type: RuntimeType<*, *>, typePath: TypePath): TypeName {
         return when (type) {
@@ -98,7 +98,7 @@ abstract class TypeCodegen<T : RuntimeType<*, *>>(
 
             type.toTypeName(parentType joinTypeName tuple.name)
         }
-        val tupleName = ClassName(packageName, "Tuple${directionality}")
+        val tupleName = ClassName(packageName, "Tuple$directionality")
 
         return if (typeParameters.isNotEmpty()) {
             tupleName.parameterizedBy(typeParameters)

@@ -1,6 +1,5 @@
 package jp.co.soramitsu.fearless_utils.keyring.signing
 
-
 import jp.co.soramitsu.fearless_utils.keyring.EncryptionType
 import jp.co.soramitsu.fearless_utils.keyring.signing.extrinsic.multiSignatureName
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypeRegistry
