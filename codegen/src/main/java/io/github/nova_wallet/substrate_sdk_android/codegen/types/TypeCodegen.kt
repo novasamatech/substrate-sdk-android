@@ -3,6 +3,7 @@ package io.github.nova_wallet.substrate_sdk_android.codegen.types
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import io.github.nova_wallet.substrate_sdk_android.codegen.ext.asNullable
+import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.serializers.BigIntegerSerializer
 import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.types.Tuple2
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.RuntimeType
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.TypeReference
@@ -10,18 +11,21 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.*
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.Compact
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.DynamicByteArray
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.FixedByteArray
+import kotlinx.serialization.UseSerializers
 import java.io.File
 import java.math.BigInteger
+import kotlin.reflect.KClass
 
 private const val MAX_TUPLE_DIMENSIONALITY = 8
 
 abstract class TypeCodegen<T : RuntimeType<*, *>>(
     private val parentDirectory: File,
-    private val configuration: Configuration
+    protected val configuration: Configuration
 ) {
 
     class Configuration(
-        val predefinedTypes: Map<String, TypeName>
+        val predefinedTypes: Map<String, TypeName>,
+        val needsContextual: Set<KClass<out RuntimeType<*, *>>>
     )
 
     abstract fun FileSpec.Builder.applyType(type: T, path: TypePath)
@@ -35,6 +39,11 @@ abstract class TypeCodegen<T : RuntimeType<*, *>>(
 
         FileSpec.builder(path.packageName, path.typeName)
             .apply { applyType(type, path) }
+            .addAnnotation(
+                AnnotationSpec.builder(UseSerializers::class)
+                    .addMember("%T::class", BigIntegerSerializer::class)
+                    .build()
+            )
             .build()
             .writeTo(parentDirectory)
     }

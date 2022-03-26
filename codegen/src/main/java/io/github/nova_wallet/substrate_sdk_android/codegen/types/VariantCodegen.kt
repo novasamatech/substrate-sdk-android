@@ -1,6 +1,8 @@
 package io.github.nova_wallet.substrate_sdk_android.codegen.types
 
 import com.squareup.kotlinpoet.*
+import io.github.nova_wallet.substrate_sdk_android.codegen.ext.markSerializable
+import io.github.nova_wallet.substrate_sdk_android.codegen.ext.maybeMarkAsContextual
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEnum
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Null
@@ -15,6 +17,7 @@ class VariantCodegen(
     override fun FileSpec.Builder.applyType(type: DictEnum, path: TypePath) {
         val rootClassBuilder = TypeSpec.classBuilder(path.typeName)
             .addModifiers(KModifier.SEALED)
+            .markSerializable()
 
         val rootClassName = ClassName(path.packageName, path.typeName)
 
@@ -24,12 +27,11 @@ class VariantCodegen(
 
             val variantFieldTypeName = variantType.toTypeName(parentType = type.name)
 
-            val childTypeSpec = when (variantType) {
+            val childTypeSpecBuilder = when (variantType) {
                 // object VariantName: Root()
                 is Null -> {
                     TypeSpec.objectBuilder(variantName)
                         .superclass(rootClassName)
-                        .build()
                 }
                 // VariantName(field1: TYPE1, field2: TYPE2,...): Root()
                 is Struct -> {
@@ -40,7 +42,7 @@ class VariantCodegen(
                         classBuilder.applyStruct(variantType)
                     }
 
-                    classBuilder.build()
+                    classBuilder
                 }
                 // VariantName(variantName: TYPE): Root()
                 else -> {
@@ -55,12 +57,16 @@ class VariantCodegen(
                         .addProperty(
                             PropertySpec.builder(variantFieldName, variantFieldTypeName)
                                 .initializer(variantFieldName)
+                                .maybeMarkAsContextual(configuration, variantType)
                                 .build()
                         )
                         .superclass(rootClassName)
-                        .build()
                 }
             }
+
+            val childTypeSpec = childTypeSpecBuilder
+                .markSerializable()
+                .build()
 
             rootClassBuilder.addType(childTypeSpec)
         }

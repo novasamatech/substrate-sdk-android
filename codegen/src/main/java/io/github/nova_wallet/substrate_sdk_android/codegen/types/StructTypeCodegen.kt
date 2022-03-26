@@ -4,7 +4,9 @@ import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
+import io.github.nova_wallet.substrate_sdk_android.codegen.ext.maybeMarkAsContextual
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
+import kotlinx.serialization.Serializable
 import java.io.File
 
 class StructTypeCodegen(
@@ -15,6 +17,7 @@ class StructTypeCodegen(
     override fun FileSpec.Builder.applyType(type: Struct, path: TypePath) {
         val typeSpec = TypeSpec.classBuilder(path.typeName)
             .apply { applyStruct(type) }
+            .addAnnotation(Serializable::class)
             .build()
 
         addType(typeSpec)
@@ -25,11 +28,12 @@ class StructTypeCodegen(
 
         struct.mapping.forEach { (fieldName, fieldTypeReference) ->
             val fieldType = fieldTypeReference.value ?: unknownType(struct.name, fieldName)
-            val fieldClassName = fieldType.toTypeName(struct.name joinTypeName fieldName)
+            val fieldClassName = fieldType.toTypeName(parentType = struct.name joinTypeName fieldName)
 
             addProperty(
                 PropertySpec.builder(fieldName, fieldClassName)
                     .initializer(fieldName)
+                    .maybeMarkAsContextual(configuration, fieldType)
                     .build()
             )
 
