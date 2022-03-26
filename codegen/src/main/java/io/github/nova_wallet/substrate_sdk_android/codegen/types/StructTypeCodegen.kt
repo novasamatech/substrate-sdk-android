@@ -4,6 +4,7 @@ import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
+import io.github.nova_wallet.substrate_sdk_android.codegen.ext.markSerializable
 import io.github.nova_wallet.substrate_sdk_android.codegen.ext.maybeMarkAsContextual
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
 import kotlinx.serialization.Serializable
@@ -17,7 +18,7 @@ class StructTypeCodegen(
     override fun FileSpec.Builder.applyType(type: Struct, path: TypePath) {
         val typeSpec = TypeSpec.classBuilder(path.typeName)
             .apply { applyStruct(type) }
-            .addAnnotation(Serializable::class)
+            .markSerializable()
             .build()
 
         addType(typeSpec)
