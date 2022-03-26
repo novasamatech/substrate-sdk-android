@@ -64,7 +64,7 @@ object TypesParserV14 {
 
     private fun findUniquePathNames(types: List<EncodableStruct<PortableType>>): Set<String> {
         return types
-            .groupingBy { it.pathBasedName(appendTypeParameters = false) }
+            .groupingBy { it.pathBasedName(appendId = false) }
             .eachCount()
             .mapNotNullTo(mutableSetOf()) { (name, count) -> name.takeIf { count == 1 } }
     }
@@ -266,22 +266,14 @@ object TypesParserV14 {
         }
     }
 
-    private fun EncodableStruct<PortableType>.pathBasedName(appendTypeParameters: Boolean): String? {
+    private fun EncodableStruct<PortableType>.pathBasedName(appendId: Boolean): String? {
         val pathSegments = this[PortableType.type][RegistryType.path]
 
         return if (pathSegments.isEmpty()) {
             null
         } else {
             val path = pathSegments.joinToString(separator = ".")
-
-            val suffix = if (appendTypeParameters) {
-                this[PortableType.type][RegistryType.params].joinToString(prefix = "_", separator = "_") {
-                    // either type parameter id (123) or type parameter name (T)
-                    it[TypeParameter.type]?.toString() ?: it[TypeParameter.name].toString()
-                }
-            } else {
-                ""
-            }
+            val suffix = if (appendId) this[PortableType.id] else ""
 
             path + suffix
         }
@@ -290,10 +282,10 @@ object TypesParserV14 {
     private fun EncodableStruct<PortableType>.pathNameResolvingNotUnique(
         whitelist: Set<String>
     ): String? {
-        return when (val withoutTypeParameters = pathBasedName(appendTypeParameters = false)) {
+        return when (val withoutTypeParameters = pathBasedName(appendId = false)) {
             null -> null
             in whitelist -> withoutTypeParameters
-            else -> pathBasedName(appendTypeParameters = true)
+            else -> pathBasedName(appendId = true)
         }
     }
 }

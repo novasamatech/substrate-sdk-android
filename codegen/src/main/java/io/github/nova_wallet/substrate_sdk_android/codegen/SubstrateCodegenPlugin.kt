@@ -2,16 +2,20 @@ package io.github.nova_wallet.substrate_sdk_android.codegen
 
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.google.gson.Gson
+import io.github.nova_wallet.substrate_sdk_android.codegen.types.TypeRegistryCodegen
 import jp.co.soramitsu.fearless_utils.gson_codec.GsonCodec
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.SourceSet
 import java.io.File
 
 interface SubstrateCodegenExtension {
     val nodeUrl: Property<String>
+
+    val typesFile: RegularFileProperty
 }
 
 class SubstrateCodegenPlugin : Plugin<Project> {
@@ -41,12 +45,16 @@ class SubstrateCodegenPlugin : Plugin<Project> {
 
                 val gson = Gson()
                 val gsonCodec = GsonCodec(gson)
-                val runtimeMetadataRetriever = RuntimeMetadataRetriever(gsonCodec, substrateExtension.nodeUrl.get())
+                val runtimeMetadataRetriever = RuntimeMetadataRetriever(
+                    gsonCodec = gsonCodec,
+                    extraTypesFile = substrateExtension.typesFile.get().asFile,
+                    nodeUrl = substrateExtension.nodeUrl.get()
+                )
 
                 runBlocking {
                     val runtime = runtimeMetadataRetriever.constructRuntime()
-
-                    print(runtime.metadata.modules.values.joinToString(separator = "\n") { it.name })
+                    val typeRegistryCodegen = TypeRegistryCodegen(codeDir)
+                    typeRegistryCodegen.generateTypes(runtime.typeRegistry)
                 }
             }
         }

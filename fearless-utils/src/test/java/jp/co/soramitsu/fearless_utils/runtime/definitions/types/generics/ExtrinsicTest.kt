@@ -3,6 +3,7 @@ package jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics
 import jp.co.soramitsu.fearless_utils.extensions.fromHex
 import jp.co.soramitsu.fearless_utils.extensions.toHexString
 import jp.co.soramitsu.fearless_utils.runtime.RealRuntimeProvider
+import jp.co.soramitsu.fearless_utils.runtime.TestSignatureConstructor
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypeRegistry
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEnum
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.fromHex

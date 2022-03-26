@@ -35,7 +35,9 @@ android {
 
 substrate {
     nodeUrl = "wss://rpc.polkadot.io"
+    typesFile = layout.projectDirectory.file("polkadot-types.json")
 }
+
 dependencies {
     implementation project(":decoratable-api")
     implementation project(":gson-codec")

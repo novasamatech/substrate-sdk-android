@@ -7,7 +7,7 @@ import jp.co.soramitsu.fearless_utils.decoratable_api.tx.DecoratableTx
 import jp.co.soramitsu.fearless_utils.decoratable_api.tx.Function2
 import jp.co.soramitsu.fearless_utils.decoratable_api.tx.function2
 import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.staking.BalanceOf
-import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.types.MultiAddress
+import sp_runtime.multiaddress.MultiAddress
 
 interface BalancesFunctions : DecoratableFunctions
 

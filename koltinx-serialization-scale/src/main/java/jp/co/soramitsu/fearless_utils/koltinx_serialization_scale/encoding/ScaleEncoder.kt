@@ -1,5 +1,6 @@
 package jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.encoding
 
+import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.serializers.bitFlagsSerializer
 import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.serializers.byteArraySerializer
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEnum
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
@@ -86,10 +87,9 @@ abstract class BaseCompositeEncoder(
     }
 
     override fun <T> encodeSerializableValue(serializer: SerializationStrategy<T>, value: T) {
-        if (serializer.descriptor == byteArraySerializer.descriptor) {
-            encodeByteArray(value as ByteArray)
-        } else {
-            encodePolymorphically(serializer, value, createConsumer())
+        when (serializer.descriptor) {
+            byteArraySerializer.descriptor, bitFlagsSerializer.descriptor -> encodeAny(value)
+            else -> encodePolymorphically(serializer, value, createConsumer())
         }
     }
 
@@ -117,9 +117,6 @@ class EnumEncoder(
         return super.beginStructure(descriptor)
     }
 
-    /**
-     * EnumEncoder is either
-     */
     override fun createConsumer(): AnyConsumer = {
         putElement(it, popTag())
 

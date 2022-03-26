@@ -24,7 +24,7 @@ internal fun <T> BaseCompositeDecoder.decodePolymorphically(
     val actualSerializer = casted.findPolymorphicSerializer(this, variantClassName)
 
     return if (serializer is SealedClassSerializer<*>) {
-        // serialize Sealed Classes as Enums
+        // deserialize enums to sealed classes
         actualSerializer.deserialize(EnumEncoder(serializersModule, enumEntry.value)) as T
     } else {
         error("Not sealed class")
