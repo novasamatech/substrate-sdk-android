@@ -2,11 +2,8 @@ package jp.co.soramitsu.fearless_utils.runtime.metadata
 
 import jp.co.soramitsu.fearless_utils.common.assertInstance
 import jp.co.soramitsu.fearless_utils.common.assertNotInstance
-import jp.co.soramitsu.fearless_utils.common.median
-import jp.co.soramitsu.fearless_utils.getFileContentFromResources
 import jp.co.soramitsu.fearless_utils.runtime.RealRuntimeProvider
-import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.unknownTypes
-import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.v14Preset
+import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypeRegistry
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Alias
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEnum
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Option
@@ -20,55 +17,19 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.UIntT
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u32
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u64
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.skipAliases
-import jp.co.soramitsu.fearless_utils.runtime.definitions.v14.TypesParserV14
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module.StorageEntryType
-import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.RuntimeMetadataSchemaV14
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.junit.MockitoJUnitRunner
-import kotlin.time.ExperimentalTime
-import kotlin.time.measureTime
 
 @RunWith(MockitoJUnitRunner::class)
 class Metadata14Test {
 
     @Test
-    fun `should decode metadata types v14`() {
-        val inHex = getFileContentFromResources("westend_metadata_v14")
-        val metadataReader = RuntimeMetadataReader.read(inHex)
-
-        val typesBuilder = TypesParserV14.parse(
-            metadataReader.metadata[RuntimeMetadataSchemaV14.lookup],
-            v14Preset()
-        )
-
-        assertEquals(0, typesBuilder.unknownTypes().size)
-    }
-
-    @OptIn(ExperimentalTime::class)
-    @Test
-    fun `performance test`() {
-        val times = 100
-
-        val inHex = getFileContentFromResources("westend_metadata_v14")
-        val metadataReader = RuntimeMetadataReader.read(inHex)
-
-        val parseTimes = (0..times).map {
-            measureTime {
-                TypesParserV14.parse(
-                    metadataReader.metadata[RuntimeMetadataSchemaV14.lookup],
-                    v14Preset()
-                )
-            }.inMilliseconds
-        }
-        println("Median: ${parseTimes.median()} ms")
-    }
-
-    @Test
     fun `should decode metadata v14`() {
+
         val runtime = RealRuntimeProvider.buildRuntimeV14("westend")
         val metadata = runtime.metadata
         val typeRegistry = runtime.typeRegistry
@@ -114,17 +75,18 @@ class Metadata14Test {
         assertInstance<Alias>(callType)
         assertEquals("westend_runtime.Call", callType.aliasedReference.value?.name)
 
-        // Options should not be path-based
-        val optionType = typeRegistry["Option"]
-        assertNull(optionType)
+        // Options should not clash by name
+        val optionTypes = typeRegistry.withPrefix("Option")
+        assert(optionTypes.size > 1)
+
         val activeEraReturnType = metadata.module("Staking").storage("ActiveEra").type.value
         assertInstance<Struct>(activeEraReturnType)
         val eraStartType = activeEraReturnType.get<Option>("start")?.innerType?.skipAliases()
         assertEquals(u64, eraStartType)
 
-        // BTreeMaps should not be path-based
-        val bTreemapType = typeRegistry["BTreeMap"]
-        assertNull(bTreemapType)
+        // BTreeMaps  should not clash by named
+        val bTreemapTypes = typeRegistry.withPrefix("BTreeMap")
+        assert(bTreemapTypes.size > 1)
 
         // Verify id-based BTreeMaps on failing case for path-based
         val eraRewardPointsReturnType =
@@ -146,4 +108,6 @@ class Metadata14Test {
         val u8Primitive = typeRegistry["2"]
         assertNotInstance<Alias>(u8Primitive)
     }
+
+    private fun TypeRegistry.withPrefix(namePrefix: String) = types.filterKeys { it.startsWith(namePrefix) }.values
 }

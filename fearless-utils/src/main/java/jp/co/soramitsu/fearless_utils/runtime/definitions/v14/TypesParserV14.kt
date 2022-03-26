@@ -18,7 +18,6 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Vec
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Bytes
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Null
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.Compact
-import jp.co.soramitsu.fearless_utils.runtime.definitions.v14.TypesParserV14.pathNameIfWhitelisted
 import jp.co.soramitsu.fearless_utils.runtime.definitions.v14.typeMapping.SiTypeMapping
 import jp.co.soramitsu.fearless_utils.runtime.definitions.v14.typeMapping.default
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.LookupSchema
@@ -33,6 +32,7 @@ import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.TypeDefEnum
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.TypeDefSequence
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.TypeDefVariant
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.TypeDefVariantItem
+import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.TypeParameter
 import jp.co.soramitsu.fearless_utils.scale.EncodableStruct
 
 @OptIn(ExperimentalUnsignedTypes::class)
@@ -64,7 +64,7 @@ object TypesParserV14 {
 
     private fun findUniquePathNames(types: List<EncodableStruct<PortableType>>): Set<String> {
         return types
-            .groupingBy { it.pathBasedName() }
+            .groupingBy { it.pathBasedName(appendTypeParameters = false) }
             .eachCount()
             .mapNotNullTo(mutableSetOf()) { (name, count) -> name.takeIf { count == 1 } }
     }
@@ -96,7 +96,7 @@ object TypesParserV14 {
     private fun EncodableStruct<PortableType>.name(
         parsingParams: Params
     ): String {
-        return pathNameIfWhitelisted(whitelist = parsingParams.uniquePathNames)
+        return pathNameResolvingNotUnique(whitelist = parsingParams.uniquePathNames)
             ?: get(PortableType.id).toString()
     }
 
@@ -266,15 +266,34 @@ object TypesParserV14 {
         }
     }
 
-    private fun EncodableStruct<PortableType>.pathBasedName(): String? {
+    private fun EncodableStruct<PortableType>.pathBasedName(appendTypeParameters: Boolean): String? {
         val pathSegments = this[PortableType.type][RegistryType.path]
 
-        return if (pathSegments.isEmpty()) null else pathSegments.joinToString(separator = ".")
+        return if (pathSegments.isEmpty()) {
+            null
+        } else {
+            val path = pathSegments.joinToString(separator = ".")
+
+            val suffix = if (appendTypeParameters) {
+                this[PortableType.type][RegistryType.params].joinToString(prefix = "_", separator = "_") {
+                    // either type parameter id (123) or type parameter name (T)
+                    it[TypeParameter.type]?.toString() ?: it[TypeParameter.name].toString()
+                }
+            } else {
+                ""
+            }
+
+            path + suffix
+        }
     }
 
-    private fun EncodableStruct<PortableType>.pathNameIfWhitelisted(
+    private fun EncodableStruct<PortableType>.pathNameResolvingNotUnique(
         whitelist: Set<String>
     ): String? {
-        return pathBasedName()?.takeIf { it in whitelist }
+        return when (val withoutTypeParameters = pathBasedName(appendTypeParameters = false)) {
+            null -> null
+            in whitelist -> withoutTypeParameters
+            else -> pathBasedName(appendTypeParameters = true)
+        }
     }
 }
