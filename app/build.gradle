@@ -35,7 +35,5 @@ dependencies {
     implementation project(':fearless-utils')
     implementation androidDep
     implementation constraintDep
-    implementation spoungyCastleBcPixDep
-    implementation spoungyCastleBcPgDep
     implementation gsonDep
 }
