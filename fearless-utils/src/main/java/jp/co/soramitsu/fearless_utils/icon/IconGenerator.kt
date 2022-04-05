@@ -2,7 +2,7 @@ package jp.co.soramitsu.fearless_utils.icon
 
 import android.graphics.drawable.PictureDrawable
 import com.caverock.androidsvg.SVG
-import org.spongycastle.jcajce.provider.digest.Blake2b
+import org.bouncycastle.jcajce.provider.digest.Blake2b
 import java.lang.RuntimeException
 import java.lang.StringBuilder
 import kotlin.math.floor

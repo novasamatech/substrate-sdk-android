@@ -48,6 +48,9 @@ android {
             java.srcDirs += "$projectDir/src/testShared/java"
         }
     }
+    kotlinOptions {
+        freeCompilerArgs = ['-Xinline-classes']
+    }
 }
 
 cargo {
@@ -78,8 +81,7 @@ createJar.dependsOn(deleteJar, build)
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation spoungyCastleBcPixDep
-    implementation spoungyCastleBcPgDep
+    implementation bouncyCastleDep
     implementation ed25519Dep
     implementation svgDep
     implementation bip39Dep
