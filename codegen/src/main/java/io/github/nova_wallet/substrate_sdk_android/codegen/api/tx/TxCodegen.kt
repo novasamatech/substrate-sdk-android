@@ -6,6 +6,7 @@ import io.github.nova_wallet.substrate_sdk_android.codegen.api.BaseModuleElement
 import io.github.nova_wallet.substrate_sdk_android.codegen.common.TypeUnfolding
 import io.github.nova_wallet.substrate_sdk_android.codegen.common.requireResolved
 import io.github.nova_wallet.substrate_sdk_android.codegen.common.snakeToLowerCamelCase
+import jp.co.soramitsu.fearless_utils.runtime.metadata.module.FunctionArgument
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module.MetadataFunction
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module.Module
 import org.slf4j.Logger
@@ -27,6 +28,8 @@ class TxCodegen(
         module.calls?.values?.forEach { function ->
             functionProperty(function, childInterfaceType)?.let {
                 addProperty(it)
+
+                addFunction(functionNamedArgsExtension(function, childInterfaceType))
             }
         }
     }
@@ -46,7 +49,7 @@ class TxCodegen(
             "entryName" to function.name,
         )
 
-        return PropertySpec.builder(name = function.name.snakeToLowerCamelCase(), type = functionReturnType)
+        return PropertySpec.builder(name = functionExtensionName(function), type = functionReturnType)
             .receiver(functionInterfaceType)
             .getter(
                 FunSpec.getterBuilder()
@@ -59,6 +62,32 @@ class TxCodegen(
             )
             .build()
     }
+
+    private fun functionNamedArgsExtension(
+        function: MetadataFunction,
+        functionInterfaceType: TypeName
+    ): FunSpec {
+        val functionExtensionName = functionExtensionName(function)
+
+        val functionArgumentTypeNames = functionArgumentTypeNames(function)
+        val functionArgumentNames = function.arguments.map { it.name.snakeToLowerCamelCase() }
+
+        val functionParameterSpecs = functionArgumentTypeNames.zip(functionArgumentNames) { typeName, name ->
+            ParameterSpec.builder(name, typeName)
+                .build()
+        }
+
+        val delegateInvocationArguments = functionArgumentNames.joinToString(separator = ",")
+
+        return FunSpec.builder(functionExtensionName)
+            .receiver(functionInterfaceType)
+            .addParameters(functionParameterSpecs)
+            .returns(submittableExtrinsicClassName())
+            .addStatement("return ${functionExtensionName}.invoke($delegateInvocationArguments)")
+            .build()
+    }
+
+    private fun functionExtensionName(function: MetadataFunction) = function.name.snakeToLowerCamelCase()
 
     private fun functionDecoratorFunction(function: MetadataFunction): MemberName {
         val functionName = "function${function.arguments.size}"
@@ -81,6 +110,8 @@ class TxCodegen(
 
         return returnTypeRaw.parameterizedBy(functionArgumentTypeNames(function))
     }
+
+    private fun submittableExtrinsicClassName() = ClassName(elementApiPackage, "SubmittableExtrinsic")
 
     private fun functionArgumentTypeNames(function: MetadataFunction): List<TypeName> {
         return function.arguments.map { argument ->
