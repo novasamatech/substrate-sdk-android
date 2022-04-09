@@ -77,13 +77,16 @@ class TxCodegen(
                 .build()
         }
 
-        val delegateInvocationArguments = functionArgumentNames.joinToString(separator = ",")
+        val delegateInvocationArguments = functionArgumentNames.joinToString(separator = ", ") { "%N" }
 
         return FunSpec.builder(functionExtensionName)
             .receiver(functionInterfaceType)
             .addParameters(functionParameterSpecs)
             .returns(submittableExtrinsicClassName())
-            .addStatement("return ${functionExtensionName}.invoke($delegateInvocationArguments)")
+            .addStatement(
+                "return this@${functionExtensionName}.${functionExtensionName}.invoke($delegateInvocationArguments)",
+                *functionArgumentNames.toTypedArray()
+            )
             .build()
     }
 
