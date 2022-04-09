@@ -6,7 +6,6 @@ import io.github.nova_wallet.substrate_sdk_android.codegen.api.BaseModuleElement
 import io.github.nova_wallet.substrate_sdk_android.codegen.common.TypeUnfolding
 import io.github.nova_wallet.substrate_sdk_android.codegen.common.requireResolved
 import io.github.nova_wallet.substrate_sdk_android.codegen.common.snakeToLowerCamelCase
-import jp.co.soramitsu.fearless_utils.runtime.metadata.module.FunctionArgument
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module.MetadataFunction
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module.Module
 import org.slf4j.Logger

@@ -42,6 +42,12 @@ abstract class BaseModuleElementCodegen(
 
     protected fun RuntimeType<*, *>.toTypeName(parentType: String) = typeUnfolding.runtimeTypeToTypeName(this, parentType)
 
+    protected fun elementName(base: String, nullable: Boolean) = if (nullable) {
+        base + "OrNull"
+    } else {
+        base
+    }
+
     /*
     val DecoratableQuery.stakingOrNull: StakingStorage?
     get() = decorate("Staking") {
@@ -132,18 +138,14 @@ abstract class BaseModuleElementCodegen(
     private fun sectionExtensionName(moduleName: String, nullable: Boolean): String {
         val base = moduleName.decapitalize()
 
-        return if (nullable) {
-            base + "OrNull"
-        } else {
-            base
-        }
+        return elementName(base, nullable)
     }
 
-    private fun substrateExceptionClass(): TypeName {
+    protected fun substrateExceptionClass(): TypeName {
         return ClassName(DECORATABLE_API_PACKAGE, "SubstrateApiException")
     }
 
-    private fun substrateExceptionMember(name: String): MemberName {
+    protected fun substrateExceptionMember(name: String): MemberName {
         return MemberName(
             packageName = DECORATABLE_API_PACKAGE,
             simpleName = name,

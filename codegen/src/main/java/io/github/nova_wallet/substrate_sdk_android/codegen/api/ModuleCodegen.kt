@@ -1,6 +1,7 @@
 package io.github.nova_wallet.substrate_sdk_android.codegen.api
 
 import com.squareup.kotlinpoet.FileSpec
+import io.github.nova_wallet.substrate_sdk_android.codegen.api.const.ConstCodegen
 import io.github.nova_wallet.substrate_sdk_android.codegen.api.storage.StorageCodegen
 import io.github.nova_wallet.substrate_sdk_android.codegen.api.tx.TxCodegen
 import io.github.nova_wallet.substrate_sdk_android.codegen.common.TypeUnfolding
@@ -21,7 +22,8 @@ class ModuleCodegen(
     typeUnfolding: TypeUnfolding,
     private val elementCodegens: List<ModuleElementCodegen> = listOf(
         StorageCodegen(typeUnfolding),
-        TxCodegen(logger, typeUnfolding)
+        TxCodegen(logger, typeUnfolding),
+        ConstCodegen(typeUnfolding)
     )
 ) {
 

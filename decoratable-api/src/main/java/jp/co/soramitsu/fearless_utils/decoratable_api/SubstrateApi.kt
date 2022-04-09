@@ -45,7 +45,7 @@ fun SubstrateApi(
 
     override val query: DecoratableQuery = DecoratableQuery(this, bindingContext, runtime)
     override val tx: DecoratableTx = DecoratableTxImpl(this, runtime)
-    override val const: DecoratableConst = DecoratableConstImpl(runtime)
+    override val const: DecoratableConst = DecoratableConstImpl(bindingContext, runtime)
     override val chainState: ChainState = ChainStateImpl(this, runtime)
     override val rpc: DecoratableRPC = DecoratableRPC(bindingContext, socketService)
 }
