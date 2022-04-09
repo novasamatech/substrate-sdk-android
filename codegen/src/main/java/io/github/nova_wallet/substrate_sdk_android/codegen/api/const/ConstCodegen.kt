@@ -64,7 +64,7 @@ class ConstCodegen(
 
         val getterBlock = """
             return $nullableName ?: %substrateExceptionClass:T.%constantNotFound:M(%constantName:S)
-            """.trimIndent()
+        """.trimIndent()
 
         val getterArgs = mapOf(
             "substrateExceptionClass" to substrateExceptionClass(),

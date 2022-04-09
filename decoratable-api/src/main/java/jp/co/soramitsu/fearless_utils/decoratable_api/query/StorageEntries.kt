@@ -68,7 +68,7 @@ class StorageEntry1<K, R>(
     bindingContext: BindingContext,
     binder: AnyBinding<R>,
     private val a1Type: KType,
-    ) : StorageEntryBase<R>(runtime, storageEntryMetadata, api, bindingContext, binder) {
+) : StorageEntryBase<R>(runtime, storageEntryMetadata, api, bindingContext, binder) {
 
     suspend operator fun invoke(key: K): R? {
         return query(storageKey(key))

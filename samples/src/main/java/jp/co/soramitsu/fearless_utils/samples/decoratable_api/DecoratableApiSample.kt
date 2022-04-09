@@ -16,7 +16,6 @@ import jp.co.soramitsu.fearless_utils.ss58.SS58Encoder.toAccountId
 import jp.co.soramitsu.fearless_utils.wsrpc.SocketService
 import jp.co.soramitsu.fearless_utils.wsrpc.logging.Logger
 import sp_runtime.multiaddress.MultiAddress
-import staking.chill
 import staking.historyDepth
 import staking.ledger
 import staking.maxNominations

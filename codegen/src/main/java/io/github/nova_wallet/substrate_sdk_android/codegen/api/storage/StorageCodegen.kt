@@ -39,7 +39,7 @@ class StorageCodegen(
     ): PropertySpec {
         val getterBlock = """
             return decorator.%decoratorFunction:M(%entryName:S)
-            """.trimIndent()
+        """.trimIndent()
 
         val getterArgs = mapOf(
             "decoratorFunction" to storageEntryDecoratorFunction(storageEntry),

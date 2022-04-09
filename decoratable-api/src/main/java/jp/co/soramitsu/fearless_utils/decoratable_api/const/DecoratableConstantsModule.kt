@@ -2,7 +2,6 @@ package jp.co.soramitsu.fearless_utils.decoratable_api.const
 
 import jp.co.soramitsu.fearless_utils.decoratable_api.util.binding.AnyBinding
 import jp.co.soramitsu.fearless_utils.decoratable_api.util.binding.Bindings
-import java.math.BigInteger
 
 interface DecoratableConstantsModule {
 

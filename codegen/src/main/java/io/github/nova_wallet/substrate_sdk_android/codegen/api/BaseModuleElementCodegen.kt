@@ -64,7 +64,7 @@ abstract class BaseModuleElementCodegen(
             return decorate(%moduleName:S) {
                 object : %childInterface:T, %parentInterface:T by this {}
             }
-            """.trimIndent()
+        """.trimIndent()
 
         val getterArgs = mapOf(
             "moduleName" to moduleName,
@@ -103,7 +103,7 @@ abstract class BaseModuleElementCodegen(
 
         val getterBlock = """
             return $sectionExtensionNameNullable ?: %substrateExceptionClass:T.%moduleNotFound:M(%moduleName:S)
-            """.trimIndent()
+        """.trimIndent()
 
         val getterArgs = mapOf(
             "substrateExceptionClass" to substrateExceptionClass(),
@@ -155,5 +155,5 @@ abstract class BaseModuleElementCodegen(
 
     private fun interfaceType(moduleName: String, packageName: String) = ClassName(packageName, interfaceName(moduleName))
 
-    private fun interfaceName(moduleName: String) = "${moduleName.capitalize()}${parentInterfaceName}"
+    private fun interfaceName(moduleName: String) = "${moduleName.capitalize()}$parentInterfaceName"
 }

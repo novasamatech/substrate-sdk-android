@@ -14,9 +14,9 @@ interface DecoratableStorage {
 
         fun <K, R> map1(name: String, a1Type: KType, binder: AnyBinding<R>): StorageEntry1<K, R>
 
-        fun <K1, K2, R> map2(name: String,  a1Type: KType, a2Type: KType, binder: AnyBinding<R>): StorageEntry2<K1, K2, R>
+        fun <K1, K2, R> map2(name: String, a1Type: KType, a2Type: KType, binder: AnyBinding<R>): StorageEntry2<K1, K2, R>
 
-        fun <K1, K2, K3, R> map3(name: String,  a1Type: KType, a2Type: KType, a3Type: KType, binder: AnyBinding<R>): StorageEntry3<K1, K2, K3, R>
+        fun <K1, K2, K3, R> map3(name: String, a1Type: KType, a2Type: KType, a3Type: KType, binder: AnyBinding<R>): StorageEntry3<K1, K2, K3, R>
     }
 }
 

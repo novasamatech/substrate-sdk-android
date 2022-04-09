@@ -41,7 +41,7 @@ class TxCodegen(
 
         val getterBlock = """
             return decorator.%decoratorFunction:M(%entryName:S)
-            """.trimIndent()
+        """.trimIndent()
 
         val getterArgs = mapOf(
             "decoratorFunction" to functionDecoratorFunction(function),
@@ -83,7 +83,7 @@ class TxCodegen(
             .addParameters(functionParameterSpecs)
             .returns(submittableExtrinsicClassName())
             .addStatement(
-                "return this@${functionExtensionName}.${functionExtensionName}.invoke($delegateInvocationArguments)",
+                "return this@$functionExtensionName.$functionExtensionName.invoke($delegateInvocationArguments)",
                 *functionArgumentNames.toTypedArray()
             )
             .build()
@@ -101,7 +101,7 @@ class TxCodegen(
         val arity = function.arguments.size
 
         if (arity > MAX_SUPPORTED_FUNCTION_ARITY) {
-            logger.warn("Skipped function ${function.name} since it has arity $arity which is greater then maximum supported (${MAX_SUPPORTED_FUNCTION_ARITY})")
+            logger.warn("Skipped function ${function.name} since it has arity $arity which is greater then maximum supported ($MAX_SUPPORTED_FUNCTION_ARITY)")
 
             return null
         }
