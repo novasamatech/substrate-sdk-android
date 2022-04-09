@@ -1,8 +1,10 @@
 package io.github.nova_wallet.substrate_sdk_android.codegen.types
 
 import com.squareup.kotlinpoet.*
-import io.github.nova_wallet.substrate_sdk_android.codegen.ext.markSerializable
-import io.github.nova_wallet.substrate_sdk_android.codegen.ext.maybeMarkAsContextual
+import io.github.nova_wallet.substrate_sdk_android.codegen.common.TypeFormatting.unknownType
+import io.github.nova_wallet.substrate_sdk_android.codegen.common.TypeUnfolding
+import io.github.nova_wallet.substrate_sdk_android.codegen.common.markSerializable
+import io.github.nova_wallet.substrate_sdk_android.codegen.common.maybeMarkAsContextual
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEnum
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Null
@@ -11,8 +13,9 @@ import java.io.File
 class VariantCodegen(
     parentDirectory: File,
     configuration: Configuration,
+    typeUnfolding: TypeUnfolding,
     private val structTypeCodegen: StructTypeCodegen,
-) : TypeCodegen<DictEnum>(parentDirectory, configuration) {
+) : TypeCodegen<DictEnum>(parentDirectory, configuration, typeUnfolding) {
 
     override fun FileSpec.Builder.applyType(type: DictEnum, path: TypePath) {
         val rootClassBuilder = TypeSpec.classBuilder(path.typeName)

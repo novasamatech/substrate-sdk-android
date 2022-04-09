@@ -32,7 +32,7 @@ class CodegenTest {
                 val typeRegistryCodegen = TypeRegistryCodegen(folder)
                 typeRegistryCodegen.generateTypes(runtime.typeRegistry)
 
-                val apiCodegen = ApiCodegen(folder)
+                val apiCodegen = ApiCodegen(folder, typeRegistryCodegen.typeUnfolding)
                 apiCodegen.generate(runtime)
             }
         }

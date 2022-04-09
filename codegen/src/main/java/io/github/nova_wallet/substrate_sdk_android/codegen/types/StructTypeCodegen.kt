@@ -4,16 +4,19 @@ import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
-import io.github.nova_wallet.substrate_sdk_android.codegen.ext.markSerializable
-import io.github.nova_wallet.substrate_sdk_android.codegen.ext.maybeMarkAsContextual
+import io.github.nova_wallet.substrate_sdk_android.codegen.common.TypeFormatting.joinTypeName
+import io.github.nova_wallet.substrate_sdk_android.codegen.common.TypeFormatting.unknownType
+import io.github.nova_wallet.substrate_sdk_android.codegen.common.TypeUnfolding
+import io.github.nova_wallet.substrate_sdk_android.codegen.common.markSerializable
+import io.github.nova_wallet.substrate_sdk_android.codegen.common.maybeMarkAsContextual
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
-import kotlinx.serialization.Serializable
 import java.io.File
 
 class StructTypeCodegen(
     parentDirectory: File,
     configuration: Configuration,
-) : TypeCodegen<Struct>(parentDirectory, configuration) {
+    typeUnfolding: TypeUnfolding,
+) : TypeCodegen<Struct>(parentDirectory, configuration, typeUnfolding) {
 
     override fun FileSpec.Builder.applyType(type: Struct, path: TypePath) {
         val typeSpec = TypeSpec.classBuilder(path.typeName)

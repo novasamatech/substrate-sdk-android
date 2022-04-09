@@ -9,6 +9,7 @@ import jp.co.soramitsu.fearless_utils.runtime.metadata.module
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module.Module
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module.StorageEntry
 import jp.co.soramitsu.fearless_utils.runtime.metadata.storage
+import kotlin.reflect.KType
 
 class DecoratableQuery(
     private val api: SubstrateApi,
@@ -31,15 +32,27 @@ class DecoratableQuery(
 
         override val decorator: DecoratableStorage.Decorator = object : DecoratableStorage.Decorator, Decoratable() {
 
-            override fun <R> plain(name: String, binder: AnyBinding<R>): PlainStorageEntry<R> {
+            override fun <R> map0(name: String, binder: AnyBinding<R>): StorageEntry0<R> {
                 return decorateInternal(name) {
-                    PlainStorageEntry(runtime, storageEntryMetadata(name), api, bindingContext, binder)
+                    StorageEntry0(runtime, storageEntryMetadata(name), api, bindingContext, binder)
                 }
             }
 
-            override fun <K, R> map1(name: String, binder: AnyBinding<R>): SingleMapStorageEntry<K, R> {
+            override fun <K, R> map1(name: String, a1Type: KType, binder: AnyBinding<R>): StorageEntry1<K, R> {
                 return decorateInternal(name) {
-                    SingleMapStorageEntry(runtime, storageEntryMetadata(name), api, bindingContext, binder)
+                    StorageEntry1(runtime, storageEntryMetadata(name), api, bindingContext, binder, a1Type)
+                }
+            }
+
+            override fun <K1, K2, R> map2(name: String, a1Type: KType, a2Type: KType, binder: AnyBinding<R>): StorageEntry2<K1, K2, R> {
+                return decorateInternal(name) {
+                    StorageEntry2(runtime, storageEntryMetadata(name), api, bindingContext, binder, a1Type, a2Type)
+                }
+            }
+
+            override fun <K1, K2, K3, R> map3(name: String, a1Type: KType, a2Type: KType, a3Type: KType, binder: AnyBinding<R>): StorageEntry3<K1, K2, K3, R> {
+                return decorateInternal(name) {
+                    StorageEntry3(runtime, storageEntryMetadata(name), api, bindingContext, binder, a1Type, a2Type, a3Type)
                 }
             }
 

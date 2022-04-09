@@ -1,4 +1,4 @@
-package io.github.nova_wallet.substrate_sdk_android.codegen.ext
+package io.github.nova_wallet.substrate_sdk_android.codegen.common
 
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeName

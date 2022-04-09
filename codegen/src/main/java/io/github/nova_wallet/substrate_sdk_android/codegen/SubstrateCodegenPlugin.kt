@@ -57,7 +57,7 @@ class SubstrateCodegenPlugin : Plugin<Project> {
                     val typeRegistryCodegen = TypeRegistryCodegen(codeDir)
                     typeRegistryCodegen.generateTypes(runtime.typeRegistry)
 
-                    val apiCodegen = ApiCodegen(codeDir)
+                    val apiCodegen = ApiCodegen(codeDir, typeRegistryCodegen.typeUnfolding)
                     apiCodegen.generate(runtime)
                 }
             }

@@ -2,6 +2,7 @@ package io.github.nova_wallet.substrate_sdk_android.codegen.api
 
 import com.squareup.kotlinpoet.FileSpec
 import io.github.nova_wallet.substrate_sdk_android.codegen.api.storage.StorageCodegen
+import io.github.nova_wallet.substrate_sdk_android.codegen.common.TypeUnfolding
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module.Module
 import java.io.File
 
@@ -14,8 +15,9 @@ interface ModuleElementCodegen {
 
 class ModuleCodegen(
     private val parentDirectory: File,
+    typeUnfolding: TypeUnfolding,
     private val elementCodegens: List<ModuleElementCodegen> = listOf(
-        StorageCodegen()
+        StorageCodegen(typeUnfolding)
     )
 ) {
 
