@@ -2,6 +2,7 @@ package io.github.nova_wallet.substrate_sdk_android.codegen
 
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.google.gson.Gson
+import io.github.nova_wallet.substrate_sdk_android.codegen.api.ApiCodegen
 import io.github.nova_wallet.substrate_sdk_android.codegen.types.TypeRegistryCodegen
 import jp.co.soramitsu.fearless_utils.gson_codec.GsonCodec
 import kotlinx.coroutines.runBlocking
@@ -52,8 +53,12 @@ class SubstrateCodegenPlugin : Plugin<Project> {
 
                 runBlocking {
                     val runtime = runtimeMetadataRetriever.constructRuntime()
+
                     val typeRegistryCodegen = TypeRegistryCodegen(codeDir)
                     typeRegistryCodegen.generateTypes(runtime.typeRegistry)
+
+                    val apiCodegen = ApiCodegen(codeDir)
+                    apiCodegen.generate(runtime)
                 }
             }
         }

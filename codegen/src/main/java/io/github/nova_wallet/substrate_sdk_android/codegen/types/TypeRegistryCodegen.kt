@@ -1,9 +1,7 @@
 package io.github.nova_wallet.substrate_sdk_android.codegen.types
 
-import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.asTypeName
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypeRegistry
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.RuntimeType
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Alias
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEnum
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.SetType
@@ -13,10 +11,6 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Generic
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.*
 import java.io.File
 import java.math.BigInteger
-
-private fun MutableMap<String, TypeName>.putType(type: RuntimeType<*, *>) {
-    put(type.name, type::class.asTypeName())
-}
 
 @OptIn(ExperimentalStdlibApi::class)
 class TypeRegistryCodegen(parentDirectory: File) {

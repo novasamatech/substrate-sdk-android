@@ -1,6 +1,10 @@
 package jp.co.soramitsu.fearless_utils.samples.decoratable_api
 
+import bagsList.bagsList
+import balances.balances
+import claims.claims
 import com.google.gson.Gson
+import electionProviderMultiPhase.electionProviderMultiPhase
 import jp.co.soramitsu.fearless_utils.decoratable_api.SubstrateApi
 import jp.co.soramitsu.fearless_utils.decoratable_api.options.Options
 import jp.co.soramitsu.fearless_utils.decoratable_api.options.Substrate
