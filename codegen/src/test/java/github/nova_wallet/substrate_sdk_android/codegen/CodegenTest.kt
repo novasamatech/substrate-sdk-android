@@ -6,12 +6,12 @@ import io.github.nova_wallet.substrate_sdk_android.codegen.api.ApiCodegen
 import io.github.nova_wallet.substrate_sdk_android.codegen.types.TypeRegistryCodegen
 import jp.co.soramitsu.fearless_utils.gson_codec.GsonCodec
 import kotlinx.coroutines.runBlocking
-import org.gradle.internal.impldep.org.testng.junit.JUnitTestRunner
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import org.slf4j.LoggerFactory
 
 @RunWith(JUnit4::class)
 class CodegenTest {
@@ -24,7 +24,7 @@ class CodegenTest {
         runBlocking {
             val gson = Gson()
             val gsonCodec = GsonCodec(gson)
-            val runtimeMetadataRetriever = RuntimeMetadataRetriever(gsonCodec, null,"wss://rpc.polkadot.io")
+            val runtimeMetadataRetriever = RuntimeMetadataRetriever(gsonCodec, null, "wss://rpc.polkadot.io")
             val folder = temporaryFolder.newFolder()
 
             runBlocking {
@@ -32,7 +32,7 @@ class CodegenTest {
                 val typeRegistryCodegen = TypeRegistryCodegen(folder)
                 typeRegistryCodegen.generateTypes(runtime.typeRegistry)
 
-                val apiCodegen = ApiCodegen(folder, typeRegistryCodegen.typeUnfolding)
+                val apiCodegen = ApiCodegen(folder, typeRegistryCodegen.typeUnfolding, LoggerFactory.getLogger("Test"))
                 apiCodegen.generate(runtime)
             }
         }

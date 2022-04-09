@@ -1,5 +1,7 @@
 package jp.co.soramitsu.fearless_utils.samples.decoratable_api
 
+import balances.balances
+import balances.transfer
 import com.google.gson.Gson
 import jp.co.soramitsu.fearless_utils.decoratable_api.SubstrateApi
 import jp.co.soramitsu.fearless_utils.decoratable_api.options.Options
@@ -8,10 +10,6 @@ import jp.co.soramitsu.fearless_utils.decoratable_api.tx.invoke
 import jp.co.soramitsu.fearless_utils.gson_codec.GsonCodec
 import jp.co.soramitsu.fearless_utils.keyring.Keyring
 import jp.co.soramitsu.fearless_utils.keyring.signing.extrinsic.signer.KeypairSigner
-import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.balances.balances
-import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.balances.transfer
-import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.utility.batch
-import jp.co.soramitsu.fearless_utils.samples.decoratable_api.derive.utility.utility
 import jp.co.soramitsu.fearless_utils.ss58.SS58Encoder.toAccountId
 import jp.co.soramitsu.fearless_utils.wsrpc.SocketService
 import jp.co.soramitsu.fearless_utils.wsrpc.logging.Logger
@@ -19,6 +17,8 @@ import sp_runtime.multiaddress.MultiAddress
 import staking.historyDepth
 import staking.ledger
 import staking.staking
+import utility.batch
+import utility.utility
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.Reader

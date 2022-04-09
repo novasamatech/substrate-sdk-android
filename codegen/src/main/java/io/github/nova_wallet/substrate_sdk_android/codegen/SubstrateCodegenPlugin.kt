@@ -6,6 +6,7 @@ import io.github.nova_wallet.substrate_sdk_android.codegen.api.ApiCodegen
 import io.github.nova_wallet.substrate_sdk_android.codegen.types.TypeRegistryCodegen
 import jp.co.soramitsu.fearless_utils.gson_codec.GsonCodec
 import kotlinx.coroutines.runBlocking
+import org.apache.log4j.spi.LoggerFactory
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
@@ -57,7 +58,7 @@ class SubstrateCodegenPlugin : Plugin<Project> {
                     val typeRegistryCodegen = TypeRegistryCodegen(codeDir)
                     typeRegistryCodegen.generateTypes(runtime.typeRegistry)
 
-                    val apiCodegen = ApiCodegen(codeDir, typeRegistryCodegen.typeUnfolding)
+                    val apiCodegen = ApiCodegen(codeDir, typeRegistryCodegen.typeUnfolding, project.logger)
                     apiCodegen.generate(runtime)
                 }
             }
