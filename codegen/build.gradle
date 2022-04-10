@@ -1,0 +1,49 @@
+plugins {
+    id 'java-gradle-plugin'
+    id 'org.jetbrains.kotlin.jvm' version '1.6.0'
+    id "maven-publish"
+    id "idea"
+}
+
+group 'io.github.nova-wallet.substrate-sdk-android'
+version '2.0.0'
+
+repositories {
+    mavenCentral()
+    google()
+    mavenLocal()
+    maven {
+        url "https://jitpack.io"
+    }
+    maven {
+        url = file('libs')
+    }
+    jcenter()
+}
+
+
+gradlePlugin {
+    plugins {
+        substrateCodegenPlugin {
+            displayName = "Substrate codegen"
+            description = "Plugin that generates type-safe API based on chain's runtime"
+            id = "io.github.nova-wallet.substrate-sdk-android.codegen"
+            implementationClass = "io.github.nova_wallet.substrate_sdk_android.codegen.SubstrateCodegenPlugin"
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation "com.android.tools.build:gradle:7.1.2"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    implementation "io.github.nova-wallet.substrate-sdk-android:core:2.0.0"
+    implementation "io.github.nova-wallet.substrate-sdk-android:coroutines-adapter:2.0.0"
+    implementation "io.github.nova-wallet.substrate-sdk-android:gson-codec:2.0.0"
+    implementation "io.github.nova-wallet.substrate-sdk-android:kotlinx-serialization-scale:2.0.0"
+
+    implementation("com.squareup:kotlinpoet:1.10.2")
+
+    testImplementation 'androidx.test.ext:junit:1.1.3'
+}

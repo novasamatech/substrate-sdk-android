@@ -1,38 +1,8 @@
 package jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics
 
-import jp.co.soramitsu.fearless_utils.encrypt.EncryptionType
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEnum
 import jp.co.soramitsu.fearless_utils.runtime.extrinsic.SignedExtension
-
-class MultiSignature(val encryptionType: EncryptionType, val value: ByteArray)
-
-fun Extrinsic.Signature.tryExtractMultiSignature(): MultiSignature? {
-    val enumEntry = signature as? DictEnum.Entry<*> ?: return null
-    val value = enumEntry.value as? ByteArray ?: return null
-
-    val encryptionType =
-        EncryptionType.fromStringOrNull(enumEntry.name.toLowerCase()) ?: return null
-
-    return MultiSignature(encryptionType, value)
-}
-
-fun Extrinsic.Companion.create(customSignedExtensions: Collection<SignedExtension>): Extrinsic {
-    val customSignedExtensionTypes = customSignedExtensions.associateBy(
-        keySelector = { it.name },
-        valueTransform = { it.type }
-    )
-
-    val allSignedExtensions = SignedExtras.default.extras + customSignedExtensionTypes
-
-    return Extrinsic(ExtrinsicPayloadExtras(allSignedExtensions))
-}
-
-private val EncryptionType.multiSignatureName
-    get() = rawName.capitalize()
-
-fun MultiSignature.prepareForEncoding(): Any {
-    return DictEnum.Entry(encryptionType.multiSignatureName, value)
-}
+import jp.co.soramitsu.fearless_utils.signing.MultiSignature
 
 fun <A> Extrinsic.Signature.Companion.new(
     accountIdentifier: A,
@@ -49,6 +19,24 @@ fun multiAddressFromId(addressId: ByteArray): DictEnum.Entry<ByteArray> {
         name = MULTI_ADDRESS_ID,
         value = addressId
     )
+}
+
+fun Extrinsic.Companion.create(customSignedExtensions: Collection<SignedExtension>): Extrinsic {
+    val customSignedExtensionTypes = customSignedExtensions.associateBy(
+        keySelector = { it.name },
+        valueTransform = { it.type }
+    )
+
+    val allSignedExtensions = SignedExtras.default.extras + customSignedExtensionTypes
+
+    return Extrinsic(ExtrinsicPayloadExtras(allSignedExtensions))
+}
+
+fun Extrinsic.Signature.tryExtractMultiSignature(): MultiSignature? {
+    val enumEntry = signature as? DictEnum.Entry<*> ?: return null
+    val value = enumEntry.value as? ByteArray ?: return null
+
+    return MultiSignature(enumEntry.name, value)
 }
 
 fun Extrinsic.EncodingInstance(

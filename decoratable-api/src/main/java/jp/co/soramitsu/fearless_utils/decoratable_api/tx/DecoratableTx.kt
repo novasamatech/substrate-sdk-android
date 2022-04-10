@@ -49,6 +49,12 @@ internal class DecoratableTxImpl(
                 }
             }
 
+            override fun <A1, A2, A3> function3(name: String, a1Type: KType, a2Type: KType, a3Type: KType): Function3<A1, A2, A3> {
+                return decorateInternal(name) {
+                    Function3(module, functionMetadata(name), api, a1Type, a2Type, a3Type)
+                }
+            }
+
             private fun functionMetadata(name: String) = module.call(name)
         }
     }

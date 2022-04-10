@@ -1,14 +1,12 @@
 package jp.co.soramitsu.fearless_utils.ss58
 
-import jp.co.soramitsu.fearless_utils.encrypt.Base58
-import jp.co.soramitsu.fearless_utils.encrypt.json.copyBytes
 import jp.co.soramitsu.fearless_utils.exceptions.AddressFormatException
+import jp.co.soramitsu.fearless_utils.extensions.copyBytes
 import jp.co.soramitsu.fearless_utils.extensions.shl
 import jp.co.soramitsu.fearless_utils.extensions.shr
 import jp.co.soramitsu.fearless_utils.hash.Hasher.blake2b256
 import jp.co.soramitsu.fearless_utils.hash.Hasher.blake2b512
-import java.lang.Exception
-import kotlin.experimental.and
+import jp.co.soramitsu.fearless_utils.utils.Base58
 import kotlin.experimental.or
 
 object SS58Encoder {
@@ -34,11 +32,7 @@ object SS58Encoder {
     }
 
     fun encode(publicKey: ByteArray, addressPrefix: Short): String {
-        val normalizedKey = if (publicKey.size > 32) {
-            publicKey.blake2b256()
-        } else {
-            publicKey
-        }
+        val normalizedKey = publicKey.publicKeyToAccountId()
         val ident = addressPrefix.toInt() and 0b0011_1111_1111_1111
         val addressTypeByteArray = when (ident) {
             in 0..63 -> byteArrayOf(ident.toByte())
@@ -83,6 +77,12 @@ object SS58Encoder {
         extractAddressPrefix(address)
     } catch (e: Exception) {
         null
+    }
+
+    fun ByteArray.publicKeyToAccountId() = if (size > 32) {
+        blake2b256()
+    } else {
+        this
     }
 
     fun ByteArray.toAddress(addressPrefix: Short) = encode(this, addressPrefix)

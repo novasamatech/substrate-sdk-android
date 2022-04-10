@@ -59,6 +59,31 @@ class Function2<A1, A2>(
     }
 }
 
+class Function3<A1, A2, A3>(
+    module: Module,
+    function: MetadataFunction,
+    api: SubstrateApi,
+    private val a1Type: KType,
+    private val a2Type: KType,
+    private val a3Type: KType,
+) : FunctionBase(
+    module, function, api
+) {
+    operator fun invoke(arg1: A1, arg2: A2, arg3: A3): SubmittableExtrinsic {
+        require(function.arguments.size == 3)
+
+        val scale = api.options.scale
+
+        return createExtrinsic(
+            mapOf(
+                function.arguments[0].name to scale.encodeToDynamicStructure(a1Type, arg1),
+                function.arguments[1].name to scale.encodeToDynamicStructure(a2Type, arg2),
+                function.arguments[2].name to scale.encodeToDynamicStructure(a3Type, arg3),
+            )
+        )
+    }
+}
+
 abstract class FunctionBase(
     private val module: Module,
     protected val function: MetadataFunction,

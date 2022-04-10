@@ -1,5 +1,6 @@
 package jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.decoding
 
+import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.serializers.bitFlagsSerializer
 import jp.co.soramitsu.fearless_utils.koltinx_serialization_scale.serializers.byteArraySerializer
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
 import kotlinx.serialization.DeserializationStrategy
@@ -84,10 +85,9 @@ abstract class BaseCompositeDecoder(
     }
 
     override fun <T> decodeSerializableValue(deserializer: DeserializationStrategy<T>): T {
-        return if (deserializer.descriptor == byteArraySerializer.descriptor) {
-            decodeByteArray() as T
-        } else {
-            decodePolymorphically(currentObject().cast(), deserializer)
+        return when (deserializer.descriptor) {
+            byteArraySerializer.descriptor, bitFlagsSerializer.descriptor -> decodeAsIs() as T
+            else -> decodePolymorphically(currentObject().cast(), deserializer)
         }
     }
 }

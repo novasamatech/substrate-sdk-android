@@ -3,14 +3,12 @@ package jp.co.soramitsu.fearless_utils.encrypt.json
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.gson.Gson
 import jp.co.soramitsu.fearless_utils.TestData
-import jp.co.soramitsu.fearless_utils.encrypt.EncryptionType
-import jp.co.soramitsu.fearless_utils.encrypt.MultiChainEncryption
-import jp.co.soramitsu.fearless_utils.encrypt.keypair.substrate.Sr25519Keypair
-import jp.co.soramitsu.fearless_utils.encrypt.keypair.substrate.SubstrateKeypairFactory
-import jp.co.soramitsu.fearless_utils.ss58.SS58Encoder.toAddress
+import jp.co.soramitsu.fearless_utils.keyring.EncryptionType
+import jp.co.soramitsu.fearless_utils.keyring.MultiChainEncryption
+import jp.co.soramitsu.fearless_utils.keyring.keypair.substrate.Sr25519Keypair
+import jp.co.soramitsu.fearless_utils.keyring.keypair.substrate.SubstrateKeypairFactory
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.security.SecureRandom
 
 private val PASSWORD = "12345"
 private val NAME = "name"
@@ -28,12 +26,13 @@ class JsonSeedEncoderTest {
     @Test
     fun shouldEncodeWithSr25519() {
         val keypairExpected =
-            SubstrateKeypairFactory.generate(EncryptionType.SR25519, TestData.SEED_BYTES)
+            jp.co.soramitsu.fearless_utils.keyring.keypair.substrate.SubstrateKeypairFactory.generate(
+                jp.co.soramitsu.fearless_utils.keyring.EncryptionType.SR25519, TestData.SEED_BYTES)
 
-        require(keypairExpected is Sr25519Keypair)
+        require(keypairExpected is jp.co.soramitsu.fearless_utils.keyring.keypair.substrate.Sr25519Keypair)
 
-        val decoder = JsonSeedDecoder(gson)
-        val encoder = JsonSeedEncoder(gson)
+        val decoder = jp.co.soramitsu.fearless_utils.keyring.json.JsonSeedDecoder(gson)
+        val encoder = jp.co.soramitsu.fearless_utils.keyring.json.JsonSeedEncoder(gson)
 
         val address = keypairExpected.publicKey.toAddress(ADDRESS_TYPE_WESTEND)
 
@@ -42,7 +41,8 @@ class JsonSeedEncoderTest {
             seed = null,
             password = PASSWORD,
             name = NAME,
-            multiChainEncryption = MultiChainEncryption.Substrate(EncryptionType.SR25519),
+            multiChainEncryption = jp.co.soramitsu.fearless_utils.keyring.MultiChainEncryption.Substrate(
+                jp.co.soramitsu.fearless_utils.keyring.EncryptionType.SR25519),
             address = address,
             genesisHash = GENESIS_HASH_WESTEND
         )
@@ -52,7 +52,7 @@ class JsonSeedEncoderTest {
         with(decoded) {
             val keypair = keypair
 
-            require(keypair is Sr25519Keypair)
+            require(keypair is jp.co.soramitsu.fearless_utils.keyring.keypair.substrate.Sr25519Keypair)
 
             require(keypairExpected.publicKey.contentEquals(keypair.publicKey))
             require(keypairExpected.privateKey.contentEquals(keypair.privateKey))

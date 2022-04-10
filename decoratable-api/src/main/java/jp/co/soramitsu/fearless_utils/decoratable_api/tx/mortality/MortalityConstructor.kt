@@ -2,10 +2,10 @@ package jp.co.soramitsu.fearless_utils.decoratable_api.tx.mortality
 
 import jp.co.soramitsu.fearless_utils.decoratable_api.SubstrateApi
 import jp.co.soramitsu.fearless_utils.decoratable_api.const.babe.babeOrNull
-import jp.co.soramitsu.fearless_utils.decoratable_api.const.babe.expectedBlockTime
+import jp.co.soramitsu.fearless_utils.decoratable_api.const.babe.expectedBlockTimeOrNull
 import jp.co.soramitsu.fearless_utils.decoratable_api.const.system.blockHashCountOrNull
 import jp.co.soramitsu.fearless_utils.decoratable_api.const.system.systemOrNull
-import jp.co.soramitsu.fearless_utils.decoratable_api.const.timestamp.minimumPeriod
+import jp.co.soramitsu.fearless_utils.decoratable_api.const.timestamp.minimumPeriodOrNull
 import jp.co.soramitsu.fearless_utils.decoratable_api.const.timestamp.timestampOrNull
 import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.chain.chain
 import jp.co.soramitsu.fearless_utils.decoratable_api.rpc.chain.getBlockHash
@@ -41,8 +41,8 @@ object MortalityConstructor {
 
         val blockHashCount = api.const.systemOrNull?.blockHashCountOrNull?.value?.toInt() ?: FALLBACK_MAX_HASH_COUNT
 
-        val blockTime = api.const.babeOrNull?.expectedBlockTime?.value?.toInt()
-            ?: api.const.timestampOrNull?.minimumPeriod?.value?.toInt()
+        val blockTime = api.const.babeOrNull?.expectedBlockTimeOrNull?.value?.toInt()
+            ?: api.const.timestampOrNull?.minimumPeriodOrNull?.value?.toInt()
             ?: FALLBACK_PERIOD
 
         val mortalPeriod = MORTAL_PERIOD / blockTime + MAX_FINALITY_LAG

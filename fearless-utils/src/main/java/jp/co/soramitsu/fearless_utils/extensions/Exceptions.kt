@@ -19,7 +19,7 @@ inline fun <reified T : Exception, R> ensureExceptionType(
 }
 
 @OptIn(ExperimentalContracts::class)
-internal fun requireOrException(condition: Boolean, lazyException: () -> Exception) {
+fun requireOrException(condition: Boolean, lazyException: () -> Exception) {
     contract {
         returns() implies condition
     }

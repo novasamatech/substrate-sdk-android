@@ -10,6 +10,6 @@ class AndroidSubstrateKeypairDerivationTest : SubstrateKeypairDerivationTest() {
      */
     @Test
     fun shouldRunSr25519Tests() {
-        performSpecTests("crypto/sr25519HDKD.json", EncryptionType.SR25519)
+        performSpecTests("crypto/sr25519HDKD.json", jp.co.soramitsu.fearless_utils.keyring.EncryptionType.SR25519)
     }
 }
