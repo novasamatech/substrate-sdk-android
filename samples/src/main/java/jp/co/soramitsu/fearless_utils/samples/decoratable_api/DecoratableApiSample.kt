@@ -11,8 +11,9 @@ import jp.co.soramitsu.fearless_utils.decoratable_api.options.Substrate
 import jp.co.soramitsu.fearless_utils.decoratable_api.tx.invoke
 import jp.co.soramitsu.fearless_utils.gson_codec.GsonCodec
 import jp.co.soramitsu.fearless_utils.keyring.Keyring
-import jp.co.soramitsu.fearless_utils.keyring.signing.extrinsic.signer.KeypairSigner
-import jp.co.soramitsu.fearless_utils.ss58.SS58Encoder.toAccountId
+import jp.co.soramitsu.fearless_utils.keyring.adress.asSubstrateAddress
+import jp.co.soramitsu.fearless_utils.decoratable_api.tx.signing.KeypairSigner
+import jp.co.soramitsu.fearless_utils.decoratable_api.tx.signing.from
 import jp.co.soramitsu.fearless_utils.wsrpc.SocketService
 import jp.co.soramitsu.fearless_utils.wsrpc.logging.Logger
 import sp_runtime.multiaddress.MultiAddress
@@ -55,24 +56,26 @@ class DecoratableApiSample {
             socketService = socketService,
             jsonCodec = jsonCodec,
             typesJsons = listOf(types),
-            options = Options.Substrate(KeypairSigner(account))
+            options = Options.Substrate(KeypairSigner.from(account))
         )
 
-        val accountId = api.options.accountIdentifierConstructor.identifier(account.publicKey).accountId
-        val targetAddress = MultiAddress.Id(accountId)
+        val accountId = api.options.addressing.accountId(account.publicKey)
+        val targetAddress = MultiAddress.Id(accountId.value)
 
-        val feeInfo = api.tx.utility.batch(
+        val tx = api.tx.utility.batch(
             api.tx.balances.transfer(targetAddress, 123.toBigInteger()),
             api.tx.staking.setController(targetAddress),
             api.tx.crowdloan.contribute(index = BigInteger.ZERO, value = BigInteger.TEN, signature = null)
         )
-            .paymentInfo()
-        println(feeInfo.partialFee)
+
+        println(tx.sign(account.publicKey))
+        println(tx.paymentInfo())
 
         val historyDepth = api.query.staking.historyDepth()
         println(historyDepth)
 
-        val ledger = api.query.staking.ledger("5E7C1NtJhfztSa4iKf8qYw1Ps88LbTTnjE65yUcf6Q9FZwqT".toAccountId())
+        val key = api.options.addressing.accountId("5E7C1NtJhfztSa4iKf8qYw1Ps88LbTTnjE65yUcf6Q9FZwqT").value
+        val ledger = api.query.staking.ledger(key)
         println(ledger?.claimedRewards)
 
         println(api.const.staking.maxNominations())

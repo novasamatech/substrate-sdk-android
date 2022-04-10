@@ -37,9 +37,9 @@ fun SubstrateApi(
     runtime: RuntimeSnapshot,
     jsonCodec: JsonCodec,
     socketService: SocketService,
-    optionsFactory: Options.Factory
+    optionsFactory: ApiDependentFactory<Options>
 ): SubstrateApi = object : SubstrateApi {
-    override val options: Options = optionsFactory.build(this)
+    override val options: Options = optionsFactory.create(this)
 
     val bindingContext = SimpleBindingContext(scale = options.scale, jsonCodec = jsonCodec)
 
@@ -54,11 +54,16 @@ suspend fun SubstrateApi(
     socketService: SocketService,
     jsonCodec: JsonCodec,
     typesJsons: List<String>,
-    options: Options.Factory
+    options: ApiDependentFactory<Options>
 ) = withContext(Dispatchers.Default) {
     val runtimeFactory = RuntimeFactory(jsonCodec)
 
     val runtime = runtimeFactory.create(socketService, typesJsons)
 
     SubstrateApi(runtime, jsonCodec, socketService, options)
+}
+
+interface ApiDependentFactory<out R> {
+
+    fun create(api: SubstrateApi): R
 }

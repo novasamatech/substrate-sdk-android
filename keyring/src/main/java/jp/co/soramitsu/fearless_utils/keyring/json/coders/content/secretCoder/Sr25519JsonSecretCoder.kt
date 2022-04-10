@@ -1,5 +1,6 @@
 package jp.co.soramitsu.fearless_utils.keyring.json.coders.content.secretCoder
 
+import jp.co.soramitsu.fearless_utils.address.asPublicKey
 import jp.co.soramitsu.fearless_utils.keyring.EncryptionType
 import jp.co.soramitsu.fearless_utils.keyring.MultiChainEncryption
 import jp.co.soramitsu.fearless_utils.keyring.Sr25519
@@ -15,7 +16,7 @@ object Sr25519JsonSecretCoder : JsonSecretCoder {
 
         val ed25519BytesSecret = Sr25519.toEd25519Bytes(keypair.privateKey + keypair.nonce)
 
-        return listOf(ed25519BytesSecret, keypair.publicKey)
+        return listOf(ed25519BytesSecret, keypair.publicKey.value)
     }
 
     override fun decode(data: List<ByteArray>): JsonContentDecoder.SecretDecoder.DecodedSecret {
@@ -27,7 +28,7 @@ object Sr25519JsonSecretCoder : JsonSecretCoder {
 
         val keypair = Sr25519Keypair(
             privateAndNonce.copyOfRange(0, 32),
-            publicKey,
+            publicKey.asPublicKey(),
             privateAndNonce.copyOfRange(32, 64)
         )
 

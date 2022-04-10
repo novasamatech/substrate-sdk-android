@@ -17,7 +17,7 @@ internal abstract class OtherSubstrateJsonSecretCoder(
     override fun encode(keypair: Keypair, seed: ByteArray?): List<ByteArray> {
         requireNotNull(seed) { "Seed cannot be null" }
 
-        return listOf(seed, keypair.publicKey)
+        return listOf(seed, keypair.publicKey.value)
     }
 
     override fun decode(data: List<ByteArray>): JsonContentDecoder.SecretDecoder.DecodedSecret {

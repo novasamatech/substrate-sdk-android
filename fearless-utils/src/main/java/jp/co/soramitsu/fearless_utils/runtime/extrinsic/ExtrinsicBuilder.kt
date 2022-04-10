@@ -1,7 +1,7 @@
 package jp.co.soramitsu.fearless_utils.runtime.extrinsic
 
+import jp.co.soramitsu.fearless_utils.address.AccountId
 import jp.co.soramitsu.fearless_utils.hash.Hasher.blake2b256
-import jp.co.soramitsu.fearless_utils.runtime.AccountId
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.RuntimeType
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.Type
@@ -91,7 +91,7 @@ class ExtrinsicBuilder(
         return this
     }
 
-    fun build(
+    suspend fun build(
         useBatchAll: Boolean = false
     ): String {
         val call = maybeWrapInBatch(useBatchAll)
@@ -99,7 +99,7 @@ class ExtrinsicBuilder(
         return build(CallRepresentation.Instance(call))
     }
 
-    fun build(
+    suspend fun build(
         rawCallBytes: ByteArray
     ): String {
         requireNotMixingBytesAndInstanceCalls()
@@ -107,7 +107,7 @@ class ExtrinsicBuilder(
         return build(CallRepresentation.Bytes(rawCallBytes))
     }
 
-    fun buildSignature(
+    suspend fun buildSignature(
         useBatchAll: Boolean = false
     ): String {
         val call = maybeWrapInBatch(useBatchAll)
@@ -115,7 +115,7 @@ class ExtrinsicBuilder(
         return buildSignature(CallRepresentation.Instance(call))
     }
 
-    fun buildSignature(
+    suspend fun buildSignature(
         rawCallBytes: ByteArray
     ): String {
         requireNotMixingBytesAndInstanceCalls()
@@ -123,7 +123,7 @@ class ExtrinsicBuilder(
         return buildSignature(CallRepresentation.Bytes(rawCallBytes))
     }
 
-    private fun build(
+    private suspend fun build(
         callRepresentation: CallRepresentation
     ): String {
         val multiSignature = buildSignatureObject(callRepresentation)
@@ -141,7 +141,7 @@ class ExtrinsicBuilder(
         return extrinsicType.toHex(runtime, extrinsic)
     }
 
-    private fun buildSignature(
+    private suspend fun buildSignature(
         callRepresentation: CallRepresentation
     ): String {
         val multiSignature = buildSignatureObject(callRepresentation)
@@ -159,7 +159,7 @@ class ExtrinsicBuilder(
         }
     }
 
-    private fun buildSignatureObject(callRepresentation: CallRepresentation): Any? {
+    private suspend fun buildSignatureObject(callRepresentation: CallRepresentation): Any? {
         val signedExtrasInstance = buildSignedExtras()
 
         val additionalExtrasInstance = mapOf(

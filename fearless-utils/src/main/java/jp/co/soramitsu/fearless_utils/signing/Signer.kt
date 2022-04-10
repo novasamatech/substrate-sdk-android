@@ -1,6 +1,6 @@
 package jp.co.soramitsu.fearless_utils.signing
 
-import jp.co.soramitsu.fearless_utils.runtime.AccountId
+import jp.co.soramitsu.fearless_utils.address.AccountId
 
 class SignerPayloadRaw(
     val data: ByteArray,
@@ -11,5 +11,5 @@ class MultiSignature(val encryptionType: String, val signature: ByteArray)
 
 interface Signer {
 
-    fun signRaw(payload: SignerPayloadRaw): MultiSignature
+    suspend fun signRaw(payload: SignerPayloadRaw): MultiSignature
 }

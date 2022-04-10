@@ -1,84 +1,84 @@
 package jp.co.soramitsu.fearless_utils.decoratable_api.options.accountIdentifier
 
+import jp.co.soramitsu.fearless_utils.address.AccountId
+import jp.co.soramitsu.fearless_utils.address.Address
+import jp.co.soramitsu.fearless_utils.address.PublicKey
 import jp.co.soramitsu.fearless_utils.decoratable_api.SubstrateApi
 import jp.co.soramitsu.fearless_utils.decoratable_api.config.ss58AddressOf
-import jp.co.soramitsu.fearless_utils.keyring.keypair.PublicKey
-import jp.co.soramitsu.fearless_utils.keyring.keypair.ethereumAccountId
-import jp.co.soramitsu.fearless_utils.keyring.keypair.ethereumAddress
-import jp.co.soramitsu.fearless_utils.keyring.keypair.substrateAccountId
-import jp.co.soramitsu.fearless_utils.runtime.AccountId
-import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.getOrThrow
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEnum
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.MULTI_ADDRESS_ID
+import jp.co.soramitsu.fearless_utils.keyring.adress.EthereumAccountId
+import jp.co.soramitsu.fearless_utils.keyring.adress.SubstrateAccountId
+import jp.co.soramitsu.fearless_utils.keyring.adress.asEthereumAddress
+import jp.co.soramitsu.fearless_utils.keyring.adress.asSubstrateAddress
+import jp.co.soramitsu.fearless_utils.keyring.adress.toAccountId
+import jp.co.soramitsu.fearless_utils.keyring.adress.toAddress
+import jp.co.soramitsu.fearless_utils.keyring.adress.toEthereumAccountId
+import jp.co.soramitsu.fearless_utils.keyring.adress.toSubstrateAccountId
 
-interface AccountIdentifierConstructor {
+interface AddressConstructor {
 
-    class Identifier(
-        val accountId: AccountId,
-        val forEncoding: Any
-    )
+    companion object;
 
     fun interface Factory {
 
-        fun create(api: SubstrateApi): AccountIdentifierConstructor
+        fun create(api: SubstrateApi): AddressConstructor
     }
 
-    companion object {
-        const val DEFAULT_ADDRESS_TYPE = "Address"
-    }
+    suspend fun accountId(address: String): AccountId
 
-    suspend fun identifier(publicKey: PublicKey): Identifier
+    suspend fun address(accountId: AccountId): Address
 
-    suspend fun address(publicKey: PublicKey): String
+    suspend fun accountId(publicKey: PublicKey): AccountId
 }
 
-class SubstrateAccountIdentifierConstructor(
-    private val lookupType: String,
+suspend fun AddressConstructor.address(publicKey: PublicKey) = address(accountId(publicKey))
+
+private class SubstrateAddressConstructor(
     private val api: SubstrateApi
-) : AccountIdentifierConstructor {
+) : AddressConstructor {
 
-    override suspend fun identifier(publicKey: PublicKey): AccountIdentifierConstructor.Identifier {
-        val typeRegistry = api.chainState.runtime.typeRegistry
-        val addressType = typeRegistry.getOrThrow(lookupType)
-        val accountId = publicKey.substrateAccountId()
 
-        val identifierForEncoding: Any = when {
-            addressType is DictEnum && addressType.variantOrNull(MULTI_ADDRESS_ID) != null -> { // MultiAddress
-                DictEnum.Entry(MULTI_ADDRESS_ID, accountId)
-            }
-            addressType.isValidInstance(accountId) -> { // GenericAccountId or similar
-                accountId
-            }
-            else -> throw UnsupportedOperationException("Unknown address type: ${addressType.name}")
+    override suspend fun address(accountId: AccountId): Address {
+        require(accountId is SubstrateAccountId) {
+            "Wrong AccountId kind was used, expected Substrate but got ${accountId::class.simpleName}"
         }
 
-        return AccountIdentifierConstructor.Identifier(accountId, identifierForEncoding)
+        return api.chainState.properties().ss58AddressOf(accountId)
     }
 
-    override suspend fun address(publicKey: PublicKey): String {
-        return api.chainState.properties().ss58AddressOf(publicKey)
-    }
-}
-
-class EthereumAccountIdentifierConstructor : AccountIdentifierConstructor {
-
-    override suspend fun identifier(publicKey: PublicKey): AccountIdentifierConstructor.Identifier {
-        val accountId = publicKey.ethereumAccountId()
-
-        return AccountIdentifierConstructor.Identifier(accountId = accountId, forEncoding = accountId)
+    override suspend fun accountId(publicKey: PublicKey): AccountId {
+        return publicKey.toSubstrateAccountId()
     }
 
-    override suspend fun address(publicKey: PublicKey): String {
-        return publicKey.ethereumAddress()
+    override suspend fun accountId(address: String): AccountId {
+        return address.asSubstrateAddress().toAccountId()
     }
 }
 
-fun AccountIdentifierConstructor.Companion.defaultSubstrate(
-    addressTypeName: String = DEFAULT_ADDRESS_TYPE
-) = AccountIdentifierConstructor.Factory { api ->
-    SubstrateAccountIdentifierConstructor(addressTypeName, api)
+private class EthereumAddressConstructor : AddressConstructor {
+
+    companion object;
+
+    override suspend fun address(accountId: AccountId): Address {
+        require(accountId is EthereumAccountId) {
+            "Wrong AccountId kind was used, expected Ethereum but got ${accountId::class.simpleName}"
+        }
+
+        return accountId.toAddress(withChecksum = true)
+    }
+
+    override suspend fun accountId(address: String): AccountId {
+        return address.asEthereumAddress().toAccountId()
+    }
+
+    override suspend fun accountId(publicKey: PublicKey): AccountId {
+        return publicKey.toEthereumAccountId()
+    }
 }
 
-fun AccountIdentifierConstructor.Companion.Ethereum() = AccountIdentifierConstructor.Factory {
-    EthereumAccountIdentifierConstructor()
+fun AddressConstructor.Companion.Substrate() = AddressConstructor.Factory { api ->
+    SubstrateAddressConstructor(api)
+}
+
+fun AddressConstructor.Companion.Ethereum() = AddressConstructor.Factory {
+    EthereumAddressConstructor()
 }

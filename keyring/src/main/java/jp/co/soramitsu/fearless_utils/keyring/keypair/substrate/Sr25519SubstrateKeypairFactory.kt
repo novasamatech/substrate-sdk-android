@@ -1,5 +1,7 @@
 package jp.co.soramitsu.fearless_utils.keyring.keypair.substrate
 
+import jp.co.soramitsu.fearless_utils.address.PublicKey
+import jp.co.soramitsu.fearless_utils.address.asPublicKey
 import jp.co.soramitsu.fearless_utils.keyring.EncryptionType
 import jp.co.soramitsu.fearless_utils.keyring.Sr25519
 import jp.co.soramitsu.fearless_utils.keyring.junction.Junction
@@ -9,7 +11,7 @@ import jp.co.soramitsu.fearless_utils.keyring.keypair.KeypairFactory
 
 class Sr25519Keypair(
     override val privateKey: ByteArray,
-    override val publicKey: ByteArray,
+    override val publicKey: PublicKey,
     val nonce: ByteArray
 ) : Keypair {
 
@@ -34,7 +36,7 @@ internal object Sr25519SubstrateKeypairFactory : KeypairFactory<Sr25519Keypair> 
         chaincode: ByteArray,
         previousKeypair: Sr25519Keypair
     ): Sr25519Keypair {
-        val keypair = previousKeypair.privateKey + previousKeypair.nonce + previousKeypair.publicKey
+        val keypair = previousKeypair.privateKey + previousKeypair.nonce + previousKeypair.publicKey.value
         val newKeypairbytes = Sr25519.deriveKeypairSoft(keypair, chaincode)
 
         return decodeSr25519Keypair(newKeypairbytes)
@@ -44,7 +46,7 @@ internal object Sr25519SubstrateKeypairFactory : KeypairFactory<Sr25519Keypair> 
         chaincode: ByteArray,
         previousKeypair: Sr25519Keypair
     ): Sr25519Keypair {
-        val keypair = previousKeypair.privateKey + previousKeypair.nonce + previousKeypair.publicKey
+        val keypair = previousKeypair.privateKey + previousKeypair.nonce + previousKeypair.publicKey.value
         val newKeypairbytes = Sr25519.deriveKeypairHard(keypair, chaincode)
 
         return decodeSr25519Keypair(newKeypairbytes)
@@ -56,7 +58,7 @@ internal object Sr25519SubstrateKeypairFactory : KeypairFactory<Sr25519Keypair> 
         val publicKey = bytes.copyOfRange(64, bytes.size)
         return Sr25519Keypair(
             privateKey,
-            publicKey,
+            publicKey.asPublicKey(),
             nonce
         )
     }

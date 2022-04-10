@@ -1,5 +1,6 @@
 package jp.co.soramitsu.fearless_utils.keyring.keypair.ethereum
 
+import jp.co.soramitsu.fearless_utils.address.asPublicKey
 import jp.co.soramitsu.fearless_utils.keyring.hmacSHA512
 import jp.co.soramitsu.fearless_utils.keyring.junction.Junction
 import jp.co.soramitsu.fearless_utils.keyring.junction.JunctionType
@@ -36,7 +37,7 @@ object Bip32KeypairFactory : KeypairFactory<Bip32ExtendedKeyPair> {
 
         return Bip32ExtendedKeyPair(
             privateKey = privateKey,
-            publicKey = publicKey,
+            publicKey = publicKey.asPublicKey(),
             chaincode = chainCode
         )
     }
@@ -52,7 +53,7 @@ object Bip32KeypairFactory : KeypairFactory<Bip32ExtendedKeyPair> {
                 padding + parent.privateKey + junction.chaincode
             }
             JunctionType.SOFT -> {
-                parent.publicKey + junction.chaincode
+                parent.publicKey.value + junction.chaincode
             }
         }
 
@@ -86,7 +87,7 @@ object Bip32KeypairFactory : KeypairFactory<Bip32ExtendedKeyPair> {
 
         return Bip32ExtendedKeyPair(
             privateKey = privateKey,
-            publicKey = publicKey,
+            publicKey = publicKey.asPublicKey(),
             chaincode = childChainCode
         )
     }

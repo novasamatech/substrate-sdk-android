@@ -1,5 +1,6 @@
 package jp.co.soramitsu.fearless_utils.runtime.extrinsic
 
+import jp.co.soramitsu.fearless_utils.address.AccountId
 import jp.co.soramitsu.fearless_utils.any
 import jp.co.soramitsu.fearless_utils.extensions.fromHex
 import jp.co.soramitsu.fearless_utils.runtime.RealRuntimeProvider
@@ -15,6 +16,7 @@ import jp.co.soramitsu.fearless_utils.signing.SignerPayloadRaw
 import jp.co.soramitsu.fearless_utils.ss58.SS58Encoder.publicKeyToAccountId
 import jp.co.soramitsu.fearless_utils.ss58.SS58Encoder.toAccountId
 import jp.co.soramitsu.fearless_utils.wsrpc.request.runtime.chain.RuntimeVersion
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -24,8 +26,12 @@ import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnitRunner
 import java.math.BigInteger
 
+private class TestAccountId(override val value: ByteArray) : AccountId
+
+private fun ByteArray.asTestAccountId() = TestAccountId(this)
+
 private val ORIGIN_ACCOUNT_ID =
-    "fdc41550fb5186d71cae699c31731b3e1baa10680c7bd6b3831a6d222cf4d168".fromHex().publicKeyToAccountId()
+    "fdc41550fb5186d71cae699c31731b3e1baa10680c7bd6b3831a6d222cf4d168".fromHex().publicKeyToAccountId().asTestAccountId()
 
 private const val SINGLE_TRANSFER_EXTRINSIC =
     "0x41028400fdc41550fb5186d71cae699c31731b3e1baa10680c7bd6b3831a6d222cf4d16800080bfe8bc67f44b498239887dc5679523cfcb1d20fd9ec9d6bae0a385cca118d2cb7ef9f4674d52a810feb32932d7c6fe3e05ce9e06cd72cf499c8692206410ab5038800040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402"
@@ -67,7 +73,7 @@ class ExtrinsicBuilderTest {
     lateinit var signer: Signer
 
     @Test
-    fun `should build extrinsic from raw call bytes`() {
+    fun `should build extrinsic from raw call bytes`() = runBlocking {
         signerSignsTransfer()
 
         val extrinsic = createExtrinsicBuilder()
@@ -77,7 +83,7 @@ class ExtrinsicBuilderTest {
     }
 
     @Test
-    fun `should build single transfer extrinsic`() {
+    fun `should build single transfer extrinsic`() = runBlocking {
         signerSignsTransfer()
 
         val encoded = createExtrinsicBuilder()
@@ -88,7 +94,7 @@ class ExtrinsicBuilderTest {
     }
 
     @Test
-    fun `should build extrinsic signature from call instance`() {
+    fun `should build extrinsic signature from call instance`() = runBlocking {
         signerSignsTransfer()
 
         val actualSignature = createExtrinsicBuilder()
@@ -99,7 +105,7 @@ class ExtrinsicBuilderTest {
     }
 
     @Test
-    fun `should build extrinsic signature from raw call bytes`() {
+    fun `should build extrinsic signature from raw call bytes`() = runBlocking {
         signerSignsTransfer()
 
         val extrinsic = createExtrinsicBuilder()
@@ -109,7 +115,7 @@ class ExtrinsicBuilderTest {
     }
 
     @Test
-    fun `should replace call`() {
+    fun `should replace call`() = runBlocking {
         signerSignsTransfer()
 
         val wrongAMount = "123".toBigInteger()
@@ -129,7 +135,7 @@ class ExtrinsicBuilderTest {
     }
 
     @Test
-    fun `should build batch extrinsic`() {
+    fun `should build batch extrinsic`() = runBlocking {
         signerSigns(
             message = "100008040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402b50388003000000004000000e143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e1b876104c68b4a8924c098d61d2ad798761bb6fff55cca2885939ffc27ef5ecb",
             signature = "5b94d4436372ba74895936695e97d543358219e77f3e827f77b2e26f53413363a5dd098e172a51308e7d35aa6c03c5f171c4b43732db61c3d86b62d83e626b07"
@@ -153,7 +159,7 @@ class ExtrinsicBuilderTest {
     }
 
     @Test
-    fun `should build batch_all extrinsic`() {
+    fun `should build batch_all extrinsic`() = runBlocking {
         signerSigns(
             message = "100208040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402b50388003000000004000000e143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e1b876104c68b4a8924c098d61d2ad798761bb6fff55cca2885939ffc27ef5ecb",
             signature = "c7353b1002c1b62e881f3013f5a01e22178e276cb9a5157ee4b0f21baf9199deaeb905f5dc42d2554dc8d1bbfc2cee1e1df293122b392b8ed83647483d104b00"
@@ -175,7 +181,7 @@ class ExtrinsicBuilderTest {
     }
 
     @Test
-    fun `should build single transfer extrinsic statemine`() {
+    fun `should build single transfer extrinsic statemine`() = runBlocking {
         signerSigns(
             message = "0a0000bcc5ecf679ebd776866a04c212a4ec5dc45cefab57d7aa858c389844e212693f0700e40b5402b503880000590200000400000048239ef607d7928874027a43a67689209727dfb3d3dc5e5b03a39bdc2eda771add7532c5c01242696001e57cded1bc1326379059300287552a9c344e5bea1070",
             signature = "45ba1f9d291fff7dddf36f7ec060405d5e87ac8fab8832cfcc66858e6975141748ce89c41bda6c3a84204d3c6f929b928702168ca38bbed69b172044b599a10a"
@@ -221,12 +227,12 @@ class ExtrinsicBuilderTest {
         assertEquals(extrinsicInHex, encoded)
     }
 
-    private fun signerSignsTransfer() = signerSigns(
+    private suspend fun signerSignsTransfer() = signerSigns(
         message = "040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402b50388003000000004000000e143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e1b876104c68b4a8924c098d61d2ad798761bb6fff55cca2885939ffc27ef5ecb",
         signature = "080bfe8bc67f44b498239887dc5679523cfcb1d20fd9ec9d6bae0a385cca118d2cb7ef9f4674d52a810feb32932d7c6fe3e05ce9e06cd72cf499c8692206410a"
     )
 
-    private fun signerSigns(
+    private suspend fun signerSigns(
         message: String,
         signature: String
     ) {

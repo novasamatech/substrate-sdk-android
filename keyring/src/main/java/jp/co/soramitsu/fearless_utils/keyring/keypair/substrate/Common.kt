@@ -1,5 +1,6 @@
 package jp.co.soramitsu.fearless_utils.keyring.keypair.substrate
 
+import jp.co.soramitsu.fearless_utils.address.PublicKey
 import jp.co.soramitsu.fearless_utils.keyring.EncryptionType
 import jp.co.soramitsu.fearless_utils.keyring.junction.Junction
 import jp.co.soramitsu.fearless_utils.keyring.junction.JunctionType
@@ -12,7 +13,7 @@ import jp.co.soramitsu.fearless_utils.scale.dataType.toByteArray
 class KeypairWithSeed(
     val seed: ByteArray,
     override val privateKey: ByteArray,
-    override val publicKey: ByteArray,
+    override val publicKey: PublicKey,
     override val encryptionType: EncryptionType
 ) : Keypair
 

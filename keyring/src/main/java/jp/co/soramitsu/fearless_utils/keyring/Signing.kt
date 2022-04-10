@@ -66,7 +66,7 @@ object Signing {
     }
 
     private fun signSr25519(message: ByteArray, keypair: Sr25519Keypair): SignatureWrapper {
-        val sign = Sr25519.sign(keypair.publicKey, keypair.privateKey + keypair.nonce, message)
+        val sign = Sr25519.sign(keypair.publicKey.value, keypair.privateKey + keypair.nonce, message)
 
         return SignatureWrapper.Sr25519(signature = sign)
     }
