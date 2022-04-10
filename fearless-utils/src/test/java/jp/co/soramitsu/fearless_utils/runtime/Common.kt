@@ -1,12 +1,12 @@
 package jp.co.soramitsu.fearless_utils.runtime
 
 import com.google.gson.Gson
-import jp.co.soramitsu.fearless_utils.getFileContentFromResources
 import jp.co.soramitsu.fearless_utils.gson_codec.GsonCodec
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypeRegistry
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEnum
 import jp.co.soramitsu.fearless_utils.runtime.extrinsic.SignatureInstanceConstructor
 import jp.co.soramitsu.fearless_utils.signing.MultiSignature
+import jp.co.soramitsu.fearless_utils.test_shared.getFileContentFromResources
 
 object RealRuntimeProvider {
 

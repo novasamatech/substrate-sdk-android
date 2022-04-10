@@ -1,6 +1,6 @@
 package jp.co.soramitsu.fearless_utils.runtime.metadata
 
-import jp.co.soramitsu.fearless_utils.common.assertThrows
+import jp.co.soramitsu.fearless_utils.test_shared.assertThrows
 import jp.co.soramitsu.fearless_utils.extensions.toHexString
 import jp.co.soramitsu.fearless_utils.hash.Hasher.xxHash128
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot

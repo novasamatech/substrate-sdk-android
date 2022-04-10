@@ -1,8 +1,8 @@
-package jp.co.soramitsu.fearless_utils.encrypt.qr
+package jp.co.soramitsu.fearless_utils.keyring.qr
 
-import jp.co.soramitsu.fearless_utils.common.assertThrows
-import jp.co.soramitsu.fearless_utils.encrypt.qr.QrFormat.Payload
-import jp.co.soramitsu.fearless_utils.encrypt.qr.formats.SubstrateQrFormat
+import jp.co.soramitsu.fearless_utils.test_shared.assertThrows
+import jp.co.soramitsu.fearless_utils.keyring.qr.QrFormat.Payload
+import jp.co.soramitsu.fearless_utils.keyring.qr.formats.SubstrateQrFormat
 import jp.co.soramitsu.fearless_utils.extensions.fromHex
 import org.junit.Assert.assertEquals
 import org.junit.Test

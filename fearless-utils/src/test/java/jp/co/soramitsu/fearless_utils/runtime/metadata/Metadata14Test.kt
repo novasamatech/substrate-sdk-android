@@ -1,7 +1,7 @@
 package jp.co.soramitsu.fearless_utils.runtime.metadata
 
-import jp.co.soramitsu.fearless_utils.common.assertInstance
-import jp.co.soramitsu.fearless_utils.common.assertNotInstance
+import jp.co.soramitsu.fearless_utils.test_shared.assertInstance
+import jp.co.soramitsu.fearless_utils.test_shared.assertNotInstance
 import jp.co.soramitsu.fearless_utils.runtime.RealRuntimeProvider
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypeRegistry
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Alias

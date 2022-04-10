@@ -37,10 +37,7 @@ dependencies {
     implementation apacheXercesDep
     implementation xxHashDep
 
-    testImplementation jUnitDep
-    testImplementation mockitoDep
-    testImplementation project(':gson-codec')
-    testImplementation coroutinesDep
+    testImplementation project(":test-shared")
 }
 
 jar {

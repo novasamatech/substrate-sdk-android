@@ -1,6 +1,6 @@
-package jp.co.soramitsu.fearless_utils.encrypt.qr.formats
+package jp.co.soramitsu.fearless_utils.keyring.qr.formats
 
-import jp.co.soramitsu.fearless_utils.encrypt.qr.QrFormat
+import jp.co.soramitsu.fearless_utils.keyring.qr.QrFormat
 import jp.co.soramitsu.fearless_utils.extensions.fromHex
 import jp.co.soramitsu.fearless_utils.extensions.toHexString
 

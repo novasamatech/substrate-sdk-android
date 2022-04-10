@@ -1,6 +1,6 @@
 package jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite
 
-import jp.co.soramitsu.fearless_utils.common.assertThrows
+import jp.co.soramitsu.fearless_utils.test_shared.assertThrows
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.BaseTypeTest
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.TypeReference
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.errors.EncodeDecodeException

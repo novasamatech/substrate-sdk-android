@@ -1,4 +1,4 @@
-package jp.co.soramitsu.fearless_utils.encrypt.qr
+package jp.co.soramitsu.fearless_utils.keyring.qr
 
 import java.lang.Exception
 

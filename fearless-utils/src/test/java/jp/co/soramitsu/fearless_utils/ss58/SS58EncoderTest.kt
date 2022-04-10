@@ -3,10 +3,10 @@ package jp.co.soramitsu.fearless_utils.ss58
 import com.google.gson.Gson
 import jp.co.soramitsu.fearless_utils.extensions.fromHex
 import jp.co.soramitsu.fearless_utils.extensions.toHexString
-import jp.co.soramitsu.fearless_utils.getResourceReader
 import jp.co.soramitsu.fearless_utils.ss58.SS58Encoder.addressPrefix
 import jp.co.soramitsu.fearless_utils.ss58.SS58Encoder.toAccountId
 import jp.co.soramitsu.fearless_utils.ss58.SS58Encoder.toAddress
+import jp.co.soramitsu.fearless_utils.test_shared.getResourceReader
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith

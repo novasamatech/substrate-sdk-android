@@ -1,6 +1,6 @@
 package jp.co.soramitsu.fearless_utils.wsrpc.request.runtime
 
-import jp.co.soramitsu.fearless_utils.common.assertThrows
+import jp.co.soramitsu.fearless_utils.test_shared.assertThrows
 import org.junit.Assert.*
 import org.junit.Test
 import java.lang.IllegalArgumentException

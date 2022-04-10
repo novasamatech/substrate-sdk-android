@@ -1,6 +1,6 @@
 package jp.co.soramitsu.fearless_utils.encrypt.qr.formats
 
-import jp.co.soramitsu.fearless_utils.encrypt.qr.QrFormat
+import jp.co.soramitsu.fearless_utils.keyring.qr.QrFormat
 
 class AddressQrFormat(
     private val addressValidator: (String) -> Boolean

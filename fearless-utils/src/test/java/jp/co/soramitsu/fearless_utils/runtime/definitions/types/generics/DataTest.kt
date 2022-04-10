@@ -1,7 +1,7 @@
 package jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics
 
-import jp.co.soramitsu.fearless_utils.common.assertInstance
-import jp.co.soramitsu.fearless_utils.common.assertThrows
+import jp.co.soramitsu.fearless_utils.test_shared.assertInstance
+import jp.co.soramitsu.fearless_utils.test_shared.assertThrows
 import jp.co.soramitsu.fearless_utils.extensions.fromHex
 import jp.co.soramitsu.fearless_utils.extensions.toHexString
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypePresetBuilder

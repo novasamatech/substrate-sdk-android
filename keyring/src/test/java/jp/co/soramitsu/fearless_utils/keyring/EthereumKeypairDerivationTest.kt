@@ -1,8 +1,8 @@
 package jp.co.soramitsu.fearless_utils.keyring
 
 import com.google.gson.Gson
-import jp.co.soramitsu.fearless_utils.getResourceReader
 import jp.co.soramitsu.fearless_utils.encrypt.mnemonic.MnemonicTestCase
+import jp.co.soramitsu.fearless_utils.getResourceReader
 import jp.co.soramitsu.fearless_utils.extensions.toHexString
 import org.junit.Assert
 import org.junit.Test

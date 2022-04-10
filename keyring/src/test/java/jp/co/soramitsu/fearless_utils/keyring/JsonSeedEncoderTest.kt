@@ -2,8 +2,8 @@ package jp.co.soramitsu.fearless_utils.keyring
 
 import com.google.gson.Gson
 import jp.co.soramitsu.fearless_utils.TestData
-import jp.co.soramitsu.fearless_utils.common.TestAddressBytes
-import jp.co.soramitsu.fearless_utils.common.TestGeneses
+import jp.co.soramitsu.fearless_utils.test_shared.TestAddressBytes
+import jp.co.soramitsu.fearless_utils.test_shared.TestGeneses
 import jp.co.soramitsu.fearless_utils.ss58.SS58Encoder.toAddress
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals

@@ -1,6 +1,6 @@
 package jp.co.soramitsu.fearless_utils.keyring.junction
 
-import jp.co.soramitsu.fearless_utils.assertListEquals
+import jp.co.soramitsu.fearless_utils.test_shared.assertListEquals
 import org.junit.Assert.assertEquals
 
 abstract class JunctionTest {

@@ -1,6 +1,6 @@
 package jp.co.soramitsu.fearless_utils.runtime.definitions.types
 
-import jp.co.soramitsu.fearless_utils.common.assertThrows
+import jp.co.soramitsu.fearless_utils.test_shared.assertThrows
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Alias
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u8
 import org.junit.Assert.assertEquals

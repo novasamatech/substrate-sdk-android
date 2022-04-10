@@ -33,6 +33,15 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    sourceSets {
+        test {
+            java.srcDirs += "$projectDir/src/testShared/java"
+        }
+
+        androidTest {
+            java.srcDirs += "$projectDir/src/testShared/java"
+        }
+    }
     kotlinOptions {
         jvmTarget = '1.8'
     }
@@ -68,13 +77,11 @@ createJar.dependsOn(deleteJar, build)
 dependencies {
     implementation project(":fearless-utils")
 
-    implementation spoungyCastleBcPixDep
-    implementation spoungyCastleBcPgDep
+    implementation bouncyCastleDep
     implementation ed25519Dep
     implementation bip39Dep
     implementation web3jDep
     implementation secureStringDep
 
-    testImplementation jUnitDep
-    testImplementation mockitoDep
+    testImplementation project(':test-shared')
 }

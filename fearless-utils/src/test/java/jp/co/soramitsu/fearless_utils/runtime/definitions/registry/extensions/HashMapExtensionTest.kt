@@ -2,8 +2,7 @@ package jp.co.soramitsu.fearless_utils.runtime.definitions.registry.extensions
 
 import com.google.gson.Gson
 import com.google.gson.stream.JsonReader
-import jp.co.soramitsu.fearless_utils.common.assertInstance
-import jp.co.soramitsu.fearless_utils.getResourceReader
+import jp.co.soramitsu.fearless_utils.test_shared.assertInstance
 import jp.co.soramitsu.fearless_utils.runtime.definitions.TypeDefinitionParser
 import jp.co.soramitsu.fearless_utils.runtime.definitions.TypeDefinitionsTree
 import jp.co.soramitsu.fearless_utils.runtime.definitions.dynamic.DynamicTypeResolver
@@ -15,6 +14,7 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.TypeReference
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Tuple
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Vec
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.stub.FakeType
+import jp.co.soramitsu.fearless_utils.test_shared.getResourceReader
 import org.junit.Assert
 import org.junit.Test
 

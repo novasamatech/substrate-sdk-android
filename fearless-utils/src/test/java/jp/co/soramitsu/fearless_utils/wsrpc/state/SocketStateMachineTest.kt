@@ -1,6 +1,6 @@
 package jp.co.soramitsu.fearless_utils.wsrpc.state
 
-import jp.co.soramitsu.fearless_utils.common.assertInstance
+import jp.co.soramitsu.fearless_utils.test_shared.assertInstance
 import jp.co.soramitsu.fearless_utils.wsrpc.request.DeliveryType
 import jp.co.soramitsu.fearless_utils.wsrpc.request.runtime.createFakeChange
 import jp.co.soramitsu.fearless_utils.wsrpc.response.RpcResponse

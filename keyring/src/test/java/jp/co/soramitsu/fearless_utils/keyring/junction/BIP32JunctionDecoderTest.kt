@@ -1,6 +1,6 @@
 package jp.co.soramitsu.fearless_utils.keyring.junction
 
-import jp.co.soramitsu.fearless_utils.common.assertThrows
+import jp.co.soramitsu.fearless_utils.test_shared.assertThrows
 import jp.co.soramitsu.fearless_utils.keyring.junction.BIP32JunctionDecoder.DecodingError.InvalidBIP32Junction
 import jp.co.soramitsu.fearless_utils.keyring.junction.JunctionDecoder.DecodingError.InvalidStart
 import org.junit.Test

@@ -1,6 +1,6 @@
 package jp.co.soramitsu.fearless_utils.wsrpc.request.runtime.storage
 
-import jp.co.soramitsu.fearless_utils.common.assertThrows
+import jp.co.soramitsu.fearless_utils.test_shared.assertThrows
 import jp.co.soramitsu.fearless_utils.wsrpc.request.runtime.createFakeChange
 import org.junit.Assert.assertEquals
 import org.junit.Test

@@ -2,8 +2,7 @@ package jp.co.soramitsu.fearless_utils.runtime.definitions
 
 import com.google.gson.Gson
 import com.google.gson.stream.JsonReader
-import jp.co.soramitsu.fearless_utils.common.assertInstance
-import jp.co.soramitsu.fearless_utils.getResourceReader
+import jp.co.soramitsu.fearless_utils.test_shared.assertInstance
 import jp.co.soramitsu.fearless_utils.runtime.definitions.dynamic.DynamicTypeResolver
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypePreset
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypeRegistry
@@ -24,6 +23,7 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.Fixed
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u64
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u8
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.stub.FakeType
+import jp.co.soramitsu.fearless_utils.test_shared.getResourceReader
 import org.junit.Assert.assertEquals
 import org.junit.Ignore
 import org.junit.Test

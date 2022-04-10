@@ -1,5 +1,6 @@
 package jp.co.soramitsu.fearless_utils.runtime.extrinsic
 
+import jp.co.soramitsu.fearless_utils.any
 import jp.co.soramitsu.fearless_utils.extensions.fromHex
 import jp.co.soramitsu.fearless_utils.runtime.RealRuntimeProvider
 import jp.co.soramitsu.fearless_utils.runtime.TestSignatureConstructor
@@ -11,6 +12,7 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Extrins
 import jp.co.soramitsu.fearless_utils.signing.MultiSignature
 import jp.co.soramitsu.fearless_utils.signing.Signer
 import jp.co.soramitsu.fearless_utils.signing.SignerPayloadRaw
+import jp.co.soramitsu.fearless_utils.ss58.SS58Encoder.publicKeyToAccountId
 import jp.co.soramitsu.fearless_utils.ss58.SS58Encoder.toAccountId
 import jp.co.soramitsu.fearless_utils.wsrpc.request.runtime.chain.RuntimeVersion
 import org.junit.Assert.assertArrayEquals
@@ -19,12 +21,11 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
-import org.mockito.Mockito.any
 import org.mockito.junit.MockitoJUnitRunner
 import java.math.BigInteger
 
 private val ORIGIN_ACCOUNT_ID =
-    "fdc41550fb5186d71cae699c31731b3e1baa10680c7bd6b3831a6d222cf4d168".toAccountId()
+    "fdc41550fb5186d71cae699c31731b3e1baa10680c7bd6b3831a6d222cf4d168".fromHex().publicKeyToAccountId()
 
 private const val SINGLE_TRANSFER_EXTRINSIC =
     "0x41028400fdc41550fb5186d71cae699c31731b3e1baa10680c7bd6b3831a6d222cf4d16800080bfe8bc67f44b498239887dc5679523cfcb1d20fd9ec9d6bae0a385cca118d2cb7ef9f4674d52a810feb32932d7c6fe3e05ce9e06cd72cf499c8692206410ab5038800040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402"

@@ -3,7 +3,6 @@ package jp.co.soramitsu.fearless_utils.keyring.mnemonic
 import io.github.novacrypto.SecureCharBuffer
 import io.github.novacrypto.bip39.MnemonicGenerator
 import io.github.novacrypto.hashing.Sha256
-import jp.co.soramitsu.fearless_utils.exceptions.Bip39Exception
 import java.security.SecureRandom
 import java.text.Normalizer
 import java.text.Normalizer.normalize

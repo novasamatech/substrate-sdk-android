@@ -1,13 +1,13 @@
 package jp.co.soramitsu.fearless_utils.keyring
 
 import com.google.gson.Gson
-import jp.co.soramitsu.fearless_utils.common.TestAddressBytes
-import jp.co.soramitsu.fearless_utils.common.TestGeneses
-import jp.co.soramitsu.fearless_utils.common.assertInstance
-import jp.co.soramitsu.fearless_utils.common.assertThrows
+import jp.co.soramitsu.fearless_utils.test_shared.TestGeneses
+import jp.co.soramitsu.fearless_utils.test_shared.assertInstance
+import jp.co.soramitsu.fearless_utils.test_shared.assertThrows
 import jp.co.soramitsu.fearless_utils.extensions.toHexString
 import jp.co.soramitsu.fearless_utils.keyring.json.JsonSeedDecodingException.IncorrectPasswordException
 import jp.co.soramitsu.fearless_utils.keyring.json.JsonSeedDecodingException.InvalidJsonException
+import jp.co.soramitsu.fearless_utils.test_shared.TestAddressBytes
 import org.bouncycastle.util.encoders.Hex
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
