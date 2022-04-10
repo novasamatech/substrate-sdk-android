@@ -1,19 +1,16 @@
-package jp.co.soramitsu.fearless_utils.encrypt.json
+package jp.co.soramitsu.fearless_utils.keyring.json
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.gson.Gson
 import jp.co.soramitsu.fearless_utils.TestData
-import jp.co.soramitsu.fearless_utils.keyring.EncryptionType
-import jp.co.soramitsu.fearless_utils.keyring.MultiChainEncryption
-import jp.co.soramitsu.fearless_utils.keyring.keypair.substrate.Sr25519Keypair
-import jp.co.soramitsu.fearless_utils.keyring.keypair.substrate.SubstrateKeypairFactory
+import jp.co.soramitsu.fearless_utils.ss58.SS58Encoder.toAddress
 import org.junit.Test
 import org.junit.runner.RunWith
 
 private val PASSWORD = "12345"
 private val NAME = "name"
 
-private const val ADDRESS_TYPE_WESTEND: Byte = 42
+private const val ADDRESS_TYPE_WESTEND: Short = 42
 private const val GENESIS_HASH_WESTEND =
     "e143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e"
 
@@ -27,12 +24,13 @@ class JsonSeedEncoderTest {
     fun shouldEncodeWithSr25519() {
         val keypairExpected =
             jp.co.soramitsu.fearless_utils.keyring.keypair.substrate.SubstrateKeypairFactory.generate(
-                jp.co.soramitsu.fearless_utils.keyring.EncryptionType.SR25519, TestData.SEED_BYTES)
+                jp.co.soramitsu.fearless_utils.keyring.EncryptionType.SR25519, TestData.SEED_BYTES
+            )
 
         require(keypairExpected is jp.co.soramitsu.fearless_utils.keyring.keypair.substrate.Sr25519Keypair)
 
-        val decoder = jp.co.soramitsu.fearless_utils.keyring.json.JsonSeedDecoder(gson)
-        val encoder = jp.co.soramitsu.fearless_utils.keyring.json.JsonSeedEncoder(gson)
+        val decoder = JsonSeedDecoder(gson)
+        val encoder = JsonSeedEncoder(gson)
 
         val address = keypairExpected.publicKey.toAddress(ADDRESS_TYPE_WESTEND)
 
@@ -42,7 +40,8 @@ class JsonSeedEncoderTest {
             password = PASSWORD,
             name = NAME,
             multiChainEncryption = jp.co.soramitsu.fearless_utils.keyring.MultiChainEncryption.Substrate(
-                jp.co.soramitsu.fearless_utils.keyring.EncryptionType.SR25519),
+                jp.co.soramitsu.fearless_utils.keyring.EncryptionType.SR25519
+            ),
             address = address,
             genesisHash = GENESIS_HASH_WESTEND
         )

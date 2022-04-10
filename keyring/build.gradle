@@ -20,6 +20,7 @@ android {
         targetSdkVersion rootProject.targetVersion
         versionCode rootProject.versionCode
         versionName rootProject.versionName
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -84,4 +85,6 @@ dependencies {
     implementation secureStringDep
 
     testImplementation project(':test-shared')
+
+    androidTestImplementation project(':test-shared')
 }
