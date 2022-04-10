@@ -14,7 +14,7 @@ import jp.co.soramitsu.fearless_utils.keyring.model.ImportAccountMeta
 import jp.co.soramitsu.fearless_utils.keyring.model.JsonAccountData
 import jp.co.soramitsu.fearless_utils.keyring.model.NetworkTypeIdentifier
 import jp.co.soramitsu.fearless_utils.ss58.SS58Encoder.addressByteOrNull
-import org.spongycastle.util.encoders.Base64
+import org.bouncycastle.util.encoders.Base64
 
 sealed class JsonSeedDecodingException : Exception() {
     class InvalidJsonException : JsonSeedDecodingException()

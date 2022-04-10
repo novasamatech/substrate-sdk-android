@@ -78,8 +78,6 @@ internal fun String.snakeCaseToCamelCase(): String {
     }.joinToString(separator = "")
 }
 
-fun ByteArray.copyLast(n: Int) = copyOfRange(fromIndex = size - n, size)
-
 @ExperimentalUnsignedTypes
 /**
  * Unsafe to overflow
@@ -91,5 +89,7 @@ infix fun UByte.shl(numOfBytes: Int) = (toInt() shl numOfBytes).toUByte()
  * Unsafe to overflow
  */
 infix fun UByte.shr(numOfBytes: Int) = (toInt() shr numOfBytes).toUByte()
+
+fun ByteArray.copyLast(n: Int) = copyOfRange(fromIndex = size - n, size)
 
 fun ByteArray.copyBytes(from: Int, size: Int) = copyOfRange(from, from + size)

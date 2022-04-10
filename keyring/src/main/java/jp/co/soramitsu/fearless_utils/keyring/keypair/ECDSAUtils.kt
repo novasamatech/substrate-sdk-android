@@ -1,8 +1,8 @@
 package jp.co.soramitsu.fearless_utils.keyring.keypair
 
 import jp.co.soramitsu.fearless_utils.extensions.toHexString
-import org.spongycastle.jce.ECNamedCurveTable
-import org.spongycastle.util.encoders.Hex
+import org.bouncycastle.jce.ECNamedCurveTable
+import org.bouncycastle.util.encoders.Hex
 import org.web3j.crypto.Sign
 import java.math.BigInteger
 

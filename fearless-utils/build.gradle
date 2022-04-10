@@ -28,8 +28,7 @@ dependencies {
     api fileTree(dir: 'libs', include: ['*.jar'])
     releaseJars fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation spoungyCastleBcPixDep
-    implementation spoungyCastleBcPgDep
+    implementation bouncyCastleDep
 
     api wsDep
     implementation gsonDep

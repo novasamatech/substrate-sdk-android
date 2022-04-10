@@ -1,7 +1,7 @@
 package jp.co.soramitsu.fearless_utils.keyring
 
 import net.i2p.crypto.eddsa.EdDSASecurityProvider
-import org.spongycastle.jce.provider.BouncyCastleProvider
+import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.Security
 
 object SecurityProviders {
