@@ -33,6 +33,11 @@ private const val PAYLOAD_HASH_THRESHOLD = 256
 
 class SignedExtension(val name: String, val type: Type<*>)
 
+data class EncodedExtrinsicWithInstance(
+    val instance: Extrinsic.EncodingInstance,
+    val encoded: String
+)
+
 class ExtrinsicBuilder(
     val runtime: RuntimeSnapshot,
     private val keypair: Keypair,
@@ -98,6 +103,18 @@ class ExtrinsicBuilder(
         return build(CallRepresentation.Instance(call))
     }
 
+    fun buildWithInstance(
+        useBatchAll: Boolean = false
+    ): EncodedExtrinsicWithInstance {
+        val call = maybeWrapInBatch(useBatchAll)
+        val instance = buildExtrinsicInstance(CallRepresentation.Instance(call))
+
+        return EncodedExtrinsicWithInstance(
+            instance = instance,
+            encoded = extrinsicType.toHex(runtime, instance)
+        )
+    }
+
     fun build(
         rawCallBytes: ByteArray
     ): String {
@@ -125,10 +142,16 @@ class ExtrinsicBuilder(
     private fun build(
         callRepresentation: CallRepresentation
     ): String {
+        val extrinsic = buildExtrinsicInstance(callRepresentation)
+
+        return extrinsicType.toHex(runtime, extrinsic)
+    }
+
+    private fun buildExtrinsicInstance(callRepresentation: CallRepresentation): Extrinsic.EncodingInstance {
         val multiSignature = buildSignatureObject(callRepresentation)
         val signedExtras = buildSignedExtras()
 
-        val extrinsic = Extrinsic.EncodingInstance(
+        return Extrinsic.EncodingInstance(
             signature = Extrinsic.Signature.new(
                 accountIdentifier = accountIdentifier,
                 signature = multiSignature,
@@ -136,8 +159,6 @@ class ExtrinsicBuilder(
             ),
             callRepresentation = callRepresentation
         )
-
-        return extrinsicType.toHex(runtime, extrinsic)
     }
 
     private fun buildSignature(

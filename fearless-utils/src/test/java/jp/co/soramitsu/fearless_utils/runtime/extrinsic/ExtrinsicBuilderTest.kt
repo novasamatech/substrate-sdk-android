@@ -10,7 +10,10 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.fromHex
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Era
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Extrinsic
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.create
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.multiAddressFromId
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.toHex
+import jp.co.soramitsu.fearless_utils.runtime.metadata.StorageEntryModifier
 import jp.co.soramitsu.fearless_utils.ss58.SS58Encoder.toAccountId
 import jp.co.soramitsu.fearless_utils.wsrpc.request.runtime.chain.RuntimeVersion
 import org.junit.Assert.assertEquals
@@ -88,6 +91,7 @@ class ExtrinsicBuilderTest {
         assertEquals(SINGLE_TRANSFER_EXTRINSIC, extrinsic)
     }
 
+
     @Test
     fun `should build single transfer extrinsic`() {
         val encoded = createExtrinsicBuilder()
@@ -95,6 +99,18 @@ class ExtrinsicBuilderTest {
             .build()
 
         assertEquals(SINGLE_TRANSFER_EXTRINSIC, encoded)
+    }
+
+    @Test
+    fun `should build extrinsic instance`() {
+        val (extrinsicInstance, encoded) = createExtrinsicBuilder()
+            .testSingleTransfer()
+            .buildWithInstance()
+
+        val encodedInstance = Extrinsic.Default.toHex(runtime, extrinsicInstance)
+
+        assertEquals(SINGLE_TRANSFER_EXTRINSIC, encoded)
+        assertEquals(encoded, encodedInstance)
     }
 
     @Test
