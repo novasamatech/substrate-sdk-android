@@ -2,9 +2,9 @@ package jp.co.soramitsu.fearless_utils.runtime.extrinsic
 
 import jp.co.soramitsu.fearless_utils.encrypt.MultiChainEncryption
 import jp.co.soramitsu.fearless_utils.encrypt.SignatureWrapper
-import jp.co.soramitsu.fearless_utils.encrypt.Signer
 import jp.co.soramitsu.fearless_utils.encrypt.keypair.Keypair
 import jp.co.soramitsu.fearless_utils.hash.Hasher.blake2b256
+import jp.co.soramitsu.fearless_utils.runtime.AccountId
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.RuntimeType
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.Type
@@ -17,10 +17,13 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Generic
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.SignedExtras
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.create
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.new
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.instances.AddressInstanceConstructor
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.instances.SignatureInstanceConstructor
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.toHex
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.toHexUntyped
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.useScaleWriter
+import jp.co.soramitsu.fearless_utils.runtime.extrinsic.signer.Signer
+import jp.co.soramitsu.fearless_utils.runtime.extrinsic.signer.SignerPayloadRaw
 import jp.co.soramitsu.fearless_utils.runtime.metadata.call
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module
 import jp.co.soramitsu.fearless_utils.scale.utils.directWrite
@@ -35,16 +38,16 @@ class SignedExtension(val name: String, val type: Type<*>)
 
 class ExtrinsicBuilder(
     val runtime: RuntimeSnapshot,
-    private val keypair: Keypair,
     private val nonce: BigInteger,
     private val runtimeVersion: RuntimeVersion,
     private val genesisHash: ByteArray,
-    private val multiChainEncryption: MultiChainEncryption,
-    private val accountIdentifier: Any,
+    private val accountId: AccountId,
+    private val signer: Signer,
     private val blockHash: ByteArray = genesisHash,
     private val era: Era = Era.Immortal,
     private val tip: BigInteger = DEFAULT_TIP,
     private val customSignedExtensions: Map<SignedExtension, Any?> = emptyMap(),
+    private val addressInstanceConstructor: RuntimeType.InstanceConstructor<AccountId> = AddressInstanceConstructor,
     private val signatureConstructor: RuntimeType.InstanceConstructor<SignatureWrapper> = SignatureInstanceConstructor
 ) {
 
@@ -90,7 +93,7 @@ class ExtrinsicBuilder(
         return this
     }
 
-    fun build(
+    suspend fun build(
         useBatchAll: Boolean = false
     ): String {
         val call = maybeWrapInBatch(useBatchAll)
@@ -98,7 +101,7 @@ class ExtrinsicBuilder(
         return build(CallRepresentation.Instance(call))
     }
 
-    fun build(
+    suspend fun build(
         rawCallBytes: ByteArray
     ): String {
         requireNotMixingBytesAndInstanceCalls()
@@ -106,7 +109,7 @@ class ExtrinsicBuilder(
         return build(CallRepresentation.Bytes(rawCallBytes))
     }
 
-    fun buildSignature(
+    suspend fun buildSignature(
         useBatchAll: Boolean = false
     ): String {
         val call = maybeWrapInBatch(useBatchAll)
@@ -114,7 +117,7 @@ class ExtrinsicBuilder(
         return buildSignature(CallRepresentation.Instance(call))
     }
 
-    fun buildSignature(
+    suspend fun buildSignature(
         rawCallBytes: ByteArray
     ): String {
         requireNotMixingBytesAndInstanceCalls()
@@ -122,7 +125,7 @@ class ExtrinsicBuilder(
         return buildSignature(CallRepresentation.Bytes(rawCallBytes))
     }
 
-    private fun build(
+    private suspend fun build(
         callRepresentation: CallRepresentation
     ): String {
         val multiSignature = buildSignatureObject(callRepresentation)
@@ -130,7 +133,7 @@ class ExtrinsicBuilder(
 
         val extrinsic = Extrinsic.EncodingInstance(
             signature = Extrinsic.Signature.new(
-                accountIdentifier = accountIdentifier,
+                accountIdentifier = buildEncodableAddressInstance(),
                 signature = multiSignature,
                 signedExtras = signedExtras
             ),
@@ -140,7 +143,7 @@ class ExtrinsicBuilder(
         return extrinsicType.toHex(runtime, extrinsic)
     }
 
-    private fun buildSignature(
+    private suspend fun buildSignature(
         callRepresentation: CallRepresentation
     ): String {
         val multiSignature = buildSignatureObject(callRepresentation)
@@ -158,7 +161,7 @@ class ExtrinsicBuilder(
         }
     }
 
-    private fun buildSignatureObject(callRepresentation: CallRepresentation): Any? {
+    private suspend fun buildSignatureObject(callRepresentation: CallRepresentation): Any? {
         val signedExtrasInstance = buildSignedExtras()
 
         val additionalExtrasInstance = mapOf(
@@ -187,7 +190,8 @@ class ExtrinsicBuilder(
             payloadBytes
         }
 
-        val signatureWrapper = Signer.sign(multiChainEncryption, messageToSign, keypair)
+        val signerPayload = SignerPayloadRaw(messageToSign, accountId)
+        val signatureWrapper = signer.signRaw(signerPayload)
 
         return signatureConstructor.constructInstance(runtime.typeRegistry, signatureWrapper)
     }
@@ -204,6 +208,10 @@ class ExtrinsicBuilder(
                 "calls" to calls
             )
         )
+    }
+
+    private fun buildEncodableAddressInstance(): Any? {
+        return addressInstanceConstructor.constructInstance(runtime.typeRegistry, accountId)
     }
 
     private fun buildSignedExtras(): ExtrinsicPayloadExtrasInstance {
