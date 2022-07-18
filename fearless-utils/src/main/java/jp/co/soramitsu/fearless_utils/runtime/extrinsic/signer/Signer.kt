@@ -8,7 +8,7 @@ class SignerPayloadRaw(
     val message: ByteArray,
     val accountId: AccountId,
     val skipMessageHashing: Boolean = false,
-){
+) {
     companion object;
 }
 
