@@ -11,6 +11,6 @@ class KeyPairSigner(
 ) : Signer {
 
     override suspend fun signRaw(payload: SignerPayloadRaw): SignatureWrapper {
-        return MessageSigner.sign(encryption, payload.message, keypair)
+        return MessageSigner.sign(encryption, payload.message, keypair, payload.skipMessageHashing)
     }
 }

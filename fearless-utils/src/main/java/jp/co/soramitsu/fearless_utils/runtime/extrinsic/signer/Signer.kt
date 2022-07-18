@@ -6,6 +6,7 @@ import jp.co.soramitsu.fearless_utils.runtime.AccountId
 class SignerPayloadRaw(
     val message: ByteArray,
     val accountId: AccountId,
+    val skipMessageHashing: Boolean,
 )
 
 interface Signer {

@@ -188,7 +188,7 @@ class ExtrinsicBuilder(
             payloadBytes
         }
 
-        val signerPayload = SignerPayloadRaw(messageToSign, accountId)
+        val signerPayload = SignerPayloadRaw(messageToSign, accountId, skipMessageHashing = false)
         val signatureWrapper = signer.signRaw(signerPayload)
 
         return signatureConstructor.constructInstance(runtime.typeRegistry, signatureWrapper)
