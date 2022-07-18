@@ -7,7 +7,7 @@ import jp.co.soramitsu.fearless_utils.runtime.AccountId
 class SignerPayloadRaw(
     val message: ByteArray,
     val accountId: AccountId,
-    val skipMessageHashing: Boolean,
+    val skipMessageHashing: Boolean = false,
 ){
     companion object;
 }
@@ -15,13 +15,13 @@ class SignerPayloadRaw(
 fun SignerPayloadRaw.Companion.fromUtf8(
     utf8Message: String,
     accountId: AccountId,
-    skipMessageHashing: Boolean
+    skipMessageHashing: Boolean = false
 ) = SignerPayloadRaw(utf8Message.encodeToByteArray(), accountId, skipMessageHashing)
 
 fun SignerPayloadRaw.Companion.fromHex(
     hexMessage: String,
     accountId: AccountId,
-    skipMessageHashing: Boolean
+    skipMessageHashing: Boolean = false
 ) = SignerPayloadRaw(hexMessage.fromHex(), accountId, skipMessageHashing)
 
 interface Signer {
