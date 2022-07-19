@@ -101,6 +101,8 @@ dependencies {
     androidTestImplementation androidTestRunnerDep
     androidTestImplementation androidTestRulesDep
     androidTestImplementation androidJunitDep
+
+    testImplementation coroutinesTestDep
 }
 
 def computeVersionName() {

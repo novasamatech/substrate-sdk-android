@@ -33,12 +33,13 @@ object Signer {
     fun sign(
         multiChainEncryption: MultiChainEncryption,
         message: ByteArray,
-        keypair: Keypair
+        keypair: Keypair,
+        skipHashing: Boolean = false
     ): SignatureWrapper {
         return when (multiChainEncryption) {
 
             is MultiChainEncryption.Ethereum -> {
-                signEcdsa(message, keypair, MessageHashing.ETHEREUM.hasher)
+                signEcdsa(message, keypair, MessageHashing.ETHEREUM.hasher, skipHashing)
             }
 
             is MultiChainEncryption.Substrate -> {
@@ -58,7 +59,8 @@ object Signer {
                     EncryptionType.ECDSA -> signEcdsa(
                         message,
                         keypair,
-                        MessageHashing.SUBSTRATE.hasher
+                        MessageHashing.SUBSTRATE.hasher,
+                        skipHashing
                     )
                 }
             }
@@ -114,12 +116,17 @@ object Signer {
     private fun signEcdsa(
         message: ByteArray,
         keypair: Keypair,
-        hasher: (ByteArray) -> ByteArray
+        hasher: (ByteArray) -> ByteArray,
+        skipHashing: Boolean
     ): SignatureWrapper {
         val privateKey = BigInteger(Hex.toHexString(keypair.privateKey), 16)
         val publicKey = Sign.publicKeyFromPrivate(privateKey)
 
-        val messageHash = hasher(message)
+        val messageHash = if (skipHashing) {
+            message
+        } else {
+            hasher(message)
+        }
 
         val sign = Sign.signMessage(messageHash, ECKeyPair(privateKey, publicKey), false)
 

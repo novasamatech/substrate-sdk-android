@@ -11,6 +11,8 @@ import jp.co.soramitsu.fearless_utils.runtime.RealRuntimeProvider
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEnum
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.multiAddressFromId
 import jp.co.soramitsu.fearless_utils.runtime.extrinsic.ExtrinsicBuilder
+import jp.co.soramitsu.fearless_utils.runtime.extrinsic.signer.KeyPairSigner
+import jp.co.soramitsu.fearless_utils.ss58.SS58Encoder.publicKeyToSubstrateAccountId
 import jp.co.soramitsu.fearless_utils.wsrpc.executeAsync
 import jp.co.soramitsu.fearless_utils.wsrpc.request.runtime.author.SubmitExtrinsicRequest
 import jp.co.soramitsu.fearless_utils.wsrpc.request.runtime.chain.RuntimeVersion
@@ -33,12 +35,14 @@ class SendIntegrationTest : BaseIntegrationTest(WESTEND_URL) {
     fun `should form batch extrinsic so node accepts it`() = runBlocking {
         val builder = ExtrinsicBuilder(
             runtime = runtime,
-            keypair = KEYPAIR,
+            signer = KeyPairSigner(
+                keypair = KEYPAIR,
+                encryption = MultiChainEncryption.Substrate(EncryptionType.ED25519)
+            ),
             nonce = 38.toBigInteger(),
             runtimeVersion = RuntimeVersion(48, 4),
             genesisHash = "e143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e".fromHex(),
-            multiChainEncryption = MultiChainEncryption.Substrate(EncryptionType.ED25519),
-            accountIdentifier = multiAddressFromId(KEYPAIR.publicKey),
+            accountId = KEYPAIR.publicKey.publicKeyToSubstrateAccountId(),
         )
 
         repeat(2) {

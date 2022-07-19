@@ -1,7 +1,7 @@
 buildscript {
     ext {
         // App version
-        versionName = '1.4.0'
+        versionName = '1.5.0'
         versionCode = 1
 
         // SDK and tools
@@ -60,6 +60,8 @@ buildscript {
         androidTestRunnerDep = 'androidx.test:runner:1.4.0'
         androidTestRulesDep = 'androidx.test:rules:1.4.0'
         androidJunitDep = 'androidx.test.ext:junit:1.1.3'
+
+        coroutinesTestDep = "org.jetbrains.kotlinx:kotlinx-coroutines-test:${coroutinesVersion}"
     }
     repositories {
         google()
