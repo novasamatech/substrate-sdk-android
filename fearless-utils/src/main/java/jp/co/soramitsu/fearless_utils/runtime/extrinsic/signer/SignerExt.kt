@@ -24,12 +24,14 @@ fun SignerPayloadExtrinsic.encodeCallDataTo(writer: ScaleCodecWriter) {
             GenericCall.encode(writer, runtime, call.call)
     }
 }
+
 fun SignerPayloadExtrinsic.encodedCallData() = bytesOf(::encodeCallDataTo)
 
 fun SignerPayloadExtrinsic.encodeExtensionsTo(writer: ScaleCodecWriter) {
     extrinsicType.signedExtrasType.encode(writer, runtime, signedExtras)
     AdditionalExtras.default.encode(writer, runtime, additionalExtras)
 }
+
 fun SignerPayloadExtrinsic.encodedExtensions() = bytesOf(::encodeExtensionsTo)
 
 fun SignerPayloadExtrinsic.encodedSignaturePayload(hashBigPayloads: Boolean = true): ByteArray {
@@ -46,3 +48,6 @@ fun SignerPayloadExtrinsic.encodedSignaturePayload(hashBigPayloads: Boolean = tr
 
     return messageToSign
 }
+
+val SignerPayloadExtrinsic.genesisHash
+    get() = additionalExtras[AdditionalExtras.GENESIS] as ByteArray
