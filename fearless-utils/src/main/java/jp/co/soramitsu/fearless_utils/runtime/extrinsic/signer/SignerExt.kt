@@ -5,7 +5,6 @@ import jp.co.soramitsu.fearless_utils.hash.Hasher.blake2b256
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.AdditionalExtras
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Extrinsic
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.GenericCall
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.toByteArray
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.useScaleWriter
 import jp.co.soramitsu.fearless_utils.scale.utils.directWrite
 
@@ -17,7 +16,7 @@ fun bytesOf(vararg writers: (ScaleCodecWriter) -> Unit) = useScaleWriter {
 }
 
 fun SignerPayloadExtrinsic.encodeCallDataTo(writer: ScaleCodecWriter) {
-    when(call) {
+    when (call) {
         is Extrinsic.EncodingInstance.CallRepresentation.Bytes ->
             writer.directWrite(call.bytes)
 
@@ -33,7 +32,7 @@ fun SignerPayloadExtrinsic.encodeExtensionsTo(writer: ScaleCodecWriter) {
 }
 fun SignerPayloadExtrinsic.encodedExtensions() = bytesOf(::encodeExtensionsTo)
 
-fun SignerPayloadExtrinsic.encodedSignaturePayload(hashBigPayloads: Boolean = true) : ByteArray {
+fun SignerPayloadExtrinsic.encodedSignaturePayload(hashBigPayloads: Boolean = true): ByteArray {
     val payloadBytes = bytesOf(
         ::encodeCallDataTo,
         ::encodeExtensionsTo
