@@ -22,7 +22,7 @@ fun SignerPayloadExtrinsic.encodeCallDataTo(writer: ScaleCodecWriter) {
             writer.directWrite(call.bytes)
 
         is Extrinsic.EncodingInstance.CallRepresentation.Instance ->
-            GenericCall.toByteArray(runtime,call.call)
+            GenericCall.encode(writer, runtime, call.call)
     }
 }
 fun SignerPayloadExtrinsic.encodedCallData() = bytesOf(::encodeCallDataTo)

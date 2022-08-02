@@ -11,7 +11,7 @@ class KeyPairSigner(
 ) : Signer {
 
     override suspend fun signExtrinsic(payloadExtrinsic: SignerPayloadExtrinsic): SignatureWrapper {
-        val messageToSign = payloadExtrinsic.encodedSignaturePayload()
+        val messageToSign = payloadExtrinsic.encodedSignaturePayload(hashBigPayloads = true)
 
         return MessageSigner.sign(encryption, messageToSign, keypair, skipHashing = false)
     }
