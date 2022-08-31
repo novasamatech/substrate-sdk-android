@@ -20,7 +20,7 @@ import java.security.Signature
 
 object Signer {
 
-    private enum class MessageHashing(val hasher: (ByteArray) -> ByteArray) {
+    enum class MessageHashing(val hasher: (ByteArray) -> ByteArray) {
         SUBSTRATE(hasher = { it.blake2b256() }),
         ETHEREUM(hasher = { it.keccak256() })
     }

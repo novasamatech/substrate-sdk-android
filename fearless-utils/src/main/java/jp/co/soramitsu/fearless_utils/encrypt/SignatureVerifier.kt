@@ -1,5 +1,6 @@
 package jp.co.soramitsu.fearless_utils.encrypt
 
+import jp.co.soramitsu.fearless_utils.encrypt.keypair.ECDSAUtils
 import jp.co.soramitsu.fearless_utils.extensions.fromHex
 import net.i2p.crypto.eddsa.EdDSAEngine
 import net.i2p.crypto.eddsa.EdDSAPublicKey
@@ -12,10 +13,15 @@ import java.security.Signature
 
 object SignatureVerifier {
 
-    fun verify(signatureWrapper: SignatureWrapper, data: ByteArray, publicKey: ByteArray): Boolean {
+    fun verify(
+        signatureWrapper: SignatureWrapper,
+        messageHashing: Signer.MessageHashing,
+        data: ByteArray,
+        publicKey: ByteArray
+    ): Boolean {
         return when(signatureWrapper) {
             is SignatureWrapper.Ecdsa -> {
-                verifyEcdsa(signatureWrapper, data, publicKey)
+                verifyEcdsa(signatureWrapper, data, publicKey, messageHashing)
             }
 
             is SignatureWrapper.Ed25519 -> {
@@ -31,13 +37,19 @@ object SignatureVerifier {
     private fun verifyEcdsa(
         signature: SignatureWrapper.Ecdsa,
         message: ByteArray,
-        publicKeyBytes: ByteArray
+        publicKeyBytes: ByteArray,
+        messageHashing: Signer.MessageHashing,
     ): Boolean = runCatching {
         val signatureData = Sign.SignatureData(signature.v, signature.r, signature.s)
-        val publicKeyInt = Sign.signedMessageToKey(message, signatureData)
+
+        val hashedMessage = messageHashing.hasher(message)
+
+        val publicKeyInt = Sign.signedMessageHashToKey(hashedMessage, signatureData)
         val signaturePublicKey = publicKeyInt.toString(16).fromHex()
 
-        signaturePublicKey.contentEquals(publicKeyBytes)
+        val decompressedExpectedPublicKey = ECDSAUtils.decompressed(publicKeyBytes)
+
+        signaturePublicKey.contentEquals(decompressedExpectedPublicKey)
     }.getOrDefault(false)
 
     private fun verifyEd25519(

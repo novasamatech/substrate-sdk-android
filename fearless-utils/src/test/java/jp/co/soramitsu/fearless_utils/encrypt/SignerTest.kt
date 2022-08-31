@@ -14,17 +14,6 @@ import org.mockito.junit.MockitoJUnitRunner
 class SignerTest {
 
     @Test
-    fun `should sign message ED25519`() {
-        val messageHex = "this is a message"
-
-        val keypair = SubstrateKeypairFactory.generate(EncryptionType.ED25519, TestData.SEED_BYTES)
-
-        val result = Signer.sign(MultiChainEncryption.Substrate(EncryptionType.ED25519), messageHex.toByteArray(), keypair)
-
-        assert(Signer.verifyEd25519(messageHex.toByteArray(), result.signature, keypair.publicKey))
-    }
-
-    @Test
     fun `should sign message ECDSA`() {
         val publicKeyHex = "f65a7d560102f2019da9b9d8993f53f51cc38d50cdff3d0b8e71997d7f911ff1"
         val privateKeyHex = "ae4093af3c40f2ecc32c14d4dada9628a4a42b28ca1a5b200b89321cbc883182"
