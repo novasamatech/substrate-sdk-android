@@ -21,7 +21,7 @@ fun interface SignTest {
 class SignatureVerifierTest {
 
     @Test
-    fun `should verify ECSA`() {
+    fun `should verify ECDSA`() {
         val isSubstrateOptions = listOf(true, false)
 
         isSubstrateOptions.forEach { isSubstrate ->
