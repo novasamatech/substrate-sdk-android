@@ -73,13 +73,7 @@ object Signer {
         return SignatureWrapper.Sr25519(signature = sign)
     }
 
-    fun verifySr25519(
-        message: ByteArray,
-        signature: ByteArray,
-        publicKeyBytes: ByteArray
-    ): Boolean {
-        return Sr25519.verify(signature, message, publicKeyBytes)
-    }
+
 
     private fun signEd25519(message: ByteArray, keypair: Keypair): SignatureWrapper {
         val spec: EdDSAParameterSpec = EdDSANamedCurveTable.getByName(EdDSANamedCurveTable.ED_25519)
@@ -94,24 +88,6 @@ object Signer {
         return SignatureWrapper.Ed25519(signature = sgr.sign())
     }
 
-    fun verifyEd25519(
-        message: ByteArray,
-        signature: ByteArray,
-        publicKeyBytes: ByteArray
-    ): Boolean {
-        val spec: EdDSAParameterSpec = EdDSANamedCurveTable.getByName(EdDSANamedCurveTable.ED_25519)
-        val sgr: Signature = Signature.getInstance(
-            EdDSAEngine.SIGNATURE_ALGORITHM,
-            EdDSASecurityProvider.PROVIDER_NAME
-        )
-
-        val privKeySpec = EdDSAPublicKeySpec(publicKeyBytes, spec)
-        val publicKey = EdDSAPublicKey(privKeySpec)
-        sgr.initVerify(publicKey)
-        sgr.update(message)
-
-        return sgr.verify(signature)
-    }
 
     private fun signEcdsa(
         message: ByteArray,
