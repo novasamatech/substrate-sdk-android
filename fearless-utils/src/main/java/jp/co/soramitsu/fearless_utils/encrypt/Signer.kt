@@ -6,12 +6,10 @@ import jp.co.soramitsu.fearless_utils.hash.Hasher.blake2b256
 import jp.co.soramitsu.fearless_utils.hash.Hasher.keccak256
 import net.i2p.crypto.eddsa.EdDSAEngine
 import net.i2p.crypto.eddsa.EdDSAPrivateKey
-import net.i2p.crypto.eddsa.EdDSAPublicKey
 import net.i2p.crypto.eddsa.EdDSASecurityProvider
 import net.i2p.crypto.eddsa.spec.EdDSANamedCurveTable
 import net.i2p.crypto.eddsa.spec.EdDSAParameterSpec
 import net.i2p.crypto.eddsa.spec.EdDSAPrivateKeySpec
-import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec
 import org.bouncycastle.util.encoders.Hex
 import org.web3j.crypto.ECKeyPair
 import org.web3j.crypto.Sign
@@ -73,8 +71,6 @@ object Signer {
         return SignatureWrapper.Sr25519(signature = sign)
     }
 
-
-
     private fun signEd25519(message: ByteArray, keypair: Keypair): SignatureWrapper {
         val spec: EdDSAParameterSpec = EdDSANamedCurveTable.getByName(EdDSANamedCurveTable.ED_25519)
         val sgr: Signature = Signature.getInstance(
@@ -87,7 +83,6 @@ object Signer {
         sgr.update(message)
         return SignatureWrapper.Ed25519(signature = sgr.sign())
     }
-
 
     private fun signEcdsa(
         message: ByteArray,

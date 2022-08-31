@@ -19,7 +19,7 @@ object SignatureVerifier {
         data: ByteArray,
         publicKey: ByteArray
     ): Boolean {
-        return when(signatureWrapper) {
+        return when (signatureWrapper) {
             is SignatureWrapper.Ecdsa -> {
                 verifyEcdsa(signatureWrapper, data, publicKey, messageHashing)
             }
