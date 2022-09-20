@@ -183,11 +183,11 @@ fun SiTypeMapping.Companion.default(): OneOfSiTypeMapping {
 }
 
 operator fun OneOfSiTypeMapping.plus(other: SiTypeMapping): OneOfSiTypeMapping {
-    return OneOfSiTypeMapping(inner + other)
+    return OneOfSiTypeMapping(listOf(other) + inner)
 }
 
 operator fun OneOfSiTypeMapping.plus(others: List<SiTypeMapping>): OneOfSiTypeMapping {
-    return OneOfSiTypeMapping(inner + others)
+    return OneOfSiTypeMapping(others + inner)
 }
 
 private val EncodableStruct<RegistryType>.lastPathSegment: String?
