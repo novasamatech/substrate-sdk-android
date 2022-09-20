@@ -38,7 +38,7 @@ interface SiTypeMapping {
 }
 
 class OneOfSiTypeMapping(
-    private val inner: List<SiTypeMapping>
+   val inner: List<SiTypeMapping>
 ) : SiTypeMapping {
 
     override fun map(
@@ -171,7 +171,7 @@ object SiByteArrayMapping : SiTypeMapping {
     }
 }
 
-fun SiTypeMapping.Companion.default(): SiTypeMapping {
+fun SiTypeMapping.Companion.default(): OneOfSiTypeMapping {
     return OneOfSiTypeMapping(
         listOf(
             SiByteArrayMapping,
@@ -180,6 +180,14 @@ fun SiTypeMapping.Companion.default(): SiTypeMapping {
             SiCompositeNoneToAliasTypeMapping
         )
     )
+}
+
+operator fun OneOfSiTypeMapping.plus(other: OneOfSiTypeMapping): OneOfSiTypeMapping {
+    return OneOfSiTypeMapping(inner + other)
+}
+
+operator fun OneOfSiTypeMapping.plus(others: List<OneOfSiTypeMapping>): OneOfSiTypeMapping {
+    return OneOfSiTypeMapping(inner + others)
 }
 
 private val EncodableStruct<RegistryType>.lastPathSegment: String?
