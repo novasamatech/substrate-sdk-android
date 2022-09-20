@@ -182,11 +182,11 @@ fun SiTypeMapping.Companion.default(): OneOfSiTypeMapping {
     )
 }
 
-operator fun OneOfSiTypeMapping.plus(other: OneOfSiTypeMapping): OneOfSiTypeMapping {
+operator fun OneOfSiTypeMapping.plus(other: SiTypeMapping): OneOfSiTypeMapping {
     return OneOfSiTypeMapping(inner + other)
 }
 
-operator fun OneOfSiTypeMapping.plus(others: List<OneOfSiTypeMapping>): OneOfSiTypeMapping {
+operator fun OneOfSiTypeMapping.plus(others: List<SiTypeMapping>): OneOfSiTypeMapping {
     return OneOfSiTypeMapping(inner + others)
 }
 
