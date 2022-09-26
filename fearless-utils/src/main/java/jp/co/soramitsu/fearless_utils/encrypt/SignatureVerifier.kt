@@ -34,20 +34,28 @@ object SignatureVerifier {
         }
     }
 
+    fun recoverSignaturePublicKey(
+        message: ByteArray,
+        signature: SignatureWrapper.Ecdsa,
+        messageHashing: Signer.MessageHashing,
+    ): ByteArray {
+        val signatureData = Sign.SignatureData(signature.v, signature.r, signature.s)
+
+        val hashedMessage = messageHashing.hasher(message)
+
+        val publicKeyInt = Sign.signedMessageHashToKey(hashedMessage, signatureData)
+
+        return publicKeyInt.toString(16).fromHex()
+    }
+
     private fun verifyEcdsa(
         signature: SignatureWrapper.Ecdsa,
         message: ByteArray,
         publicKeyBytes: ByteArray,
         messageHashing: Signer.MessageHashing,
     ): Boolean = runCatching {
-        val signatureData = Sign.SignatureData(signature.v, signature.r, signature.s)
-
-        val hashedMessage = messageHashing.hasher(message)
-
-        val publicKeyInt = Sign.signedMessageHashToKey(hashedMessage, signatureData)
-        val signaturePublicKey = publicKeyInt.toString(16).fromHex()
-
         val decompressedExpectedPublicKey = ECDSAUtils.decompressed(publicKeyBytes)
+        val signaturePublicKey = recoverSignaturePublicKey(message, signature, messageHashing)
 
         signaturePublicKey.contentEquals(decompressedExpectedPublicKey)
     }.getOrDefault(false)
