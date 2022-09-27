@@ -38,7 +38,7 @@ interface SiTypeMapping {
 }
 
 class OneOfSiTypeMapping(
-   val inner: List<SiTypeMapping>
+    val inner: List<SiTypeMapping>
 ) : SiTypeMapping {
 
     override fun map(
