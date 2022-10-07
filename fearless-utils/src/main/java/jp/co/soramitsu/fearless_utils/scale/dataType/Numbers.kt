@@ -68,7 +68,7 @@ open class uint(val size: Int) : DataType<BigInteger>() {
     override fun read(reader: ScaleCodecReader): BigInteger {
         val bytes = reader.readByteArray(size)
 
-        return bytes.fromUnsignedBytes(ByteOrder.LITTLE_ENDIAN)
+        return bytes.fromUnsignedBytes(originByteOrder = ByteOrder.LITTLE_ENDIAN)
     }
 
     override fun write(writer: ScaleCodecWriter, value: BigInteger) {

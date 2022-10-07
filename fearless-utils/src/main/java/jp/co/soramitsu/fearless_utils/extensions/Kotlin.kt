@@ -1,5 +1,6 @@
 package jp.co.soramitsu.fearless_utils.extensions
 
+import jp.co.soramitsu.fearless_utils.hash.isNegative
 import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -16,11 +17,47 @@ inline fun <T, R> Iterable<T>.tryFindNonNull(transform: (T) -> R?): R? {
 
 private const val UNSIGNED_SIGNUM = 1
 
-fun ByteArray.fromUnsignedBytes(byteOrder: ByteOrder = ByteOrder.BIG_ENDIAN): BigInteger {
-    // Big Integer accepts big endian numbers
-    val ordered = if (byteOrder == ByteOrder.LITTLE_ENDIAN) reversedArray() else this
+fun ByteArray.fromUnsignedBytes(originByteOrder: ByteOrder = ByteOrder.BIG_ENDIAN): BigInteger {
+    val ordered = toBigIntegerByteOrder(originByteOrder)
 
     return BigInteger(UNSIGNED_SIGNUM, ordered)
+}
+
+fun ByteArray.fromSignedBytes(originByteOrder: ByteOrder = ByteOrder.BIG_ENDIAN): BigInteger {
+    val ordered = toBigIntegerByteOrder(originByteOrder)
+
+    return BigInteger(ordered)
+}
+
+fun BigInteger.toSignedBytes(
+    resultByteOrder: ByteOrder = ByteOrder.BIG_ENDIAN,
+    expectedBytesSize: Int
+): ByteArray {
+    val signedBytes = toByteArray()
+    // 0xff if negative else 0x00 as per two-complement notation
+    val padding: Byte = if (isNegative()) -1 else 0
+
+    val padded = signedBytes.pad(expectedBytesSize, padding)
+
+    return padded.fromBigIntegerByteOrder(resultByteOrder = resultByteOrder)
+}
+
+fun ByteArray.pad(expectedSize: Int, padding: Byte = 0): ByteArray {
+    if (size >= expectedSize) return this
+
+    val padded = ByteArray(expectedSize) { padding }
+    val startAt = expectedSize - size
+    return copyInto(padded, startAt)
+}
+
+private fun ByteArray.fromBigIntegerByteOrder(resultByteOrder: ByteOrder): ByteArray {
+    // Big Integer uses big endian numbers
+    return if (resultByteOrder == ByteOrder.LITTLE_ENDIAN) reversedArray() else this
+}
+
+private fun ByteArray.toBigIntegerByteOrder(originByteOrder: ByteOrder): ByteArray {
+    // Big Integer accepts big endian numbers
+    return if (originByteOrder == ByteOrder.LITTLE_ENDIAN) reversedArray() else this
 }
 
 @ExperimentalUnsignedTypes
