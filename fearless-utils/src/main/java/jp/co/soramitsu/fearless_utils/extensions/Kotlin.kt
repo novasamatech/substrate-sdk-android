@@ -16,11 +16,32 @@ inline fun <T, R> Iterable<T>.tryFindNonNull(transform: (T) -> R?): R? {
 
 private const val UNSIGNED_SIGNUM = 1
 
-fun ByteArray.fromUnsignedBytes(byteOrder: ByteOrder = ByteOrder.BIG_ENDIAN): BigInteger {
-    // Big Integer accepts big endian numbers
-    val ordered = if (byteOrder == ByteOrder.LITTLE_ENDIAN) reversedArray() else this
+fun ByteArray.fromUnsignedBytes(originByteOrder: ByteOrder = ByteOrder.BIG_ENDIAN): BigInteger {
+    val ordered = toBigIntegerByteOrder(originByteOrder)
 
     return BigInteger(UNSIGNED_SIGNUM, ordered)
+}
+
+fun ByteArray.fromSignedBytes(originByteOrder: ByteOrder = ByteOrder.BIG_ENDIAN): BigInteger {
+    val ordered = toBigIntegerByteOrder(originByteOrder)
+
+    return BigInteger(ordered)
+}
+
+fun BigInteger.toSignedBytes(resultByteOrder: ByteOrder = ByteOrder.BIG_ENDIAN): ByteArray {
+    val signedBytes = toByteArray()
+
+    return signedBytes.fromBigIntegerByteOrder(resultByteOrder = resultByteOrder)
+}
+
+private fun ByteArray.fromBigIntegerByteOrder(resultByteOrder: ByteOrder): ByteArray {
+    // Big Integer uses big endian numbers
+    return if (resultByteOrder == ByteOrder.LITTLE_ENDIAN) reversedArray() else this
+}
+
+private fun ByteArray.toBigIntegerByteOrder(originByteOrder: ByteOrder): ByteArray {
+    // Big Integer accepts big endian numbers
+    return if (originByteOrder == ByteOrder.LITTLE_ENDIAN) reversedArray() else this
 }
 
 @ExperimentalUnsignedTypes

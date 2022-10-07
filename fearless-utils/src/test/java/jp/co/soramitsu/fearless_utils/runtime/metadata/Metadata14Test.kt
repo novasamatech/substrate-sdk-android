@@ -22,11 +22,13 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.UIntT
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u32
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u64
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u8
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.i64
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.skipAliases
 import jp.co.soramitsu.fearless_utils.runtime.definitions.v14.TypesParserV14
 import jp.co.soramitsu.fearless_utils.runtime.metadata.builder.VersionedRuntimeBuilder
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module.StorageEntryType
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.RuntimeMetadataSchemaV14
+import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -73,19 +75,10 @@ class Metadata14Test {
     }
 
     @Test
-    fun `should decode metadata v14`() {
-        val inHex = getFileContentFromResources("westend_metadata_v14")
-        val metadataReader = RuntimeMetadataReader.read(inHex)
-        val typePreset = TypesParserV14.parse(
-            lookup = metadataReader.metadata[RuntimeMetadataSchemaV14.lookup],
-            typePreset = v14Preset()
-        )
-
-        val typeRegistry = TypeRegistry(
-            typePreset,
-            DynamicTypeResolver.defaultCompoundResolver()
-        )
-        val metadata = VersionedRuntimeBuilder.buildMetadata(metadataReader, typeRegistry)
+    fun `should decode westend metadata v14`() {
+        val runtime = buildTestRuntime("westend_metadata_v14")
+        val metadata = runtime.metadata
+        val typeRegistry = runtime.typeRegistry
 
         val accountReturnEntry = metadata.module("System").storage("Account").type
         assertInstance<StorageEntryType.NMap>(accountReturnEntry)
@@ -159,5 +152,32 @@ class Metadata14Test {
         // id-based types with empty path should not be aliased
         val u8Primitive = typeRegistry["2"]
         assertNotInstance<Alias>(u8Primitive)
+    }
+
+    @Test
+    fun `should decode gov2 testnet runtime v14`() {
+        val runtime = buildTestRuntime("gov2_testnet_runtime_v14")
+        val typeRegistry = runtime.typeRegistry
+
+        // should parse signed primitives to IntType
+        val fixedI64 = typeRegistry["sp_arithmetic.fixed_point.FixedI64"]?.skipAliases()
+        assertEquals(i64, fixedI64)
+    }
+
+    private fun buildTestRuntime(fileName: String): RuntimeSnapshot {
+        val inHex = getFileContentFromResources(fileName)
+        val metadataReader = RuntimeMetadataReader.read(inHex)
+        val typePreset = TypesParserV14.parse(
+            lookup = metadataReader.metadata[RuntimeMetadataSchemaV14.lookup],
+            typePreset = v14Preset()
+        )
+
+        val typeRegistry = TypeRegistry(
+            typePreset,
+            DynamicTypeResolver.defaultCompoundResolver()
+        )
+        val metadata = VersionedRuntimeBuilder.buildMetadata(metadataReader, typeRegistry)
+
+        return RuntimeSnapshot(typeRegistry, metadata)
     }
 }

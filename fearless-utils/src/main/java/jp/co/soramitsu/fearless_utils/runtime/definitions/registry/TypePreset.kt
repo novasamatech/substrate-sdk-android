@@ -25,6 +25,12 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Null
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.OpaqueCall
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.SessionKeysSubstrate
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.BooleanType
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.i128
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.i16
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.i256
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.i32
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.i64
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.i8
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u128
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u16
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u256
@@ -69,12 +75,20 @@ fun typePreset(builder: TypePresetBuilder.() -> Unit): TypePreset {
 
 fun v14Preset() = typePreset {
     type(BooleanType)
+
     type(u8)
     type(u16)
     type(u32)
     type(u64)
     type(u128)
     type(u256)
+
+    type(i8)
+    type(i16)
+    type(i32)
+    type(i64)
+    type(i128)
+    type(i256)
 
     type(Bytes)
     type(Null)
@@ -96,6 +110,13 @@ fun v13Preset(): TypePreset = typePreset {
     type(u64)
     type(u128)
     type(u256)
+
+    type(i8)
+    type(i16)
+    type(i32)
+    type(i64)
+    type(i128)
+    type(i256)
 
     type(GenericAccountId)
     type(Null)
@@ -140,8 +161,6 @@ fun v13Preset(): TypePreset = typePreset {
     alias("Bidkind", "BidKind")
 
     alias("AccountIdAddress", "GenericAccountId")
-
-    alias("i128", "u128")
 
     alias("VoteWeight", "u128")
     alias("PreRuntime", "GenericPreRuntime")
