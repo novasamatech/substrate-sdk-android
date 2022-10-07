@@ -1,7 +1,6 @@
 package jp.co.soramitsu.fearless_utils.extensions
 
 import jp.co.soramitsu.fearless_utils.hash.isNegative
-import jp.co.soramitsu.fearless_utils.hash.isPositive
 import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
