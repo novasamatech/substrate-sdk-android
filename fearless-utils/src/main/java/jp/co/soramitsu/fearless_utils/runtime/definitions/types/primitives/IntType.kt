@@ -3,8 +3,10 @@ package jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives
 import io.emeraldpay.polkaj.scale.ScaleCodecReader
 import io.emeraldpay.polkaj.scale.ScaleCodecWriter
 import jp.co.soramitsu.fearless_utils.extensions.fromSignedBytes
+import jp.co.soramitsu.fearless_utils.extensions.pad
 import jp.co.soramitsu.fearless_utils.extensions.toSignedBytes
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
+import jp.co.soramitsu.fearless_utils.scale.utils.directWrite
 import java.math.BigInteger
 import java.nio.ByteOrder
 
@@ -24,14 +26,17 @@ class IntType(bits: Int) : NumberType("i$bits") {
     val bytes = bits / 8
 
     override fun encode(scaleCodecWriter: ScaleCodecWriter, runtime: RuntimeSnapshot, value: BigInteger) {
-        val bytes = value.toSignedBytes(resultByteOrder = ByteOrder.BIG_ENDIAN)
-        
-        scaleCodecWriter.writeByteArray(bytes)
+        val bytes = value.toSignedBytes(
+            resultByteOrder = ByteOrder.LITTLE_ENDIAN,
+            expectedBytesSize = bytes
+        )
+
+        scaleCodecWriter.directWrite(bytes)
     }
 
     override fun decode(scaleCodecReader: ScaleCodecReader, runtime: RuntimeSnapshot): BigInteger {
         val bytes = scaleCodecReader.readByteArray(bytes)
 
-        return bytes.fromSignedBytes(originByteOrder = ByteOrder.BIG_ENDIAN)
+        return bytes.fromSignedBytes(originByteOrder = ByteOrder.LITTLE_ENDIAN)
     }
 }

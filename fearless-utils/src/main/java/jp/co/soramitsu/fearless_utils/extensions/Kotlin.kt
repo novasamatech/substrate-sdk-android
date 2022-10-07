@@ -1,5 +1,7 @@
 package jp.co.soramitsu.fearless_utils.extensions
 
+import jp.co.soramitsu.fearless_utils.hash.isNegative
+import jp.co.soramitsu.fearless_utils.hash.isPositive
 import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -28,10 +30,25 @@ fun ByteArray.fromSignedBytes(originByteOrder: ByteOrder = ByteOrder.BIG_ENDIAN)
     return BigInteger(ordered)
 }
 
-fun BigInteger.toSignedBytes(resultByteOrder: ByteOrder = ByteOrder.BIG_ENDIAN): ByteArray {
+fun BigInteger.toSignedBytes(
+    resultByteOrder: ByteOrder = ByteOrder.BIG_ENDIAN,
+    expectedBytesSize: Int
+): ByteArray {
     val signedBytes = toByteArray()
+    // 0xff if negative else 0x00 as per two-complement notation
+    val padding: Byte = if (isNegative()) -1 else 0
 
-    return signedBytes.fromBigIntegerByteOrder(resultByteOrder = resultByteOrder)
+    val padded = signedBytes.pad(expectedBytesSize, padding)
+
+    return padded.fromBigIntegerByteOrder(resultByteOrder = resultByteOrder)
+}
+
+fun ByteArray.pad(expectedSize: Int, padding: Byte = 0): ByteArray {
+    if (size >= expectedSize) return this
+
+    val padded = ByteArray(expectedSize) { padding }
+    val startAt = expectedSize - size
+    return copyInto(padded, startAt)
 }
 
 private fun ByteArray.fromBigIntegerByteOrder(resultByteOrder: ByteOrder): ByteArray {
