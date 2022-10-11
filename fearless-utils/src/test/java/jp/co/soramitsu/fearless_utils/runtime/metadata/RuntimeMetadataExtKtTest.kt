@@ -10,6 +10,8 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.Dynam
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u32
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module.StorageEntry
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module.StorageEntryType
+import jp.co.soramitsu.fearless_utils.runtime.metadata.module.MetadataFunction
+import jp.co.soramitsu.fearless_utils.runtime.metadata.module.Module
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -17,6 +19,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.junit.MockitoJUnitRunner
+import java.math.BigInteger
 
 private val MODULE_NAME = "Test"
 private val CALL_NAME = "Test"
@@ -133,6 +136,22 @@ class RuntimeMetadataExtKtTest {
         assertArrayEquals(a3, splittedArguments[2] as ByteArray)
     }
 
+    @Test
+    fun `should retrieve call by index when indexing is array-like`() {
+        val module = newModule(listOf(0, 1, 2))
+        val call = module.call(2)
+
+        assertEquals("Function 2", call.name)
+    }
+
+    @Test
+    fun `should retrieve call by index when indexing is not array-like`() {
+        val module = newModule(listOf(1, 2, 3, 5, 8))
+        val call = module.call(5)
+
+        assertEquals("Function 5", call.name)
+    }
+
     private fun storageEntry(storageEntryType: StorageEntryType): StorageEntry {
         val mock = Mockito.mock(StorageEntry::class.java)
 
@@ -142,4 +161,22 @@ class RuntimeMetadataExtKtTest {
 
         return mock
     }
+
+    private fun newModule(callIndices: List<Int>): Module {
+        val mock = Mockito.mock(Module::class.java)
+
+        val calls = callIndices.map { newCall(moduleIndex = 0, callIndex = it) }
+            .associateBy(MetadataFunction::name)
+
+        Mockito.`when`(mock.calls).thenReturn(calls)
+
+        return mock
+    }
+
+    private fun newCall(moduleIndex: Int, callIndex: Int) = MetadataFunction(
+        name = "Function $callIndex",
+        arguments = emptyList(),
+        documentation = emptyList(),
+        index = moduleIndex to callIndex
+    )
 }
