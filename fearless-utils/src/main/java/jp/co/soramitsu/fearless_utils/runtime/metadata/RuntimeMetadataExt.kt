@@ -41,7 +41,8 @@ fun Module.storageOrNull(name: String): StorageEntry? = storage?.get(name)
 /**
  * @throws NoSuchElementException if call was not found
  */
-fun Module.call(index: Int): MetadataFunction = requireElementInMap(calls, index)
+fun Module.call(index: Int): MetadataFunction =
+    calls.getByIndexOrThrow(index, MetadataFunction::index)
 
 fun Module.callOrNull(index: Int): MetadataFunction? = nullOnException { call(index) }
 
@@ -55,7 +56,8 @@ fun Module.callOrNull(name: String): MetadataFunction? = calls?.get(name)
 /**
  * @throws NoSuchElementException if event was not found
  */
-fun Module.event(index: Int): Event = requireElementInMap(events, index)
+fun Module.event(index: Int): Event =
+    events.getByIndexOrThrow(index, Event::index)
 
 fun Module.eventOrNull(index: Int): Event? = nullOnException { event(index) }
 
@@ -238,8 +240,13 @@ private inline fun <T> nullOnException(block: () -> T): T? {
     return runCatching(block).getOrNull()
 }
 
-private fun <V> requireElementInMap(map: Map<String, V>?, index: Int): V {
-    if (map == null) throw NoSuchElementException()
+private inline fun <V> Map<*, V>?.getByIndexOrThrow(
+    index: Int,
+    valueIndexExtractor: (V) -> Pair<Int, Int>
+): V {
+    return this?.values?.firstOrNull {
+        val (_, elementIndex) = valueIndexExtractor(it)
 
-    return map.values.elementAtOrNull(index) ?: throw NoSuchElementException()
+        elementIndex == index
+    } ?: throw NoSuchElementException()
 }
