@@ -1,8 +1,10 @@
 package jp.co.soramitsu.fearless_utils.wsrpc.request.base
 
-import com.google.gson.annotations.SerializedName
+import jp.co.soramitsu.fearless_utils.wsrpc.request.runtime.RuntimeRequest
 
-abstract class RpcRequest(
-    @SerializedName("jsonrpc")
-    val jsonRpc: String = "2.0"
-)
+sealed class RpcRequest(val id: Int) {
+
+    class Raw(val content: String, id: Int) : RpcRequest(id)
+
+    class Rpc2(val request: RuntimeRequest) : RpcRequest(request.id)
+}
