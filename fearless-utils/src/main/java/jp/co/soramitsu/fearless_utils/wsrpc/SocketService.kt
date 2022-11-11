@@ -11,6 +11,7 @@ import jp.co.soramitsu.fearless_utils.wsrpc.recovery.Reconnector
 import jp.co.soramitsu.fearless_utils.wsrpc.request.DeliveryType
 import jp.co.soramitsu.fearless_utils.wsrpc.request.RequestExecutor
 import jp.co.soramitsu.fearless_utils.wsrpc.request.RespondableSendable
+import jp.co.soramitsu.fearless_utils.wsrpc.request.base.RpcRequest
 import jp.co.soramitsu.fearless_utils.wsrpc.request.runtime.RuntimeRequest
 import jp.co.soramitsu.fearless_utils.wsrpc.response.RpcResponse
 import jp.co.soramitsu.fearless_utils.wsrpc.socket.ObservableState
@@ -97,6 +98,15 @@ class SocketService(
         callback: ResponseListener<SubscriptionChange>,
         unsubscribeMethod: String
     ): Cancellable {
+        return subscribe(RpcRequest.Rpc2(request), callback, unsubscribeMethod)
+    }
+
+    @Synchronized
+    fun subscribe(
+        request: RpcRequest,
+        callback: ResponseListener<SubscriptionChange>,
+        unsubscribeMethod: String
+    ): Cancellable {
         return executeRequest(
             request,
             DeliveryType.ON_RECONNECT,
@@ -112,15 +122,28 @@ class SocketService(
 
     @Synchronized
     fun executeRequest(
-        runtimeRequest: RuntimeRequest,
+        rpcRequest: RpcRequest,
         deliveryType: DeliveryType = DeliveryType.AT_LEAST_ONCE,
         callback: ResponseListener<RpcResponse>
     ): Cancellable {
-        val sendable = RespondableSendable(runtimeRequest, deliveryType, callback)
+        val sendable = RespondableSendable(rpcRequest, deliveryType, callback)
 
         updateState(Event.Send(sendable))
 
         return RequestCancellable(sendable)
+    }
+
+    @Synchronized
+    fun executeRequest(
+        runtimeRequest: RuntimeRequest,
+        deliveryType: DeliveryType = DeliveryType.AT_LEAST_ONCE,
+        callback: ResponseListener<RpcResponse>
+    ): Cancellable {
+        return executeRequest(
+            rpcRequest = RpcRequest.Rpc2(runtimeRequest),
+            deliveryType = deliveryType,
+            callback = callback
+        )
     }
 
     @Synchronized
@@ -244,8 +267,7 @@ class SocketService(
     private fun unsubscribe(subscription: SocketStateMachine.Subscription) {
         require(subscription is RespondableSubscription)
 
-        val unsubscribeRequest =
-            RuntimeRequest(subscription.unsubscribeMethod, listOf(subscription.id))
+        val unsubscribeRequest = RuntimeRequest(subscription.unsubscribeMethod, listOf(subscription.id))
 
         executeRequest(
             unsubscribeRequest,

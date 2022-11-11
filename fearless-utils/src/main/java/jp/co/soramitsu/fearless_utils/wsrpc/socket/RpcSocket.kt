@@ -14,6 +14,7 @@ import jp.co.soramitsu.fearless_utils.wsrpc.subscription.response.SubscriptionCh
 import java.util.concurrent.TimeUnit
 
 interface RpcSocketListener {
+
     fun onResponse(rpcResponse: RpcResponse)
 
     fun onResponse(subscriptionChange: SubscriptionChange)
@@ -57,7 +58,10 @@ class RpcSocket(
     }
 
     fun sendRpcRequest(rpcRequest: RpcRequest) {
-        val text = gson.toJson(rpcRequest)
+        val text = when (rpcRequest) {
+            is RpcRequest.Raw -> rpcRequest.content
+            is RpcRequest.Rpc2 -> gson.toJson(rpcRequest.request)
+        }
 
         log("Sending", text)
 
