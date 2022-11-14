@@ -7,6 +7,7 @@ import com.neovisionaries.ws.client.WebSocketException
 import com.neovisionaries.ws.client.WebSocketFactory
 import com.neovisionaries.ws.client.WebSocketFrame
 import com.neovisionaries.ws.client.WebSocketState
+import jp.co.soramitsu.fearless_utils.util.fromJson
 import jp.co.soramitsu.fearless_utils.wsrpc.logging.Logger
 import jp.co.soramitsu.fearless_utils.wsrpc.request.base.RpcRequest
 import jp.co.soramitsu.fearless_utils.wsrpc.response.RpcResponse
@@ -15,9 +16,11 @@ import java.util.concurrent.TimeUnit
 
 interface RpcSocketListener {
 
-    fun onResponse(rpcResponse: RpcResponse)
+    fun onSingleResponse(rpcResponse: RpcResponse)
 
-    fun onResponse(subscriptionChange: SubscriptionChange)
+    fun onSubscriptionResponse(subscriptionChange: SubscriptionChange)
+
+    fun onBatchResponse(batchResponse: List<RpcResponse>)
 
     fun onStateChanged(newState: WebSocketState)
 
@@ -58,14 +61,29 @@ class RpcSocket(
     }
 
     fun sendRpcRequest(rpcRequest: RpcRequest) {
-        val text = when (rpcRequest) {
-            is RpcRequest.Raw -> rpcRequest.content
-            is RpcRequest.Rpc2 -> gson.toJson(rpcRequest.request)
-        }
+        val text = rpcRequest.toJson()
 
         log("Sending", text)
 
         ws.sendText(text)
+    }
+
+    fun sendBatchRpcRequests(batchRequests: List<RpcRequest>) {
+        // wrap in json array
+        val toSend = batchRequests.joinToString(separator = ",", prefix = "[", postfix = "]") {
+            it.toJson()
+        }
+
+        log("Sending batch", toSend)
+
+        ws.sendText(toSend)
+    }
+
+    private fun RpcRequest.toJson(): String {
+        return when (this) {
+            is RpcRequest.Raw -> content
+            is RpcRequest.Rpc2 -> gson.toJson(request)
+        }
     }
 
     private fun setupListener(listener: RpcSocketListener) {
@@ -73,10 +91,10 @@ class RpcSocket(
             override fun onTextMessage(websocket: WebSocket, text: String) {
                 log("Received", text)
 
-                if (isSubscriptionChange(text)) {
-                    listener.onResponse(gson.fromJson(text, SubscriptionChange::class.java))
-                } else {
-                    listener.onResponse(gson.fromJson(text, RpcResponse::class.java))
+                when {
+                    isBatchReply(text) -> listener.onBatchResponse(gson.fromJson(text))
+                    isSubscriptionChange(text) -> listener.onSubscriptionResponse(gson.fromJson(text))
+                    else -> listener.onSingleResponse(gson.fromJson(text))
                 }
             }
 
@@ -111,6 +129,10 @@ class RpcSocket(
 
     private fun log(topic: String, message: Any?) {
         logger?.log("\t[SOCKET][${topic.toUpperCase()}] $message")
+    }
+
+    private fun isBatchReply(response: String): Boolean {
+        return response.startsWith("[")
     }
 
     private fun isSubscriptionChange(string: String): Boolean {

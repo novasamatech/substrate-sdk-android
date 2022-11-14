@@ -61,6 +61,11 @@ object SocketStateMachine {
 
         data class SendableResponse(val response: RpcResponse) : Event()
 
+        data class SendableBatchResponse(val responses: List<RpcResponse>) : Event() {
+
+            val responseId = responses.first().id
+        }
+
         data class Subscribed(val subscription: Subscription) : Event()
 
         data class SubscriptionResponse(val response: SubscriptionChange) : Event()
@@ -88,6 +93,11 @@ object SocketStateMachine {
 
         data class ResponseToSendable(val sendable: Sendable, val response: RpcResponse) :
             SideEffect()
+
+        data class ResponseToBatchSendable(
+            val sendable: Sendable,
+            val responses: List<RpcResponse>
+        ) : SideEffect()
 
         /**
          * For [DeliveryType.AT_MOST_ONCE] errors
@@ -244,6 +254,21 @@ object SocketStateMachine {
 
                         if (sendable != null) {
                             sideEffects += SideEffect.ResponseToSendable(sendable, event.response)
+
+                            state.copy(waitingForResponse = state.waitingForResponse - sendable)
+                        } else {
+                            state
+                        }
+                    }
+
+                    is Event.SendableBatchResponse -> {
+                        val sendable = findSendableById(state.waitingForResponse, event.responseId)
+
+                        if (sendable != null) {
+                            sideEffects += SideEffect.ResponseToBatchSendable(
+                                sendable = sendable,
+                                responses = event.responses
+                            )
 
                             state.copy(waitingForResponse = state.waitingForResponse - sendable)
                         } else {
