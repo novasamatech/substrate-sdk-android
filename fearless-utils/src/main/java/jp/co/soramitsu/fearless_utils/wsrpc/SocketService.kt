@@ -8,9 +8,10 @@ import jp.co.soramitsu.fearless_utils.wsrpc.logging.Logger
 import jp.co.soramitsu.fearless_utils.wsrpc.mappers.nonNull
 import jp.co.soramitsu.fearless_utils.wsrpc.mappers.stringIdMapper
 import jp.co.soramitsu.fearless_utils.wsrpc.recovery.Reconnector
+import jp.co.soramitsu.fearless_utils.wsrpc.request.BatchSendable
 import jp.co.soramitsu.fearless_utils.wsrpc.request.DeliveryType
 import jp.co.soramitsu.fearless_utils.wsrpc.request.RequestExecutor
-import jp.co.soramitsu.fearless_utils.wsrpc.request.RespondableSendable
+import jp.co.soramitsu.fearless_utils.wsrpc.request.SingleSendable
 import jp.co.soramitsu.fearless_utils.wsrpc.request.base.RpcRequest
 import jp.co.soramitsu.fearless_utils.wsrpc.request.runtime.RuntimeRequest
 import jp.co.soramitsu.fearless_utils.wsrpc.response.RpcResponse
@@ -126,7 +127,20 @@ class SocketService(
         deliveryType: DeliveryType = DeliveryType.AT_LEAST_ONCE,
         callback: ResponseListener<RpcResponse>
     ): Cancellable {
-        val sendable = RespondableSendable(rpcRequest, deliveryType, callback)
+        val sendable = SingleSendable(rpcRequest, deliveryType, callback)
+
+        updateState(Event.Send(sendable))
+
+        return RequestCancellable(sendable)
+    }
+
+    @Synchronized
+    fun executeBatchRequest(
+        rpcRequests: List<RpcRequest>,
+        deliveryType: DeliveryType = DeliveryType.AT_LEAST_ONCE,
+        callback: ResponseListener<List<RpcResponse>>
+    ): Cancellable {
+        val sendable = BatchSendable(rpcRequests, deliveryType, callback)
 
         updateState(Event.Send(sendable))
 
@@ -147,12 +161,16 @@ class SocketService(
     }
 
     @Synchronized
-    override fun onResponse(rpcResponse: RpcResponse) {
+    override fun onSingleResponse(rpcResponse: RpcResponse) {
         updateState(Event.SendableResponse(rpcResponse))
     }
 
-    override fun onResponse(subscriptionChange: SubscriptionChange) {
+    override fun onSubscriptionResponse(subscriptionChange: SubscriptionChange) {
         updateState(Event.SubscriptionResponse(subscriptionChange))
+    }
+
+    override fun onBatchResponse(batchResponse: List<RpcResponse>) {
+        updateState(Event.SendableBatchResponse(batchResponse))
     }
 
     @Synchronized
@@ -182,9 +200,13 @@ class SocketService(
         logger.log("[STATE MACHINE][SIDE EFFECT] $sideEffect")
 
         when (sideEffect) {
-            is SideEffect.ResponseToSendable -> respondToRequest(
+            is SideEffect.ResponseToSendable -> respondToSingleRequest(
                 sideEffect.sendable,
                 sideEffect.response
+            )
+            is SideEffect.ResponseToBatchSendable -> respondToBatchRequest(
+                sideEffect.sendable,
+                sideEffect.responses
             )
             is SideEffect.RespondSendablesError -> respondError(
                 sideEffect.sendables,
@@ -202,20 +224,30 @@ class SocketService(
         }
     }
 
-    private fun respondToRequest(
+    private fun respondToSingleRequest(
         sendable: SocketStateMachine.Sendable,
         response: RpcResponse
     ) {
-        require(sendable is RespondableSendable)
+        require(sendable is SingleSendable)
 
         sendable.callback.onNext(response)
     }
 
-    private fun respondError(sendables: Set<SocketStateMachine.Sendable>, throwable: Throwable) {
-        sendables.forEach {
-            require(it is RespondableSendable)
+    private fun respondToBatchRequest(
+        sendable: SocketStateMachine.Sendable,
+        responses: List<RpcResponse>
+    ) {
+        require(sendable is BatchSendable)
 
-            it.callback.onError(throwable)
+        sendable.callback.onNext(responses)
+    }
+
+    private fun respondError(sendables: Set<SocketStateMachine.Sendable>, throwable: Throwable) {
+        sendables.forEach { sendable ->
+            when(sendable) {
+              is SingleSendable -> sendable.callback.onError(throwable)
+              is BatchSendable -> sendable.callback.onError(throwable)
+            }
         }
     }
 
@@ -230,10 +262,11 @@ class SocketService(
 
     private fun sendToSocket(sendables: Set<SocketStateMachine.Sendable>) {
         requestExecutor.execute {
-            sendables.forEach {
-                require(it is RespondableSendable)
-
-                socket!!.sendRpcRequest(it.request)
+            sendables.forEach { sendable ->
+                when(sendable) {
+                    is SingleSendable -> socket!!.sendRpcRequest(sendable.request)
+                    is BatchSendable -> socket!!.sendBatchRpcRequests(sendable.requests)
+                }
             }
         }
     }
