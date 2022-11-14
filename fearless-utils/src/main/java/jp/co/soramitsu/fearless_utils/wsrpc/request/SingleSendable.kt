@@ -17,12 +17,11 @@ internal class SingleSendable(
     }
 }
 
-
 internal class BatchSendable(
     val requests: List<RpcRequest>,
     override val deliveryType: DeliveryType,
     val callback: SocketService.ResponseListener<List<RpcResponse>>
-): SocketStateMachine.Sendable {
+) : SocketStateMachine.Sendable {
 
     override val id: Int = requests.first().id
 

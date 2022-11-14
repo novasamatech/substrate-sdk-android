@@ -244,9 +244,9 @@ class SocketService(
 
     private fun respondError(sendables: Set<SocketStateMachine.Sendable>, throwable: Throwable) {
         sendables.forEach { sendable ->
-            when(sendable) {
-              is SingleSendable -> sendable.callback.onError(throwable)
-              is BatchSendable -> sendable.callback.onError(throwable)
+            when (sendable) {
+                is SingleSendable -> sendable.callback.onError(throwable)
+                is BatchSendable -> sendable.callback.onError(throwable)
             }
         }
     }
@@ -263,7 +263,7 @@ class SocketService(
     private fun sendToSocket(sendables: Set<SocketStateMachine.Sendable>) {
         requestExecutor.execute {
             sendables.forEach { sendable ->
-                when(sendable) {
+                when (sendable) {
                     is SingleSendable -> socket!!.sendRpcRequest(sendable.request)
                     is BatchSendable -> socket!!.sendBatchRpcRequests(sendable.requests)
                 }
