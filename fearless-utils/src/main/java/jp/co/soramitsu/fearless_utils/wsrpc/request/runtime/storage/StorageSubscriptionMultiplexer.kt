@@ -55,7 +55,6 @@ class StorageSubscriptionMultiplexer(
     }
 }
 
-
 fun SocketService.subscribeUsing(multiplexer: StorageSubscriptionMultiplexer): SocketService.Cancellable? {
     val request = multiplexer.createRequest()
 
