@@ -13,8 +13,15 @@ class StorageSubscriptionMultiplexer(
 
     class Change(val block: String, val key: String, val value: String?)
 
-    fun createRequest(): RuntimeRequest {
-        return SubscribeStorageRequest(callbacks.keys.toList())
+    /**
+     * @return subscription request. Null if there were nothing to subscribe for
+     */
+    fun createRequest(): RuntimeRequest? {
+        return if (callbacks.isNotEmpty()) {
+            SubscribeStorageRequest(callbacks.keys.toList())
+        } else {
+            null
+        }
     }
 
     override fun onNext(response: SubscriptionChange) {
@@ -48,8 +55,11 @@ class StorageSubscriptionMultiplexer(
     }
 }
 
-fun SocketService.subscribeUsing(multiplexer: StorageSubscriptionMultiplexer): SocketService.Cancellable {
+
+fun SocketService.subscribeUsing(multiplexer: StorageSubscriptionMultiplexer): SocketService.Cancellable? {
     val request = multiplexer.createRequest()
 
-    return subscribe(request, multiplexer, UnsubscribeMethodResolver.resolve(request.method))
+    return request?.let {
+        subscribe(request, multiplexer, UnsubscribeMethodResolver.resolve(request.method))
+    }
 }
