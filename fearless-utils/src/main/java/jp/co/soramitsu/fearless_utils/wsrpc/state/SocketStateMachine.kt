@@ -441,7 +441,6 @@ object SocketStateMachine {
         }
     }
 
-
     private fun Map<Sendable, ResponseCounter>.add(sendable: Sendable) = plus(sendable to 0)
 
     private fun Set<Sendable>.withCounter() = associateWith { 0 }
