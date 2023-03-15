@@ -148,6 +148,20 @@ class SocketService(
     }
 
     @Synchronized
+    fun executeAccumulatingBatchRequest(
+        rpcRequests: List<RpcRequest>,
+        deliveryType: DeliveryType = DeliveryType.AT_LEAST_ONCE,
+        allBatchDoneCallback: ResponseListener<List<RpcResponse>>
+    ): Cancellable {
+        val callback = AccumulatingBatchRequest(allBatchDoneCallback, rpcRequests.size)
+        val sendable = BatchSendable(rpcRequests, deliveryType, callback)
+
+        updateState(Event.Send(sendable))
+
+        return RequestCancellable(sendable)
+    }
+
+    @Synchronized
     fun executeRequest(
         runtimeRequest: RuntimeRequest,
         deliveryType: DeliveryType = DeliveryType.AT_LEAST_ONCE,
@@ -339,6 +353,22 @@ class SocketService(
 
         override fun onError(throwable: Throwable) {
             // do nothing
+        }
+    }
+
+    private class AccumulatingBatchRequest(
+        private val allDoneCallBack: ResponseListener<List<RpcResponse>>,
+        expectedSize: Int
+    ) : ResponseListener<RpcResponse> {
+
+        private var arrivedResponses: MutableList<RpcResponse> = ArrayList(expectedSize)
+
+        override fun onNext(response: RpcResponse) {
+            arrivedResponses.add(response)
+        }
+
+        override fun onError(throwable: Throwable) {
+            allDoneCallBack.onError(throwable)
         }
     }
 }
