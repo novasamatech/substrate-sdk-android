@@ -11,6 +11,9 @@ internal class SingleSendable(
     override val deliveryType: DeliveryType,
     override val callback: SocketService.ResponseListener<RpcResponse>
 ) : SocketStateMachine.Sendable {
+
+    override val numberOfNeededResponses: Int = 1
+
     override fun relatesTo(id: Int): Boolean = request.id == id
     override fun sendTo(rpcSocket: RpcSocket) {
         rpcSocket.sendRpcRequest(request)
@@ -26,6 +29,8 @@ internal class BatchSendable(
     override val deliveryType: DeliveryType,
     override val callback: SocketService.ResponseListener<RpcResponse>
 ) : SocketStateMachine.Sendable {
+
+    override val numberOfNeededResponses: Int = requests.size
 
     private val ids = requests.mapTo(mutableSetOf(), RpcRequest::id)
     override fun relatesTo(id: Int): Boolean = id in ids
