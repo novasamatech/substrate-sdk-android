@@ -3,27 +3,35 @@ package jp.co.soramitsu.fearless_utils.wsrpc.request
 import jp.co.soramitsu.fearless_utils.wsrpc.SocketService
 import jp.co.soramitsu.fearless_utils.wsrpc.request.base.RpcRequest
 import jp.co.soramitsu.fearless_utils.wsrpc.response.RpcResponse
+import jp.co.soramitsu.fearless_utils.wsrpc.socket.RpcSocket
 import jp.co.soramitsu.fearless_utils.wsrpc.state.SocketStateMachine
 
 internal class SingleSendable(
     val request: RpcRequest,
     override val deliveryType: DeliveryType,
-    val callback: SocketService.ResponseListener<RpcResponse>
+    override val callback: SocketService.ResponseListener<RpcResponse>
 ) : SocketStateMachine.Sendable {
-    override val id: Int = request.id
+    override fun relatesTo(id: Int): Boolean = request.id == id
+    override fun sendTo(rpcSocket: RpcSocket) {
+        rpcSocket.sendRpcRequest(request)
+    }
 
     override fun toString(): String {
-        return "Sendable($id)"
+        return "Sendable(${request.id})"
     }
 }
 
 internal class BatchSendable(
     val requests: List<RpcRequest>,
     override val deliveryType: DeliveryType,
-    val callback: SocketService.ResponseListener<List<RpcResponse>>
+    override val callback: SocketService.ResponseListener<RpcResponse>
 ) : SocketStateMachine.Sendable {
 
-    override val id: Int = requests.first().id
+    private val ids = requests.mapTo(mutableSetOf(), RpcRequest::id)
+    override fun relatesTo(id: Int): Boolean = id in ids
+    override fun sendTo(rpcSocket: RpcSocket) {
+        rpcSocket.sendBatchRpcRequests(requests)
+    }
 
     override fun toString(): String {
         val jointIds = requests.joinToString { it.id.toString() }

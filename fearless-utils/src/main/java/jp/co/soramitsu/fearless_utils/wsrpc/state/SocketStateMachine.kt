@@ -1,7 +1,10 @@
 package jp.co.soramitsu.fearless_utils.wsrpc.state
 
+import jp.co.soramitsu.fearless_utils.wsrpc.SocketService
+import jp.co.soramitsu.fearless_utils.wsrpc.request.BatchSendable
 import jp.co.soramitsu.fearless_utils.wsrpc.request.DeliveryType
 import jp.co.soramitsu.fearless_utils.wsrpc.response.RpcResponse
+import jp.co.soramitsu.fearless_utils.wsrpc.socket.RpcSocket
 import jp.co.soramitsu.fearless_utils.wsrpc.subscription.response.SubscriptionChange
 
 typealias Transition = Pair<SocketStateMachine.State, List<SocketStateMachine.SideEffect>>
@@ -9,12 +12,18 @@ typealias Transition = Pair<SocketStateMachine.State, List<SocketStateMachine.Si
 object SocketStateMachine {
 
     interface Sendable {
-        val id: Int
+
+        fun relatesTo(id: Int): Boolean
 
         val deliveryType: DeliveryType
+
+        val callback: SocketService.ResponseListener<RpcResponse>
+
+        fun sendTo(rpcSocket: RpcSocket)
     }
 
     interface Subscription {
+
         val id: String
 
         val initiatorId: Int
@@ -61,10 +70,7 @@ object SocketStateMachine {
 
         data class SendableResponse(val response: RpcResponse) : Event()
 
-        data class SendableBatchResponse(val responses: List<RpcResponse>) : Event() {
-
-            val responseId = responses.first().id
-        }
+        data class SendableBatchResponse(val responses: List<RpcResponse>) : Event()
 
         data class Subscribed(val subscription: Subscription) : Event()
 
@@ -93,11 +99,6 @@ object SocketStateMachine {
 
         data class ResponseToSendable(val sendable: Sendable, val response: RpcResponse) :
             SideEffect()
-
-        data class ResponseToBatchSendable(
-            val sendable: Sendable,
-            val responses: List<RpcResponse>
-        ) : SideEffect()
 
         /**
          * For [DeliveryType.AT_MOST_ONCE] errors
@@ -262,18 +263,22 @@ object SocketStateMachine {
                     }
 
                     is Event.SendableBatchResponse -> {
-                        val sendable = findSendableById(state.waitingForResponse, event.responseId)
+                        val newWaitingForResponse = state.waitingForResponse.toMutableSet()
 
-                        if (sendable != null) {
-                            sideEffects += SideEffect.ResponseToBatchSendable(
-                                sendable = sendable,
-                                responses = event.responses
-                            )
+                        event.responses.forEach { response ->
+                            val sendable = findSendableById(state.waitingForResponse, response.id)
 
-                            state.copy(waitingForResponse = state.waitingForResponse - sendable)
-                        } else {
-                            state
+                            if (sendable != null) {
+                                sideEffects += SideEffect.ResponseToSendable(
+                                    sendable = sendable,
+                                    response = response
+                                )
+
+                                newWaitingForResponse -= sendable
+                            }
                         }
+
+                        state.copy(waitingForResponse = newWaitingForResponse)
                     }
 
                     is Event.Subscribed -> {
@@ -412,10 +417,11 @@ object SocketStateMachine {
     private fun findSubscriptionById(subscriptions: Set<Subscription>, id: String) =
         subscriptions.find { it.id == id }
 
-    private fun findSendableById(sendables: Set<Sendable>, id: Int) = sendables.find { it.id == id }
+    private fun findSendableById(sendables: Set<Sendable>, id: Int) =
+        sendables.find { it.relatesTo(id) }
 
     private fun findSubscriptionByInitiator(subscriptions: Set<Subscription>, initiator: Sendable) =
-        subscriptions.find { it.initiatorId == initiator.id }
+        subscriptions.find { initiator.relatesTo(it.initiatorId) }
 
     private fun handleStop(sideEffects: MutableList<SideEffect>): State {
         sideEffects += SideEffect.Disconnect
