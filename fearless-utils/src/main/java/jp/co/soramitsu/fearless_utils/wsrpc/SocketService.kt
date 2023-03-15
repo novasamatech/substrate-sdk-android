@@ -358,13 +358,17 @@ class SocketService(
 
     private class AccumulatingBatchRequest(
         private val allDoneCallBack: ResponseListener<List<RpcResponse>>,
-        expectedSize: Int
+        private val batchSize: Int
     ) : ResponseListener<RpcResponse> {
 
-        private var arrivedResponses: MutableList<RpcResponse> = ArrayList(expectedSize)
+        private var arrivedResponses: MutableList<RpcResponse> = ArrayList(batchSize)
 
         override fun onNext(response: RpcResponse) {
             arrivedResponses.add(response)
+
+            if (arrivedResponses.size == batchSize) {
+                allDoneCallBack.onNext(arrivedResponses)
+            }
         }
 
         override fun onError(throwable: Throwable) {
