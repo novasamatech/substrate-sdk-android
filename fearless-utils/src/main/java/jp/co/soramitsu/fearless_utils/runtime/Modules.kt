@@ -33,7 +33,8 @@ abstract class Module(val id: String) {
     object System : Module("System") {
 
         object Account : AccountIdService(
-            System, "Account",
+            System,
+            "Account",
             IdentifierHasher.Blake2b128concat
         )
     }
@@ -41,12 +42,14 @@ abstract class Module(val id: String) {
     object Staking : Module("Staking") {
 
         object Ledger : AccountIdService(
-            Staking, "Ledger",
+            Staking,
+            "Ledger",
             IdentifierHasher.Blake2b128concat
         )
 
         object ActiveEra : Service<Unit>(
-            Staking, "ActiveEra"
+            Staking,
+            "ActiveEra"
         ) {
 
             override fun storageKey(storageArgs: Unit): String {
@@ -58,7 +61,8 @@ abstract class Module(val id: String) {
         }
 
         object Bonded : AccountIdService(
-            Staking, "Bonded",
+            Staking,
+            "Bonded",
             IdentifierHasher.TwoX64Concat
         )
     }

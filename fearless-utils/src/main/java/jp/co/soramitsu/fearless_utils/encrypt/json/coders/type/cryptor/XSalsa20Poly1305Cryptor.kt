@@ -14,7 +14,6 @@ private val DATA_OFFSET = NONCE_OFFSET + NONCE_SIZE
 object XSalsa20Poly1305Cryptor : JsonCryptor {
 
     override fun decrypt(keyGenerationResult: JsonTypeDecoder.KeyGenerationResult): ByteArray? {
-
         val byteData = keyGenerationResult.encryptedData
 
         val nonce = byteData.copyBytes(0, NONCE_SIZE)

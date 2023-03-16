@@ -22,7 +22,6 @@ class RuntimeMetadataReader private constructor(
 
         @OptIn(ExperimentalUnsignedTypes::class)
         fun read(metadaScale: String): RuntimeMetadataReader {
-
             val scaleCoderReader = ScaleCodecReader(metadaScale.fromHex())
 
             val runtimeVersion = Magic.read(scaleCoderReader)[Magic.runtimeVersion].toInt()

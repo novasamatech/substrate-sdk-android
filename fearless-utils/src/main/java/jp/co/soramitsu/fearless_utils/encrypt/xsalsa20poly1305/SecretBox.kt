@@ -71,7 +71,8 @@ class SecretBox(secretKey: ByteArray) {
         xsalsa20.init(
             true,
             ParametersWithIV(
-                KeyParameter(key), nonce
+                KeyParameter(key),
+                nonce
             )
         )
         // generate Poly1305 subkey
@@ -116,7 +117,8 @@ class SecretBox(secretKey: ByteArray) {
         xsalsa20.init(
             false,
             ParametersWithIV(
-                KeyParameter(key), nonce
+                KeyParameter(key),
+                nonce
             )
         )
         // generate mac subkey

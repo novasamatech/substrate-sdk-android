@@ -54,7 +54,6 @@ class JsonSeedEncoder(
         password: String,
         encoding: JsonAccountData.Encoding
     ): String {
-
         val contentEncoder = ContentCoderFactory.getEncoder(encoding.content)!!
         val typeEncoder = TypeCoderFactory.getEncoder(encoding.type)!!
 

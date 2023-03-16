@@ -25,7 +25,6 @@ class Data(preset: TypePresetBuilder) : DictEnum(TYPE_NAME, createMapping(preset
     }
 
     override fun decode(scaleCodecReader: ScaleCodecReader, runtime: RuntimeSnapshot): Entry<Any?> {
-
         return when (val typeIndex = byte.read(scaleCodecReader).toInt()) {
             0 -> Entry(NONE, null)
 

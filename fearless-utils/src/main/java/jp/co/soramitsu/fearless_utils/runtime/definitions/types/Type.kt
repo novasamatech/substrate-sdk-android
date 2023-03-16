@@ -69,7 +69,8 @@ abstract class RuntimeType<ENCODE, DECODE>(val name: String) {
             val valueTypeName = value?.let { it::class.java.simpleName }
             val message = """
                 |$value ($valueTypeName) is not a valid instance of ${this.name}
-                | (${this::class.java.simpleName})""".trimMargin()
+                | (${this::class.java.simpleName})
+            """.trimMargin()
 
             throw EncodeDecodeException(message)
         }
