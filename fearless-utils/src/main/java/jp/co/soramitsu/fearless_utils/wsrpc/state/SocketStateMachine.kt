@@ -443,8 +443,6 @@ object SocketStateMachine {
 
     private fun Map<Sendable, ResponseCounter>.add(sendable: Sendable) = plus(sendable to 0)
 
-    private fun Set<Sendable>.withCounter() = associateWith { 0 }
-
     private fun getRequestsToResendAndReportErrorToOthers(
         state: State.Connected,
         mutableSideEffects: MutableList<SideEffect>,
@@ -492,3 +490,5 @@ object SocketStateMachine {
             it.deliveryType == deliveryType
         }
 }
+
+internal fun Set<SocketStateMachine.Sendable>.withCounter() = associateWith { 0 }
