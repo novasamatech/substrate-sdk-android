@@ -1,20 +1,32 @@
 package jp.co.soramitsu.fearless_utils.wsrpc.state
 
+import jp.co.soramitsu.fearless_utils.wsrpc.SocketService
 import jp.co.soramitsu.fearless_utils.wsrpc.request.DeliveryType
 import jp.co.soramitsu.fearless_utils.wsrpc.response.RpcResponse
+import jp.co.soramitsu.fearless_utils.wsrpc.socket.RpcSocket
 import jp.co.soramitsu.fearless_utils.wsrpc.subscription.response.SubscriptionChange
 
 typealias Transition = Pair<SocketStateMachine.State, List<SocketStateMachine.SideEffect>>
 
+private typealias ResponseCounter = Int
+
 object SocketStateMachine {
 
     interface Sendable {
-        val id: Int
+
+        val numberOfNeededResponses: Int
+
+        fun relatesTo(id: Int): Boolean
 
         val deliveryType: DeliveryType
+
+        val callback: SocketService.ResponseListener<RpcResponse>
+
+        fun sendTo(rpcSocket: RpcSocket)
     }
 
     interface Subscription {
+
         val id: String
 
         val initiatorId: Int
@@ -40,7 +52,7 @@ object SocketStateMachine {
             val url: String,
             internal val toResendOnReconnect: Set<Sendable>,
             internal val unknownSubscriptionResponses: Map<String, SubscriptionChange>,
-            internal val waitingForResponse: Set<Sendable>,
+            internal val waitingForResponse: Map<Sendable, ResponseCounter>,
             internal val subscriptions: Set<Subscription>
         ) : State()
 
@@ -61,10 +73,7 @@ object SocketStateMachine {
 
         data class SendableResponse(val response: RpcResponse) : Event()
 
-        data class SendableBatchResponse(val responses: List<RpcResponse>) : Event() {
-
-            val responseId = responses.first().id
-        }
+        data class SendableBatchResponse(val responses: List<RpcResponse>) : Event()
 
         data class Subscribed(val subscription: Subscription) : Event()
 
@@ -93,11 +102,6 @@ object SocketStateMachine {
 
         data class ResponseToSendable(val sendable: Sendable, val response: RpcResponse) :
             SideEffect()
-
-        data class ResponseToBatchSendable(
-            val sendable: Sendable,
-            val responses: List<RpcResponse>
-        ) : SideEffect()
 
         /**
          * For [DeliveryType.AT_MOST_ONCE] errors
@@ -190,7 +194,7 @@ object SocketStateMachine {
                             toResendOnReconnect = state.pendingSendables.filterByDeliveryType(
                                 DeliveryType.ON_RECONNECT
                             ),
-                            waitingForResponse = state.pendingSendables,
+                            waitingForResponse = state.pendingSendables.withCounter(),
                             subscriptions = emptySet(),
                             unknownSubscriptionResponses = emptyMap()
                         )
@@ -226,7 +230,7 @@ object SocketStateMachine {
 
                         state.copy(
                             toResendOnReconnect = toResendOnReconnect,
-                            waitingForResponse = state.waitingForResponse + sendable
+                            waitingForResponse = state.waitingForResponse.add(sendable)
                         )
                     }
 
@@ -250,30 +254,50 @@ object SocketStateMachine {
                     }
 
                     is Event.SendableResponse -> {
-                        val sendable = findSendableById(state.waitingForResponse, event.response.id)
+                        val entry = findSendableById(state.waitingForResponse, event.response.id)
 
-                        if (sendable != null) {
+                        if (entry != null) {
+                            val (sendable, counter) = entry
                             sideEffects += SideEffect.ResponseToSendable(sendable, event.response)
 
-                            state.copy(waitingForResponse = state.waitingForResponse - sendable)
+                            val newCounter = counter + 1
+
+                            state.copy(
+                                waitingForResponse = state.waitingForResponse.keepUntilThreshold(
+                                    key = sendable,
+                                    newValue = newCounter,
+                                    threshold = sendable.numberOfNeededResponses
+                                )
+                            )
                         } else {
                             state
                         }
                     }
 
                     is Event.SendableBatchResponse -> {
-                        val sendable = findSendableById(state.waitingForResponse, event.responseId)
+                        val newWaitingForResponse = state.waitingForResponse.toMutableMap()
 
-                        if (sendable != null) {
-                            sideEffects += SideEffect.ResponseToBatchSendable(
-                                sendable = sendable,
-                                responses = event.responses
-                            )
+                        event.responses.forEach { response ->
+                            val entry = findSendableById(state.waitingForResponse, response.id)
 
-                            state.copy(waitingForResponse = state.waitingForResponse - sendable)
-                        } else {
-                            state
+                            if (entry != null) {
+                                val (sendable, counter) = entry
+                                val newCounter = counter + 1
+
+                                sideEffects += SideEffect.ResponseToSendable(
+                                    sendable = sendable,
+                                    response = response
+                                )
+
+                                newWaitingForResponse.keepUntilThreshold(
+                                    key = sendable,
+                                    newValue = newCounter,
+                                    threshold = sendable.numberOfNeededResponses
+                                )
+                            }
                         }
+
+                        state.copy(waitingForResponse = newWaitingForResponse)
                     }
 
                     is Event.Subscribed -> {
@@ -392,12 +416,41 @@ object SocketStateMachine {
         return Transition(newState, sideEffects)
     }
 
+    private fun MutableMap<Sendable, ResponseCounter>.keepUntilThreshold(
+        key: Sendable,
+        newValue: ResponseCounter,
+        threshold: ResponseCounter
+    ) {
+        if (newValue >= threshold) {
+            minusAssign(key)
+        } else {
+            plusAssign(key to newValue)
+        }
+    }
+
+    // we keep separate method for read-only `minus` since it optimizes result internally
+    private fun Map<Sendable, ResponseCounter>.keepUntilThreshold(
+        key: Sendable,
+        newValue: ResponseCounter,
+        threshold: ResponseCounter
+    ): Map<Sendable, ResponseCounter> {
+        return if (newValue >= threshold) {
+            minus(key)
+        } else {
+            plus(key to newValue)
+        }
+    }
+
+    private fun Map<Sendable, ResponseCounter>.add(sendable: Sendable) = plus(sendable to 0)
+
     private fun getRequestsToResendAndReportErrorToOthers(
         state: State.Connected,
         mutableSideEffects: MutableList<SideEffect>,
         error: Throwable
     ): Set<Sendable> {
-        val toReportError = state.waitingForResponse.filterByDeliveryType(DeliveryType.AT_MOST_ONCE)
+        val waitingSendables = state.waitingForResponse.keys
+
+        val toReportError = waitingSendables.filterByDeliveryType(DeliveryType.AT_MOST_ONCE)
 
         if (toReportError.isNotEmpty()) {
             mutableSideEffects += SideEffect.RespondSendablesError(
@@ -406,16 +459,17 @@ object SocketStateMachine {
             )
         }
 
-        return state.waitingForResponse - toReportError + state.toResendOnReconnect
+        return waitingSendables - toReportError + state.toResendOnReconnect
     }
 
     private fun findSubscriptionById(subscriptions: Set<Subscription>, id: String) =
         subscriptions.find { it.id == id }
 
-    private fun findSendableById(sendables: Set<Sendable>, id: Int) = sendables.find { it.id == id }
+    private fun findSendableById(sendables: Map<Sendable, ResponseCounter>, id: Int) =
+        sendables.entries.find { (sendable, _) -> sendable.relatesTo(id) }
 
     private fun findSubscriptionByInitiator(subscriptions: Set<Subscription>, initiator: Sendable) =
-        subscriptions.find { it.initiatorId == initiator.id }
+        subscriptions.find { initiator.relatesTo(it.initiatorId) }
 
     private fun handleStop(sideEffects: MutableList<SideEffect>): State {
         sideEffects += SideEffect.Disconnect
@@ -436,3 +490,5 @@ object SocketStateMachine {
             it.deliveryType == deliveryType
         }
 }
+
+internal fun Set<SocketStateMachine.Sendable>.withCounter() = associateWith { 0 }
