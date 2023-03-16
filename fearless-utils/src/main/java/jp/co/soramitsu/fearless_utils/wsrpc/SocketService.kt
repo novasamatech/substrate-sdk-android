@@ -138,8 +138,22 @@ class SocketService(
     fun executeBatchRequest(
         rpcRequests: List<RpcRequest>,
         deliveryType: DeliveryType = DeliveryType.AT_LEAST_ONCE,
-        callback: ResponseListener<List<RpcResponse>>
+        callback: ResponseListener<RpcResponse>
     ): Cancellable {
+        val sendable = BatchSendable(rpcRequests, deliveryType, callback)
+
+        updateState(Event.Send(sendable))
+
+        return RequestCancellable(sendable)
+    }
+
+    @Synchronized
+    fun executeAccumulatingBatchRequest(
+        rpcRequests: List<RpcRequest>,
+        deliveryType: DeliveryType = DeliveryType.AT_LEAST_ONCE,
+        allBatchDoneCallback: ResponseListener<List<RpcResponse>>
+    ): Cancellable {
+        val callback = AccumulatingBatchRequest(allBatchDoneCallback, rpcRequests.size)
         val sendable = BatchSendable(rpcRequests, deliveryType, callback)
 
         updateState(Event.Send(sendable))
@@ -200,13 +214,9 @@ class SocketService(
         logger.log("[STATE MACHINE][SIDE EFFECT] $sideEffect")
 
         when (sideEffect) {
-            is SideEffect.ResponseToSendable -> respondToSingleRequest(
+            is SideEffect.ResponseToSendable -> respondToRequest(
                 sideEffect.sendable,
                 sideEffect.response
-            )
-            is SideEffect.ResponseToBatchSendable -> respondToBatchRequest(
-                sideEffect.sendable,
-                sideEffect.responses
             )
             is SideEffect.RespondSendablesError -> respondError(
                 sideEffect.sendables,
@@ -224,31 +234,15 @@ class SocketService(
         }
     }
 
-    private fun respondToSingleRequest(
+    private fun respondToRequest(
         sendable: SocketStateMachine.Sendable,
         response: RpcResponse
     ) {
-        require(sendable is SingleSendable)
-
         sendable.callback.onNext(response)
     }
 
-    private fun respondToBatchRequest(
-        sendable: SocketStateMachine.Sendable,
-        responses: List<RpcResponse>
-    ) {
-        require(sendable is BatchSendable)
-
-        sendable.callback.onNext(responses)
-    }
-
     private fun respondError(sendables: Set<SocketStateMachine.Sendable>, throwable: Throwable) {
-        sendables.forEach { sendable ->
-            when (sendable) {
-                is SingleSendable -> sendable.callback.onError(throwable)
-                is BatchSendable -> sendable.callback.onError(throwable)
-            }
-        }
+        sendables.forEach { sendable -> sendable.callback.onError(throwable) }
     }
 
     private fun respondToSubscription(
@@ -260,14 +254,9 @@ class SocketService(
         subscription.callback.onNext(response)
     }
 
-    private fun sendToSocket(sendables: Set<SocketStateMachine.Sendable>) {
+    private fun sendToSocket(sendables: Collection<SocketStateMachine.Sendable>) {
         requestExecutor.execute {
-            sendables.forEach { sendable ->
-                when (sendable) {
-                    is SingleSendable -> socket!!.sendRpcRequest(sendable.request)
-                    is BatchSendable -> socket!!.sendBatchRpcRequests(sendable.requests)
-                }
-            }
+            sendables.forEach { sendable -> sendable.sendTo(socket!!) }
         }
     }
 
@@ -364,6 +353,26 @@ class SocketService(
 
         override fun onError(throwable: Throwable) {
             // do nothing
+        }
+    }
+
+    private class AccumulatingBatchRequest(
+        private val allDoneCallBack: ResponseListener<List<RpcResponse>>,
+        private val batchSize: Int
+    ) : ResponseListener<RpcResponse> {
+
+        private var arrivedResponses: MutableList<RpcResponse> = ArrayList(batchSize)
+
+        override fun onNext(response: RpcResponse) {
+            arrivedResponses.add(response)
+
+            if (arrivedResponses.size == batchSize) {
+                allDoneCallBack.onNext(arrivedResponses)
+            }
+        }
+
+        override fun onError(throwable: Throwable) {
+            allDoneCallBack.onError(throwable)
         }
     }
 }

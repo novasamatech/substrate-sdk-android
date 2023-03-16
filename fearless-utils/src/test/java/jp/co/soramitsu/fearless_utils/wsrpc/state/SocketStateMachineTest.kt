@@ -1,10 +1,14 @@
 package jp.co.soramitsu.fearless_utils.wsrpc.state
 
 import jp.co.soramitsu.fearless_utils.common.assertInstance
+import jp.co.soramitsu.fearless_utils.wsrpc.SocketService
+import jp.co.soramitsu.fearless_utils.wsrpc.SocketService.*
 import jp.co.soramitsu.fearless_utils.wsrpc.request.DeliveryType
 import jp.co.soramitsu.fearless_utils.wsrpc.request.runtime.createFakeChange
 import jp.co.soramitsu.fearless_utils.wsrpc.response.RpcResponse
+import jp.co.soramitsu.fearless_utils.wsrpc.socket.RpcSocket
 import jp.co.soramitsu.fearless_utils.wsrpc.state.SocketStateMachine.Event
+import jp.co.soramitsu.fearless_utils.wsrpc.state.SocketStateMachine.Sendable
 import jp.co.soramitsu.fearless_utils.wsrpc.state.SocketStateMachine.SideEffect
 import jp.co.soramitsu.fearless_utils.wsrpc.state.SocketStateMachine.SideEffect.Connect
 import jp.co.soramitsu.fearless_utils.wsrpc.state.SocketStateMachine.SideEffect.Disconnect
@@ -30,13 +34,27 @@ private const val SWITCH_URL = "SWITCHED"
 val emptyConnectedState = State.Connected(
     url = URL,
     toResendOnReconnect = emptySet(),
-    waitingForResponse = emptySet(),
+    waitingForResponse = emptyMap(),
     subscriptions = emptySet(),
     unknownSubscriptionResponses = emptyMap()
 )
 
-class TestSendable(override val id: Int, override val deliveryType: DeliveryType) :
-    SocketStateMachine.Sendable
+class TestSendable(val id: Int, override val deliveryType: DeliveryType) : Sendable {
+
+    override val numberOfNeededResponses: Int = 1
+
+    override fun relatesTo(id: Int): Boolean {
+        return this.id == id
+    }
+
+    override val callback = object : ResponseListener<RpcResponse> {
+        override fun onNext(response: RpcResponse) {}
+
+        override fun onError(throwable: Throwable) {}
+    }
+
+    override fun sendTo(rpcSocket: RpcSocket) {}
+}
 
 class TestSubscription(override val id: String, override val initiatorId: Int) :
     SocketStateMachine.Subscription
@@ -107,7 +125,7 @@ open class SocketStateMachineTest {
 
         state = transition(state, Event.Send(sendable))
 
-        assertEquals(state, emptyConnectedState.copy(waitingForResponse = sendables))
+        assertEquals(state, emptyConnectedState.copy(waitingForResponse = sendables.withCounter()))
 
         assertEquals(listOf(CONNECT_SIDE_EFFECT, SendSendables(sendables)), sideEffectLog)
     }
@@ -125,7 +143,7 @@ open class SocketStateMachineTest {
 
         val expectedConnectedState = emptyConnectedState.copy(
             toResendOnReconnect = sendables,
-            waitingForResponse = sendables
+            waitingForResponse = sendables.withCounter()
         )
 
         assertEquals(expectedConnectedState, state)
@@ -169,7 +187,7 @@ open class SocketStateMachineTest {
 
         state = transition(state, Event.Connected)
 
-        assertEquals(emptyConnectedState.copy(waitingForResponse = sendables), state)
+        assertEquals(emptyConnectedState.copy(waitingForResponse = sendables.withCounter()), state)
         assertEquals(listOf(CONNECT_SIDE_EFFECT, SendSendables(sendables)), sideEffectLog)
     }
 
@@ -569,7 +587,7 @@ open class SocketStateMachineTest {
         var state: State = State.Connected(
             URL,
             toResendOnReconnect = emptySet(),
-            waitingForResponse = sendables,
+            waitingForResponse = sendables.withCounter(),
             subscriptions = emptySet(),
             unknownSubscriptionResponses = emptyMap()
         )
@@ -766,7 +784,7 @@ open class SocketStateMachineTest {
         url = "test",
         toResendOnReconnect = emptySet(),
         unknownSubscriptionResponses = emptyMap(),
-        waitingForResponse = emptySet(),
+        waitingForResponse = emptyMap(),
         subscriptions = emptySet()
     )
 
