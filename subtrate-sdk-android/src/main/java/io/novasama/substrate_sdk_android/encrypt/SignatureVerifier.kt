@@ -76,6 +76,6 @@ object SignatureVerifier {
         message: ByteArray,
         publicKeyBytes: ByteArray
     ): Boolean {
-        return io.novasama.substrate_sdk_android.encrypt.Sr25519.verify(signature, message, publicKeyBytes)
+        return Sr25519.verify(signature, message, publicKeyBytes)
     }
 }

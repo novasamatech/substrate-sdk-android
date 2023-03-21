@@ -15,9 +15,10 @@ class AndroidSignerTest {
         val result = Signer.sign(MultiChainEncryption.Substrate(EncryptionType.SR25519), messageHex.toByteArray(), keypair)
 
         require(
-            Signer.verifySr25519(
+            SignatureVerifier.verify(
+                result,
+                Signer.MessageHashing.SUBSTRATE,
                 messageHex.toByteArray(),
-                result.signature,
                 keypair.publicKey
             )
         )

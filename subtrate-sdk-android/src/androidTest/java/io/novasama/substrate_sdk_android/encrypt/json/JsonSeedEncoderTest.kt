@@ -14,7 +14,7 @@ import org.junit.runner.RunWith
 private val PASSWORD = "12345"
 private val NAME = "name"
 
-private const val ADDRESS_TYPE_WESTEND: Byte = 42
+private const val ADDRESS_TYPE_WESTEND: Short = 42
 private const val GENESIS_HASH_WESTEND =
     "e143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e"
 
