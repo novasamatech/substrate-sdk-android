@@ -1,0 +1,118 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'org.mozilla.rust-android-gradle.rust-android'
+apply from: '../maven-publish-helper.gradle'
+
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId 'io.github.nova-wallet'
+        }
+    }
+}
+
+android {
+    compileSdkVersion rootProject.compileVersion
+    defaultConfig {
+        minSdkVersion rootProject.minVersion
+        targetSdkVersion rootProject.targetVersion
+        versionCode rootProject.versionCode
+        versionName computeVersionName()
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+
+    sourceSets {
+        test {
+            java.srcDirs += "$projectDir/src/testShared/java"
+        }
+
+        androidTest {
+            java.srcDirs += "$projectDir/src/testShared/java"
+        }
+    }
+    kotlinOptions {
+        freeCompilerArgs = ['-Xinline-classes']
+    }
+}
+
+cargo {
+    module = "../sr25519-java/"
+    libname = "sr25519java"
+    targets = ["arm", "arm64", "x86", "x86_64"]
+}
+
+tasks.whenTaskAdded { task ->
+    if ((task.name == 'javaPreCompileDebug' || task.name == 'javaPreCompileRelease')) {
+        task.dependsOn 'cargoBuild'
+    }
+}
+
+task deleteJar(type: Delete) {
+    delete 'libs/jars/lib-substrate-sdk.jar'
+}
+
+task createJar(type: Copy) {
+    from('build/intermediates/bundles/release/')
+    into('libs/jars/')
+    include('classes.jar')
+    rename('classes.jar', 'lib-substrate-sdk.jar')
+}
+
+createJar.dependsOn(deleteJar, build)
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation bouncyCastleDep
+    implementation ed25519Dep
+    implementation svgDep
+    implementation bip39Dep
+    implementation secureStringDep
+    implementation wsDep
+    implementation gsonDep
+    implementation web3jDep
+    implementation gsonDep
+    implementation apacheXercesDep
+    implementation xxHashDep
+
+    implementation coroutinesDep
+
+    testImplementation jUnitDep
+    testImplementation mockitoDep
+
+    androidTestImplementation androidTestRunnerDep
+    androidTestImplementation androidTestRulesDep
+    androidTestImplementation androidJunitDep
+
+    testImplementation coroutinesTestDep
+}
+
+def computeVersionName() {
+    def verMatcher = rootProject.versionName =~ /^([0-9]+\.[0-9]+)\.([0-9]+)$/
+    if (!verMatcher.find()) {
+        throw new GradleException("Invalid versionName!")
+    }
+    if (System.getenv('BUILD_ID') != null && System.getenv('BRANCH_NAME') != null && System.getenv('BRANCH_NAME') == 'develop') {
+        return "${verMatcher.group(1)}.${System.getenv('BUILD_ID')}"
+    } else {
+        return "${rootProject.versionName}"
+    }
+}

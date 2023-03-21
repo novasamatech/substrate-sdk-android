@@ -96,17 +96,6 @@ fn create_secret(secret: &[u8]) -> JniResult<SecretKey> {
     }
 }
 
-#[no_mangle]
-pub unsafe extern "system" fn Java_jp_co_soramitsu_fearless_1utils_encrypt_Sr25519_test<'a>(
-    jni_env: JNIEnv<'a>,
-    _: JClass,
-    hello_what: JString) -> JString<'a> {
-    let hello_what_str = try_or_throw!(jni_env, jni_env.get_string(hello_what), JObject::null().into());
-    let s = format!("Hello, {}!", hello_what_str.to_str().unwrap_or("<invalid string>"));
-    println!("{}", s);
-    try_or_throw!(jni_env, jni_env.new_string(s), JObject::null().into())
-}
-
 /**
  * Verify a message and its corresponding against a public key;
  *
@@ -116,7 +105,7 @@ pub unsafe extern "system" fn Java_jp_co_soramitsu_fearless_1utils_encrypt_Sr255
  * @return true if signature is valid, false otherwise
  */
 #[no_mangle]
-pub unsafe extern "system" fn Java_jp_co_soramitsu_fearless_1utils_encrypt_Sr25519_verify(
+pub unsafe extern "system" fn Java_io_novasama_substrate_sdk_android_encrypt_Sr25519_verify(
     jni_env: JNIEnv,
     _: JClass,
     signature_bytes: jbyteArray, message: jbyteArray, public_key: jbyteArray) -> jboolean {
@@ -144,7 +133,7 @@ pub unsafe extern "system" fn Java_jp_co_soramitsu_fearless_1utils_encrypt_Sr255
  * @return the signature
  */
 #[no_mangle]
-pub unsafe extern "system" fn Java_jp_co_soramitsu_fearless_1utils_encrypt_Sr25519_sign(
+pub unsafe extern "system" fn Java_io_novasama_substrate_sdk_android_encrypt_Sr25519_sign(
     jni_env: JNIEnv,
     _: JClass,
     public_key: jbyteArray, secret: jbyteArray, message: jbyteArray) -> jbyteArray {
@@ -169,7 +158,7 @@ pub unsafe extern "system" fn Java_jp_co_soramitsu_fearless_1utils_encrypt_Sr255
  * @return pre-allocated output buffer of SR25519_KEYPAIR_SIZE bytes
  */
 #[no_mangle]
-pub unsafe extern "system" fn Java_jp_co_soramitsu_fearless_1utils_encrypt_Sr25519_deriveKeypairHard(
+pub unsafe extern "system" fn Java_io_novasama_substrate_sdk_android_encrypt_Sr25519_deriveKeypairHard(
     jni_env: JNIEnv,
     _: JClass,
    pair: jbyteArray, cc: jbyteArray,
@@ -191,7 +180,7 @@ pub unsafe extern "system" fn Java_jp_co_soramitsu_fearless_1utils_encrypt_Sr255
  * @return keypair: pre-allocated output buffer of SR25519_KEYPAIR_SIZE bytes
  */
 #[no_mangle]
-pub unsafe extern "system" fn Java_jp_co_soramitsu_fearless_1utils_encrypt_Sr25519_deriveKeypairSoft(
+pub unsafe extern "system" fn Java_io_novasama_substrate_sdk_android_encrypt_Sr25519_deriveKeypairSoft(
     jni_env: JNIEnv,
     _: JClass,
     pair: jbyteArray,
@@ -213,7 +202,7 @@ pub unsafe extern "system" fn Java_jp_co_soramitsu_fearless_1utils_encrypt_Sr255
  * @return pre-allocated output buffer of SR25519_PUBLIC_SIZE bytes
  */
 #[no_mangle]
-pub unsafe extern "system" fn Java_jp_co_soramitsu_fearless_1utils_encrypt_Sr25519_derivePublicSoft(
+pub unsafe extern "system" fn Java_io_novasama_substrate_sdk_android_encrypt_Sr25519_derivePublicSoft(
     jni_env: JNIEnv,
     _: JClass,
     pair: jbyteArray,
@@ -233,7 +222,7 @@ pub unsafe extern "system" fn Java_jp_co_soramitsu_fearless_1utils_encrypt_Sr255
  * @return keypair [32b key | 32b nonce | 32b public], pre-allocated output buffer of SR25519_KEYPAIR_SIZE bytes
  */
 #[no_mangle]
-pub unsafe extern "system" fn Java_jp_co_soramitsu_fearless_1utils_encrypt_Sr25519_keypairFromSeed(
+pub unsafe extern "system" fn Java_io_novasama_substrate_sdk_android_encrypt_Sr25519_keypairFromSeed(
     jni_env: JNIEnv,
     _: JClass,
     seed: jbyteArray) -> jbyteArray {
@@ -249,7 +238,7 @@ pub unsafe extern "system" fn Java_jp_co_soramitsu_fearless_1utils_encrypt_Sr255
  * and the last 32 bytes being the seed for nonces
  */
 #[no_mangle]
-pub unsafe extern "system" fn Java_jp_co_soramitsu_fearless_1utils_encrypt_Sr25519_toEd25519Bytes(
+pub unsafe extern "system" fn Java_io_novasama_substrate_sdk_android_encrypt_Sr25519_toEd25519Bytes(
     jni_env: JNIEnv,
     _: JClass,
     secret: jbyteArray
@@ -266,7 +255,7 @@ pub unsafe extern "system" fn Java_jp_co_soramitsu_fearless_1utils_encrypt_Sr255
  * represented canonically, and the last 32 bytes being the seed for nonces
  */
 #[no_mangle]
-pub unsafe extern "system" fn Java_jp_co_soramitsu_fearless_1utils_encrypt_Sr25519_fromEd25519Bytes(
+pub unsafe extern "system" fn Java_io_novasama_substrate_sdk_android_encrypt_Sr25519_fromEd25519Bytes(
     jni_env: JNIEnv,
     _: JClass,
     expanded_ed_secret: jbyteArray
