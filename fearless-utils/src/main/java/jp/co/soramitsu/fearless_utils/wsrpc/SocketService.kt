@@ -4,6 +4,8 @@ import com.google.gson.Gson
 import com.neovisionaries.ws.client.WebSocketFactory
 import com.neovisionaries.ws.client.WebSocketState
 import jp.co.soramitsu.fearless_utils.wsrpc.exception.ConnectionClosedException
+import jp.co.soramitsu.fearless_utils.wsrpc.interceptor.WebSocketResponseInterceptor
+import jp.co.soramitsu.fearless_utils.wsrpc.interceptor.shouldDeliver
 import jp.co.soramitsu.fearless_utils.wsrpc.logging.Logger
 import jp.co.soramitsu.fearless_utils.wsrpc.mappers.nonNull
 import jp.co.soramitsu.fearless_utils.wsrpc.mappers.stringIdMapper
@@ -31,12 +33,14 @@ class SocketService(
     private val logger: Logger,
     private val webSocketFactory: WebSocketFactory,
     private val reconnector: Reconnector,
-    private val requestExecutor: RequestExecutor
+    private val requestExecutor: RequestExecutor,
 ) : RpcSocketListener {
 
     private var socket: RpcSocket? = null
 
     private val stateContainer = ObservableState(initialState = State.Disconnected)
+
+    private var responseInterceptor: WebSocketResponseInterceptor? = null
 
     fun started() = stateContainer.getState() !is State.Disconnected
 
@@ -79,6 +83,11 @@ class SocketService(
      */
     fun pause() {
         updateState(Event.Pause)
+    }
+
+    @Synchronized
+    fun setInterceptor(interceptor: WebSocketResponseInterceptor) {
+        this.responseInterceptor = interceptor
     }
 
     /**
@@ -176,15 +185,33 @@ class SocketService(
 
     @Synchronized
     override fun onSingleResponse(rpcResponse: RpcResponse) {
-        updateState(Event.SendableResponse(rpcResponse))
+        val interceptor = responseInterceptor
+
+        if (
+            interceptor != null &&
+            interceptor.onRpcResponseReceived(rpcResponse).shouldDeliver()
+        ) {
+            updateState(Event.SendableResponse(rpcResponse))
+        }
     }
 
     override fun onSubscriptionResponse(subscriptionChange: SubscriptionChange) {
         updateState(Event.SubscriptionResponse(subscriptionChange))
     }
 
+    @Synchronized
     override fun onBatchResponse(batchResponse: List<RpcResponse>) {
-        updateState(Event.SendableBatchResponse(batchResponse))
+        val interceptor = responseInterceptor
+
+        val toDeliver = if (interceptor != null) {
+            batchResponse.filter { interceptor.onRpcResponseReceived(it).shouldDeliver() }
+        } else {
+            batchResponse
+        }
+
+        if (toDeliver.isNotEmpty()) {
+            updateState(Event.SendableBatchResponse(batchResponse))
+        }
     }
 
     @Synchronized
@@ -289,7 +316,8 @@ class SocketService(
     private fun unsubscribe(subscription: SocketStateMachine.Subscription) {
         require(subscription is RespondableSubscription)
 
-        val unsubscribeRequest = RuntimeRequest(subscription.unsubscribeMethod, listOf(subscription.id))
+        val unsubscribeRequest =
+            RuntimeRequest(subscription.unsubscribeMethod, listOf(subscription.id))
 
         executeRequest(
             unsubscribeRequest,
