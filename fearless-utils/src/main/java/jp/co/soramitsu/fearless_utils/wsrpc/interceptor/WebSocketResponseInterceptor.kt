@@ -2,7 +2,6 @@ package jp.co.soramitsu.fearless_utils.wsrpc.interceptor
 
 import jp.co.soramitsu.fearless_utils.wsrpc.response.RpcResponse
 
-
 interface WebSocketResponseInterceptor {
 
     enum class ResponseDelivery {
