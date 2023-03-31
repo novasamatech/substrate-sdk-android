@@ -34,12 +34,13 @@ class SocketService(
     private val webSocketFactory: WebSocketFactory,
     private val reconnector: Reconnector,
     private val requestExecutor: RequestExecutor,
-    private val interceptor: WebSocketResponseInterceptor? = null,
 ) : RpcSocketListener {
 
     private var socket: RpcSocket? = null
 
     private val stateContainer = ObservableState(initialState = State.Disconnected)
+
+    private var responseInterceptor: WebSocketResponseInterceptor? = null
 
     fun started() = stateContainer.getState() !is State.Disconnected
 
@@ -82,6 +83,11 @@ class SocketService(
      */
     fun pause() {
         updateState(Event.Pause)
+    }
+
+    @Synchronized
+    fun setInterceptor(interceptor: WebSocketResponseInterceptor) {
+        this.responseInterceptor = interceptor
     }
 
     /**
@@ -179,6 +185,8 @@ class SocketService(
 
     @Synchronized
     override fun onSingleResponse(rpcResponse: RpcResponse) {
+        val interceptor = responseInterceptor
+
         if (
             interceptor != null &&
             interceptor.onRpcResponseReceived(rpcResponse).shouldDeliver()
@@ -193,6 +201,8 @@ class SocketService(
 
     @Synchronized
     override fun onBatchResponse(batchResponse: List<RpcResponse>) {
+        val interceptor = responseInterceptor
+
         val toDeliver = if (interceptor != null) {
             batchResponse.filter { interceptor.onRpcResponseReceived(it).shouldDeliver() }
         } else {
