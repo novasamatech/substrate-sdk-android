@@ -52,6 +52,7 @@ android {
             java.srcDirs += "$projectDir/src/testShared/java"
         }
     }
+    buildToolsVersion '28.0.3'
     kotlinOptions {
         freeCompilerArgs = ['-Xinline-classes']
     }
