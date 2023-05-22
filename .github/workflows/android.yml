@@ -1,23 +1,40 @@
 name: Android CI
 
 on:
-  [pull_request]
+  push:
+    branches: [ master ]
 
 jobs:
-  test:
+  build:
 
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/nova-wallet/build_tools:pr-3
-      credentials:
-        username: stepanLav
-        password: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v1
+      - name: Set up JDK 12
+        uses: actions/setup-java@v1
+        with:
+          java-version: 12
 
-      - name: Lint
-        run: ./gradlew ktlint
+      # Cache gradle
+      - name: Cache Gradle and Wrapper
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: cache-${{ runner.os }}-${{ matrix.jdk }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
-      - name: Unit tests
-        run: ./gradlew testDebugUnitTest
+      - name: Grant Permission to Execute
+        run: chmod +x gradlew
+
+      - name: Build Debug APK
+        run: bash ./gradlew assembleDebug --stacktrace
+
+      - name: Upload Build Debug APK
+        uses: actions/upload-artifact@v1
+        with:
+          name: app
+          path: app/build/outputs/apk/debug/app-debug.apk
