@@ -1,8 +1,38 @@
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.nova-wallet/substrate-sdk-android/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.nova-wallet/substrate-sdk-android)
+[![Jetpack.io](https://jitpack.io/v/DannyAhmedApex/substrate-sdk-android.svg)](https://jitpack.io/#DannyAhmedApex/substrate-sdk-android)
 
 # Nova Substrate SDK for Android (Kotlin/Java)
 Nova Substrate SDK is a native Android library to help developers build native mobile apps for Substrate-based networks, e.g. Polkadot, Kusama & parachains
 
+# Implementation
+build.gradle:
+
+``` groovy
+	allprojects {
+		repositories {
+			...
+			maven { url 'https://jitpack.io' }
+		}
+	}
+``` 
+
+app level build.gradle
+``` groovy
+	dependencies {
+	        implementation 'com.github.DannyAhmedApex:substrate-sdk-android:Tag'
+	}
+``` 
+
+In new project template
+``` groovy
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url "https://jitpack.io" }
+    }
+}
+``` 
 # Table of contents
 
 - [Nova Substrate SDK for Android (Kotlin/Java)](#nova-substrate-sdk-for-android-kotlinjava)

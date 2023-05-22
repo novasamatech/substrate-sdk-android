@@ -14,4 +14,4 @@ class RpcResponse(
     override fun toString(): String = "RpcResponse($id)"
 }
 
-class RpcError(val code: Int, val message: String)
+class RpcError(val code: Int, val message: String, val data: String? = null)

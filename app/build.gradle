@@ -5,6 +5,7 @@ apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion rootProject.compileVersion
+    ndkVersion "25.1.8937393"
     defaultConfig {
         minSdkVersion rootProject.minVersion
         targetSdkVersion rootProject.targetVersion
@@ -14,8 +15,11 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility 1.8
-        targetCompatibility 1.8
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
     }
 
 

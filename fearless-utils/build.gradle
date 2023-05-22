@@ -3,17 +3,10 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'org.mozilla.rust-android-gradle.rust-android'
-apply from: '../maven-publish-helper.gradle'
-
-publishing {
-    publications {
-        release(MavenPublication) {
-            groupId 'io.github.nova-wallet'
-        }
-    }
-}
+apply from: "$rootProject.projectDir/publish.gradle"
 
 android {
+    ndkVersion "25.1.8937393"
     compileSdkVersion rootProject.compileVersion
     defaultConfig {
         minSdkVersion rootProject.minVersion
@@ -35,8 +28,11 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility 1.8
-        targetCompatibility 1.8
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
     }
 
     sourceSets {
@@ -48,6 +44,7 @@ android {
             java.srcDirs += "$projectDir/src/testShared/java"
         }
     }
+    buildToolsVersion '28.0.3'
     kotlinOptions {
         freeCompilerArgs = ['-Xinline-classes']
     }
