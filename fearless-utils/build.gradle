@@ -14,7 +14,7 @@ publishing {
 }
 
 android {
-    ndkVersion "15.2.4203891"
+    ndkVersion "25.1.8937393"
     compileSdkVersion rootProject.compileVersion
     defaultConfig {
         minSdkVersion rootProject.minVersion
