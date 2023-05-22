@@ -6,8 +6,8 @@
 // Required plugin for publishing library module
 apply plugin: 'maven-publish'
 // Replace nisrulz with <your_github_username>
-final group = "com.github.amplica"
-final artifact = "standalone-utils"
+final group = "com.github.LibertyDSNP"
+final artifact = "fearless-utils"
 final versionCode = 1
 final versionName = "1.0"
 
