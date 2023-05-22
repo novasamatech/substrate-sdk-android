@@ -18,7 +18,7 @@ build.gradle:
 app level build.gradle
 ``` groovy
 	dependencies {
-	        implementation 'com.github.DannyAhmedApex:substrate-sdk-android:Tag'
+	        implementation 'com.github.LibertyDSNP:substrate-sdk-android:Tag'
 	}
 ``` 
 

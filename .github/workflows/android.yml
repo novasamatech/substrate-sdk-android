@@ -1,0 +1,52 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        cache: gradle
+        
+    - name: Prepare NDK dir for caching ( workaround for https://github.com/actions/virtual-environments/issues/1337 )
+      run: |
+        sudo mkdir -p /usr/local/lib/android/sdk/ndk
+        sudo chmod -R 777 /usr/local/lib/android/sdk/ndk
+        sudo chown -R $USER:$USER /usr/local/lib/android/sdk/ndk
+    
+    - name: NDK Cache
+      id: ndk-cache
+      uses: actions/cache@v2
+      with:
+        path: /usr/local/lib/android/sdk/ndk
+        key: ndk-cache-25.1.8937393-v2
+    
+    - name: Install NDK
+      if: steps.ndk-cache.outputs.cache-hit != 'true'
+      run: echo "y" | sudo /usr/local/lib/android/sdk/tools/bin/sdkmanager --install "ndk;25.1.8937393"
+      
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Build with Gradle
+      run: ./gradlew build
+
+    - name: Build Debug APK
+      run: bash ./gradlew assembleDebug --stacktrace
+
+    - name: Upload Build Debug APK
+      uses: actions/upload-artifact@v1
+      with:
+        name: app
+        path: app/build/outputs/apk/debug/app-debug.apk
