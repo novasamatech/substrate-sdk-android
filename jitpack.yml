@@ -1,6 +1,5 @@
-jdk:
+before_install:
+  - yes | sdkmanager --install "ndk;25.1.8937393" "ndk;22.1.7171670"
   - sdk install java 11.0.10-open
   - sdk use java 11.0.10-open
-before_install:
-  - sdkmanager --install "ndk;25.1.8937393" "ndk;22.1.7171670"
 
