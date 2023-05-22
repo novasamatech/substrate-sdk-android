@@ -26,46 +26,13 @@
 echo "Downloading libs into distribution directory"
 
 RELEASE=2.0
-NDK=21.1.6352462
+NDK_VERSION=21.1.6352462
 API=22
 TAG=0.8.0
 
-ARCH_ARM64=arm64-v8a
-ARCH_X86_64=x86_64
-ARCH_X86=x86
+echo "Installing NDK ${NDK_VERSION}"
+yes | $ANDROID_HOME/tools/bin/sdkmanager --install "ndk;${NDK_VERSION}"
+# sdkmanager --install "ndk;${NDK_VERSION}"
 
-LIB_NSYNC=libnsync.a
-LIB_PROTO=libprotobuf.so
-LIB_TENSORFLOW=libtensorflow-core.a
-
-LIB_DIR=distribution/tensorflow/lib
-
-ARM64_LIB_NSYNC_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/tag/${TAG}/arch/${ARCH_ARM64}/${LIB_NSYNC}
-ARM64_LIB_PROTO_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/tag/${TAG}/arch/${ARCH_ARM64}/${LIB_PROTO}
-ARM64_LIB_TENSORFLOW_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/tag/${TAG}/arch/${ARCH_ARM64}/${LIB_TENSORFLOW}
-
-X86_64_LIB_NSYNC_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/tag/${TAG}/arch/${ARCH_X86_64}/${LIB_NSYNC}
-X86_64_LIB_PROTO_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/tag/${TAG}/arch/${ARCH_X86_64}/${LIB_PROTO}
-X86_64_LIB_TENSORFLOW_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/tag/${TAG}/arch/${ARCH_X86_64}/${LIB_TENSORFLOW}
-
-X86_LIB_NSYNC_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/tag/${TAG}/arch/${ARCH_X86}/${LIB_NSYNC}
-X86_LIB_PROTO_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/tag/${TAG}/arch/${ARCH_X86}/${LIB_PROTO}
-X86_LIB_TENSORFLOW_URL=https://storage.googleapis.com/tensorio-build/android/release/${RELEASE}/ndk/${NDK}/api/${API}/tag/${TAG}/arch/${ARCH_X86}/${LIB_TENSORFLOW}
-
-echo "Downloading arm64 libs"
-
-wget ${ARM64_LIB_NSYNC_URL} -O ${LIB_DIR}/${ARCH_ARM64}/${LIB_NSYNC}
-wget ${ARM64_LIB_PROTO_URL} -O ${LIB_DIR}/${ARCH_ARM64}/${LIB_PROTO}
-wget ${ARM64_LIB_TENSORFLOW_URL} -O ${LIB_DIR}/${ARCH_ARM64}/${LIB_TENSORFLOW}
-
-echo "Downloading x86_64 libs"
-
-wget ${X86_64_LIB_NSYNC_URL} -O ${LIB_DIR}/${ARCH_X86_64}/${LIB_NSYNC}
-wget ${X86_64_LIB_PROTO_URL} -O ${LIB_DIR}/${ARCH_X86_64}/${LIB_PROTO}
-wget ${X86_64_LIB_TENSORFLOW_URL} -O ${LIB_DIR}/${ARCH_X86_64}/${LIB_TENSORFLOW}
-
-echo "Downloading x86 libs"
-
-wget ${X86_LIB_NSYNC_URL} -O ${LIB_DIR}/${ARCH_X86}/${LIB_NSYNC}
-wget ${X86_LIB_PROTO_URL} -O ${LIB_DIR}/${ARCH_X86}/${LIB_PROTO}
-wget ${X86_LIB_TENSORFLOW_URL} -O ${LIB_DIR}/${ARCH_X86}/${LIB_TENSORFLOW}
+export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${NDK_VERSION}
+export NDK_HOME=$ANDROID_HOME/ndk/${NDK_VERSION}
