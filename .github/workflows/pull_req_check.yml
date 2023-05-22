@@ -1,7 +1,7 @@
 name: Android CI
 
 on:
-  push:
+  pull_request:
     branches: [ "master" ]
 
 jobs:
@@ -39,12 +39,3 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew build
-
-    - name: Build Debug APK
-      run: bash ./gradlew assembleDebug --stacktrace
-
-    - name: Upload Build Debug APK
-      uses: actions/upload-artifact@v1
-      with:
-        name: app
-        path: app/build/outputs/apk/debug/app-debug.apk
