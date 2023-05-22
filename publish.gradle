@@ -7,10 +7,10 @@
 apply plugin: 'maven-publish'
 
 // Replace nisrulz with <your_github_username>
-final group = "com.github.nisrulz"
-final artifact = "awesomelib"
-final versionCode = 2
-final versionName = "1.2"
+final group = "com.github.amplica"
+final artifact = "standalone-utils"
+final versionCode = 1
+final versionName = "1.0"
 
 android {
     defaultConfig {
