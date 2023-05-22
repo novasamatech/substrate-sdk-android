@@ -73,6 +73,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:4.2.2'
         classpath 'org.mozilla.rust-android-gradle:plugin:0.9.3'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath 'io.github.gradle-nexus:publish-plugin:1.1.0'
     }

@@ -5,14 +5,6 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'org.mozilla.rust-android-gradle.rust-android'
 apply from: "$rootProject.projectDir/publish.gradle"
 
-publishing {
-    publications {
-        release(MavenPublication) {
-            groupId 'io.github.nova-wallet'
-        }
-    }
-}
-
 android {
     ndkVersion "25.1.8937393"
     compileSdkVersion rootProject.compileVersion
