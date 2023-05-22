@@ -34,16 +34,6 @@ afterEvaluate {
                 artifactId = artifact
                 version = versionName
             }
-
-            // Creates a Maven publication called “debug”.
-            debug(MavenPublication) {
-                // Applies the component for the debug build variant.
-                from components.debug
-
-                groupId = group + ".debug"
-                artifactId = artifact + "-debug"
-                version = versionName
-            }
         }
     }
 }
