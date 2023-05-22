@@ -1,4 +1,0 @@
-before_install:
-  - yes | sdkmanager --uninstall "ndk-bundle" | sdkmanager --install "ndk;16.1.4479499" "ndk;20.1.5948944"
-jdk:
-  - openjdk11
