@@ -7,7 +7,7 @@
 apply plugin: 'maven-publish'
 // Replace nisrulz with <your_github_username>
 final group = "com.github.LibertyDSNP"
-final artifact = "fearless-utils"
+final artifact = "substrate-sdk-android"
 final versionCode = 1
 final versionName = "1.0"
 
