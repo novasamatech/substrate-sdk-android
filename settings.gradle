@@ -1,3 +1,3 @@
 include ':fearless-utils'
 include ':app'
-rootProject.name = "substrate-android-sdk"
+rootProject.name = "fearless-utils-android"
