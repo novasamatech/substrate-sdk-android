@@ -1,4 +1,4 @@
-[![Jetpack.io](https://jitpack.io/v/DannyAhmedApex/substrate-sdk-android.svg)](https://jitpack.io/#DannyAhmedApex/substrate-sdk-android)
+[![](https://jitpack.io/v/LibertyDSNP/substrate-sdk-android.svg)](https://jitpack.io/#LibertyDSNP/substrate-sdk-android)
 
 # Nova Substrate SDK for Android (Kotlin/Java)
 Nova Substrate SDK is a native Android library to help developers build native mobile apps for Substrate-based networks, e.g. Polkadot, Kusama & parachains
