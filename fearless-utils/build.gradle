@@ -53,7 +53,8 @@ android {
 cargo {
     module = "../sr25519-java/"
     libname = "sr25519java"
-    cargoCommand = "./gradlew cargoBuild --stacktrace"
+    cargoCommand = "cargo"
+    rustcCommand = "rustc"
     targets = ["arm", "arm64", "x86", "x86_64"]
 }
 
