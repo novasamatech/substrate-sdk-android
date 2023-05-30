@@ -3,4 +3,6 @@ jdk:
 
 before_install:
   - yes | sdkmanager --install "ndk;25.1.8937393" "ndk;22.1.7171670"
+  - ./gradlew cargoBuild --stacktrace
+
 
