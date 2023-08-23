@@ -188,10 +188,10 @@ Library provides the support for the following data types:
 * Numbers: `uint8`, `uint16`, `uint32`, `uint64`, `uint128`, `uint(nBytes)`, `compactInt`, `byte`, `long`
 * Primitives: `bool`, `string`
 * Arrays:
-    * `sizedByteArray(n)` - only content is encoded/decoded), size is thus known in advance
+    * `sizedByteArray(n)` - only content is encoded/decoded, size is thus known in advance
     * `byteArray` - size can vary, so the size is also encoded/decoded alongside with the content
 * Compound types:
-    * `vector<D>` - List of objects of the some data type
+    * `vector<D>` - List of objects of some data type
     * `optional<D>` - Nullable container for other data type
     * `pair<D1, D2>`
     * `enum(D1, D2, D3...)` - like union in C, stores only one value at once, but this value can have different data type
@@ -237,7 +237,7 @@ object DefaultValues : Schema<DefaultValues>() {
 
 ### Nullable fields
 
-By default, all fields are non null. However, you can use `optional()` to change the default behavior:
+By default, all fields are non-null. However, you can use `optional()` to change the default behavior:
 ``` kotlin
 object Person : Schema<Person>() {
     val friendName by string().optional() // friendName now is Field<String?>
@@ -315,7 +315,7 @@ While sending a request, you can specify a `DeliveryType`. Currently, there are 
 
 ### Using with coroutines
 
-Library has a out-of-box support for coroutines:
+Library has an out-of-box support for coroutines:
 
 ``` kotlin
 scope.launch {
@@ -345,3 +345,6 @@ scale().nonNull().map(response, gson)
 // or with coroutines adapter
 socketService.executeAsync(request, deliveryType, mapper = scale().nonNull())
 ```
+## License
+Nova Substrate SDK is available under the Apache 2.0 license. See the LICENSE file for more info.
+© Novasama Technologies GmbH 2023
