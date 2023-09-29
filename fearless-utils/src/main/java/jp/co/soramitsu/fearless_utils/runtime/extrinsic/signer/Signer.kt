@@ -17,13 +17,12 @@ class SignerPayloadRaw(
 
 class SignerPayloadExtrinsic(
     val runtime: RuntimeSnapshot,
-    val extrinsicType: Extrinsic,
 
     val accountId: AccountId,
 
     val call: CallRepresentation,
     val signedExtras: Map<String, Any?>,
-    val additionalExtras: Map<String, Any?>
+    val additionalSignedExtras: Map<String, Any?>
 )
 
 fun SignerPayloadRaw.Companion.fromUtf8(
