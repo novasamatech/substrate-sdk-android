@@ -14,7 +14,6 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Generic
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.new
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.instances.AddressInstanceConstructor
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.instances.SignatureInstanceConstructor
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.NumberType
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.skipAliases
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.toHex
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.toHexUntyped
