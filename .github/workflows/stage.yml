@@ -9,7 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/nova-wallet/build_tools:pr-3
+      image: ghcr.io/novasamatech/build_tools:pr-3
       credentials:
         username: stepanLav
         password: ${{ secrets.GITHUB_TOKEN }}
