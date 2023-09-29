@@ -67,7 +67,10 @@ abstract class ExtrinsicPayloadExtras(name: String) : Type<ExtrinsicPayloadExtra
         return instance is Map<*, *> && instance.keys.all { it is String }
     }
 
-    protected fun shouldSkipEncoding(type: RuntimeType<*, *>): Boolean {
+    private fun shouldSkipEncoding(type: RuntimeType<*, *>): Boolean {
+        // this is for better backward-compatibility -
+        // clients might pass null instead of empty struct / empty tuple that are specified in
+        // RuntimeMetadata.signedExtensions v14
         return type.isNullType() || type.isEmptyStruct() || type.isEmptyTuple()
     }
 }
