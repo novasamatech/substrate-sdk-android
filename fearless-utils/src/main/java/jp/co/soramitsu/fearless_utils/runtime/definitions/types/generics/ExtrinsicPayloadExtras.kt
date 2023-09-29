@@ -10,7 +10,6 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.isEmpt
 import jp.co.soramitsu.fearless_utils.runtime.metadata.SignedExtensionId
 import jp.co.soramitsu.fearless_utils.runtime.metadata.SignedExtensionMetadata
 
-
 object SignedExtras : ExtrinsicPayloadExtras("ExtrinsicPayloadExtras.SignedExtras") {
 
     override fun getTypeFrom(signedExtension: SignedExtensionMetadata): Type<*>? {
@@ -68,7 +67,7 @@ abstract class ExtrinsicPayloadExtras(name: String) : Type<ExtrinsicPayloadExtra
         return instance is Map<*, *> && instance.keys.all { it is String }
     }
 
-    protected fun shouldSkipEncoding(type: RuntimeType<*, *>) :Boolean {
+    protected fun shouldSkipEncoding(type: RuntimeType<*, *>): Boolean {
         return type.isNullType() || type.isEmptyStruct() || type.isEmptyTuple()
     }
 }

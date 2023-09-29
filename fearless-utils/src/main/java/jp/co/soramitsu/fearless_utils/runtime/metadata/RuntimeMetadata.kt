@@ -32,11 +32,11 @@ class SignedExtensionMetadata(
 
     companion object {
 
-        fun onlySigned(id: String, type: RuntimeType<*, *>) :SignedExtensionMetadata {
+        fun onlySigned(id: String, type: RuntimeType<*, *>): SignedExtensionMetadata {
             return SignedExtensionMetadata(id, type, Null)
         }
 
-        fun onlyAdditional(id: String, additionalSigned: RuntimeType<*, *>) :SignedExtensionMetadata {
+        fun onlyAdditional(id: String, additionalSigned: RuntimeType<*, *>): SignedExtensionMetadata {
             return SignedExtensionMetadata(id, Null, additionalSigned)
         }
     }

@@ -39,7 +39,6 @@ class Tuple(name: String, val typeReferences: List<TypeReference>) : Type<List<*
         get() = typeReferences.all { it.isResolved() }
 }
 
-
 fun RuntimeType<*, *>.isEmptyTuple(): Boolean {
     val asTuple = skipAliases() as? Tuple ?: return false
 
