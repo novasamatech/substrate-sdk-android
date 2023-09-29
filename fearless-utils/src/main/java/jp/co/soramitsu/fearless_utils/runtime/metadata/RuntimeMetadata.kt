@@ -41,3 +41,7 @@ class SignedExtensionMetadata(
         }
     }
 }
+
+fun ExtrinsicMetadata.findSignedExtension(id: SignedExtensionId): SignedExtensionMetadata? {
+    return signedExtensions.find { it.id == id }
+}
