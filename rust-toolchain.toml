@@ -1,5 +1,0 @@
-[toolchain]
-channel = "nightly-2022-02-25"
-components = [ "rustfmt", "rustc-dev" ]
-targets = [ "armv7-linux-androideabi", "i686-linux-android", "aarch64-linux-android", "x86_64-linux-android" ]
-profile = "default"

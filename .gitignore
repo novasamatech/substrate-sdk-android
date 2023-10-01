@@ -12,3 +12,8 @@ app/*.apk
 *.lock
 /sr25519-java/target
 /sr25519-java/.idea
+
+
+# Added by cargo
+
+/target
