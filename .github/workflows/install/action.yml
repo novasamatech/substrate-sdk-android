@@ -1,0 +1,17 @@
+name: Install dependencies for Android build
+description: Contains all dependencies for Android build
+runs:
+  using: "composite"
+  steps:
+    - name: ☕️ Install Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '8'
+        cache: 'gradle'
+    
+    - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: rustfmt
+    - name: Rustfmt Check
+        uses: actions-rust-lang/rustfmt@v1
