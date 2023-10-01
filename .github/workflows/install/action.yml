@@ -69,7 +69,3 @@ runs:
         rustup target add x86_64-linux-android
         rustup target add aarch64-linux-android
       shell: bash
-    
-    - name: Debug library
-      run: find /usr -name libgcc*
-      shell: bash
