@@ -14,7 +14,7 @@ runs:
       run: |
         bash .github/setup_android.sh
         echo 'ANDROID_HOME=/home/runner/Android/sdk'  >> "$GITHUB_ENV"
-        echo 'ANDROID_NDK_HOME=/home/runner/Android/ndk/r21d'  >> "$GITHUB_ENV"
+        echo 'ANDROID_NDK_HOME=/home/runner/Android/ndk/r21d/android-ndk-r21d'  >> "$GITHUB_ENV"
       shell: bash
     
     - name: Install Rust
