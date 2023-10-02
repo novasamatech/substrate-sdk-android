@@ -3,6 +3,7 @@ package jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite
 import io.emeraldpay.polkaj.scale.ScaleCodecReader
 import io.emeraldpay.polkaj.scale.ScaleCodecWriter
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.RuntimeType
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.Type
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.TypeReference
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.skipAliases
@@ -43,4 +44,10 @@ class Struct(
 
     override val isFullyResolved: Boolean
         get() = mapping.all { (_, ref) -> ref.isResolved() }
+}
+
+fun RuntimeType<*, *>.isEmptyStruct(): Boolean {
+    val asStruct = skipAliases() as? Struct ?: return false
+
+    return asStruct.mapping.isEmpty()
 }

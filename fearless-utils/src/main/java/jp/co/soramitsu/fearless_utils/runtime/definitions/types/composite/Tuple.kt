@@ -3,8 +3,10 @@ package jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite
 import io.emeraldpay.polkaj.scale.ScaleCodecReader
 import io.emeraldpay.polkaj.scale.ScaleCodecWriter
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.RuntimeType
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.Type
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.TypeReference
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.skipAliases
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.skipAliasesOrNull
 
 class Tuple(name: String, val typeReferences: List<TypeReference>) : Type<List<*>>(name) {
@@ -35,4 +37,10 @@ class Tuple(name: String, val typeReferences: List<TypeReference>) : Type<List<*
 
     override val isFullyResolved: Boolean
         get() = typeReferences.all { it.isResolved() }
+}
+
+fun RuntimeType<*, *>.isEmptyTuple(): Boolean {
+    val asTuple = skipAliases() as? Tuple ?: return false
+
+    return asTuple.typeReferences.isEmpty()
 }

@@ -4,30 +4,29 @@ import jp.co.soramitsu.fearless_utils.encrypt.SignatureWrapper
 import jp.co.soramitsu.fearless_utils.runtime.AccountId
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.RuntimeType
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.Type
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.AdditionalExtras
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.DefaultSignedExtensions
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Era
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Extrinsic
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Extrinsic.EncodingInstance.CallRepresentation
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.ExtrinsicPayloadExtrasInstance
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.GenericCall
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.SignedExtras
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.create
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.new
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.instances.AddressInstanceConstructor
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.instances.SignatureInstanceConstructor
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.skipAliases
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.toHex
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.toHexUntyped
 import jp.co.soramitsu.fearless_utils.runtime.extrinsic.signer.Signer
 import jp.co.soramitsu.fearless_utils.runtime.extrinsic.signer.SignerPayloadExtrinsic
+import jp.co.soramitsu.fearless_utils.runtime.metadata.SignedExtensionId
 import jp.co.soramitsu.fearless_utils.runtime.metadata.call
+import jp.co.soramitsu.fearless_utils.runtime.metadata.findSignedExtension
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module
 import jp.co.soramitsu.fearless_utils.wsrpc.request.runtime.chain.RuntimeVersion
 import java.math.BigInteger
 
 private val DEFAULT_TIP = BigInteger.ZERO
-
-class SignedExtension(val name: String, val type: Type<*>)
 
 class ExtrinsicBuilder(
     val runtime: RuntimeSnapshot,
@@ -39,14 +38,12 @@ class ExtrinsicBuilder(
     private val blockHash: ByteArray = genesisHash,
     private val era: Era = Era.Immortal,
     private val tip: BigInteger = DEFAULT_TIP,
-    private val customSignedExtensions: Map<SignedExtension, Any?> = emptyMap(),
+    private val customSignedExtensions: Map<SignedExtensionId, Any?> = emptyMap(),
     private val addressInstanceConstructor: RuntimeType.InstanceConstructor<AccountId> = AddressInstanceConstructor,
     private val signatureConstructor: RuntimeType.InstanceConstructor<SignatureWrapper> = SignatureInstanceConstructor
 ) {
 
     private val calls = mutableListOf<GenericCall.Instance>()
-
-    private val extrinsicType = Extrinsic.create(customSignedExtensions.keys)
 
     fun call(
         moduleIndex: Int,
@@ -133,7 +130,7 @@ class ExtrinsicBuilder(
             callRepresentation = callRepresentation
         )
 
-        return extrinsicType.toHex(runtime, extrinsic)
+        return Extrinsic.toHex(runtime, extrinsic)
     }
 
     private suspend fun buildSignature(
@@ -141,7 +138,7 @@ class ExtrinsicBuilder(
     ): String {
         val multiSignature = buildSignatureObject(callRepresentation)
 
-        val signatureType = extrinsicType.signatureType(runtime)
+        val signatureType = Extrinsic.signatureType(runtime)
 
         return signatureType.toHexUntyped(runtime, multiSignature)
     }
@@ -158,19 +155,18 @@ class ExtrinsicBuilder(
         val signedExtrasInstance = buildSignedExtras()
 
         val additionalExtrasInstance = mapOf(
-            AdditionalExtras.BLOCK_HASH to blockHash,
-            AdditionalExtras.GENESIS to genesisHash,
-            AdditionalExtras.SPEC_VERSION to runtimeVersion.specVersion.toBigInteger(),
-            AdditionalExtras.TX_VERSION to runtimeVersion.transactionVersion.toBigInteger()
+            DefaultSignedExtensions.CHECK_MORTALITY to blockHash,
+            DefaultSignedExtensions.CHECK_GENESIS to genesisHash,
+            DefaultSignedExtensions.CHECK_SPEC_VERSION to runtimeVersion.specVersion.toBigInteger(),
+            DefaultSignedExtensions.CHECK_TX_VERSION to runtimeVersion.transactionVersion.toBigInteger()
         )
 
         val signerPayload = SignerPayloadExtrinsic(
             runtime = runtime,
-            extrinsicType = extrinsicType,
             accountId = accountId,
             call = callRepresentation,
             signedExtras = signedExtrasInstance,
-            additionalExtras = additionalExtrasInstance,
+            additionalSignedExtras = additionalExtrasInstance,
         )
         val signatureWrapper = signer.signExtrinsic(signerPayload)
 
@@ -197,14 +193,28 @@ class ExtrinsicBuilder(
 
     private fun buildSignedExtras(): ExtrinsicPayloadExtrasInstance {
         val default = mapOf(
-            SignedExtras.MORTALITY to era,
-            SignedExtras.TIP to tip,
-            SignedExtras.NONCE to nonce
+            DefaultSignedExtensions.CHECK_MORTALITY to era,
+            DefaultSignedExtensions.CHECK_TX_PAYMENT to tip,
+            DefaultSignedExtensions.CHECK_NONCE to encodeNonce(nonce)
         )
 
-        val custom = customSignedExtensions.mapKeys { (extension, _) -> extension.name }
+        return default + customSignedExtensions
+    }
 
-        return default + custom
+    private fun encodeNonce(nonce: BigInteger): Any {
+        val nonceExtension = runtime.metadata.extrinsic
+            .findSignedExtension(DefaultSignedExtensions.CHECK_NONCE) ?: return nonce
+
+        val nonceType = nonceExtension.type?.skipAliases()
+
+        return when {
+            nonceType is Struct && nonceType.mapping.size == 1 -> {
+                val fieldName = nonceType.mapping.keys.single()
+
+                Struct.Instance(mapOf(fieldName to nonce))
+            }
+            else -> nonce
+        }
     }
 
     private fun requireNotMixingBytesAndInstanceCalls() {

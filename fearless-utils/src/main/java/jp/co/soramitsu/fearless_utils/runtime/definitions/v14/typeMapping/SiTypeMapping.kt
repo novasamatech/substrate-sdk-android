@@ -8,6 +8,8 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.TypeReference
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Alias
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Option
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.SetType
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.aliasedAs
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.EraType
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.DynamicByteArray
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.FixedByteArray
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u8
@@ -171,13 +173,37 @@ object SiByteArrayMapping : SiTypeMapping {
     }
 }
 
+class ReplaceTypesSiTypeMapping(
+    vararg cases: Pair<String, Type<*>>
+) : SiTypeMapping {
+
+    companion object {
+        fun default(): SiTypeMapping {
+            return ReplaceTypesSiTypeMapping(
+                "sp_runtime.generic.era.Era" to EraType
+            )
+        }
+    }
+
+    private val casesById = cases.toMap()
+
+    override fun map(
+        originalDefinition: EncodableStruct<PortableType>,
+        suggestedTypeName: String,
+        typesBuilder: TypePresetBuilder
+    ): Type<*>? {
+        return casesById[suggestedTypeName]?.aliasedAs(suggestedTypeName)
+    }
+}
+
 fun SiTypeMapping.Companion.default(): OneOfSiTypeMapping {
     return OneOfSiTypeMapping(
         listOf(
             SiByteArrayMapping,
             SiOptionTypeMapping,
             SiSetTypeMapping,
-            SiCompositeNoneToAliasTypeMapping
+            SiCompositeNoneToAliasTypeMapping,
+            ReplaceTypesSiTypeMapping.default(),
         )
     )
 }

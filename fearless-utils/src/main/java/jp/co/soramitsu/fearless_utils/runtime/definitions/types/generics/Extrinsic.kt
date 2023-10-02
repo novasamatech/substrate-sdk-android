@@ -18,14 +18,8 @@ private val SIGNED_MASK = 0b1000_0000.toUByte()
 private const val TYPE_ADDRESS = "Address"
 private const val TYPE_SIGNATURE = "ExtrinsicSignature"
 
-class Extrinsic(
-    val signedExtrasType: ExtrinsicPayloadExtras = SignedExtras.default
-) :
-    RuntimeType<Extrinsic.EncodingInstance, Extrinsic.DecodedInstance>("ExtrinsicsDecoder") {
-
-    companion object {
-        val Default = Extrinsic()
-    }
+@OptIn(ExperimentalUnsignedTypes::class)
+object Extrinsic : RuntimeType<Extrinsic.EncodingInstance, Extrinsic.DecodedInstance>("ExtrinsicsDecoder") {
 
     class EncodingInstance(
         val signature: Signature?,
@@ -71,7 +65,7 @@ class Extrinsic(
             Signature(
                 accountIdentifier = addressType(runtime).decode(scaleCodecReader, runtime),
                 signature = signatureType(runtime).decode(scaleCodecReader, runtime),
-                signedExtras = signedExtrasType.decode(scaleCodecReader, runtime)
+                signedExtras = SignedExtras.decode(scaleCodecReader, runtime)
             )
         } else {
             null
@@ -113,7 +107,7 @@ class Extrinsic(
 
             val addressBytes = addressType(runtime).bytes(runtime, signature.accountIdentifier)
             val signatureBytes = signatureType(runtime).bytes(runtime, signature.signature)
-            val signedExtrasBytes = signedExtrasType.bytes(runtime, signature.signedExtras)
+            val signedExtrasBytes = SignedExtras.bytes(runtime, signature.signedExtras)
 
             addressBytes + signatureBytes + signedExtrasBytes
         } else {

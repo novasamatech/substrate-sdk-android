@@ -2,9 +2,11 @@ package jp.co.soramitsu.fearless_utils.runtime.extrinsic.signer
 
 import io.emeraldpay.polkaj.scale.ScaleCodecWriter
 import jp.co.soramitsu.fearless_utils.hash.Hasher.blake2b256
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.AdditionalExtras
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.AdditionalSignedExtras
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.DefaultSignedExtensions
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Extrinsic
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.GenericCall
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.SignedExtras
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.useScaleWriter
 import jp.co.soramitsu.fearless_utils.scale.utils.directWrite
 
@@ -28,8 +30,8 @@ fun SignerPayloadExtrinsic.encodeCallDataTo(writer: ScaleCodecWriter) {
 fun SignerPayloadExtrinsic.encodedCallData() = bytesOf(::encodeCallDataTo)
 
 fun SignerPayloadExtrinsic.encodeExtensionsTo(writer: ScaleCodecWriter) {
-    extrinsicType.signedExtrasType.encode(writer, runtime, signedExtras)
-    AdditionalExtras.default.encode(writer, runtime, additionalExtras)
+    SignedExtras.encode(writer, runtime, signedExtras)
+    AdditionalSignedExtras.encode(writer, runtime, additionalSignedExtras)
 }
 
 fun SignerPayloadExtrinsic.encodedExtensions() = bytesOf(::encodeExtensionsTo)
@@ -50,4 +52,4 @@ fun SignerPayloadExtrinsic.encodedSignaturePayload(hashBigPayloads: Boolean = tr
 }
 
 val SignerPayloadExtrinsic.genesisHash
-    get() = additionalExtras[AdditionalExtras.GENESIS] as ByteArray
+    get() = additionalSignedExtras[DefaultSignedExtensions.CHECK_GENESIS] as ByteArray

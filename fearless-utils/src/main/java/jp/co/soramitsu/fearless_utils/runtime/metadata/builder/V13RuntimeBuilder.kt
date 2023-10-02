@@ -15,6 +15,7 @@ import jp.co.soramitsu.fearless_utils.runtime.metadata.NMapSchema
 import jp.co.soramitsu.fearless_utils.runtime.metadata.RuntimeMetadata
 import jp.co.soramitsu.fearless_utils.runtime.metadata.RuntimeMetadataReader
 import jp.co.soramitsu.fearless_utils.runtime.metadata.RuntimeMetadataSchema
+import jp.co.soramitsu.fearless_utils.runtime.metadata.SignedExtensionMetadata
 import jp.co.soramitsu.fearless_utils.runtime.metadata.StorageEntryMetadataSchema
 import jp.co.soramitsu.fearless_utils.runtime.metadata.StorageMetadataSchema
 import jp.co.soramitsu.fearless_utils.runtime.metadata.groupByName
@@ -34,14 +35,18 @@ internal object V13RuntimeBuilder : RuntimeBuilder {
 
     override fun buildMetadata(
         reader: RuntimeMetadataReader,
-        typeRegistry: TypeRegistry
+        typeRegistry: TypeRegistry,
+        knownSignedExtensions: List<SignedExtensionMetadata>
     ): RuntimeMetadata {
         val metadataStruct = reader.metadata
 
         require(metadataStruct.schema is RuntimeMetadataSchema)
 
         return RuntimeMetadata(
-            extrinsic = buildExtrinsic(metadataStruct[RuntimeMetadataSchema.extrinsic]),
+            extrinsic = buildExtrinsic(
+                struct = metadataStruct[RuntimeMetadataSchema.extrinsic],
+                knownSignedExtensions = knownSignedExtensions
+            ),
             modules = buildModules(metadataStruct[RuntimeMetadataSchema.modules], typeRegistry),
             runtimeVersion = reader.metadataVersion.toBigInteger()
         )
@@ -205,11 +210,18 @@ internal object V13RuntimeBuilder : RuntimeBuilder {
     }
 
     private fun buildExtrinsic(
-        struct: EncodableStruct<ExtrinsicMetadataSchema>
-    ) = ExtrinsicMetadata(
-        version = struct[ExtrinsicMetadataSchema.version].toInt().toBigInteger(),
-        signedExtensions = struct[ExtrinsicMetadataSchema.signedExtensions]
-    )
+        struct: EncodableStruct<ExtrinsicMetadataSchema>,
+        knownSignedExtensions: List<SignedExtensionMetadata>
+    ): ExtrinsicMetadata {
+        val knownSignedExtensionsById = knownSignedExtensions.associateBy { it.id }
+
+        return ExtrinsicMetadata(
+            version = struct[ExtrinsicMetadataSchema.version].toInt().toBigInteger(),
+            signedExtensions = struct[ExtrinsicMetadataSchema.signedExtensions].mapNotNull {
+                knownSignedExtensionsById[it]
+            }
+        )
+    }
 
     private fun cannotConstructStorageEntry(from: Any?): Nothing {
         throw IllegalArgumentException("Cannot construct StorageEntryType from $from")
