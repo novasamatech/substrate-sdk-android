@@ -9,14 +9,14 @@ runs:
         distribution: 'temurin'
         java-version: '8'
         cache: 'gradle'
-        
-    - uses: nttld/setup-ndk@v1
-      with:
-        ndk-version: r21d
-        local-cache: true
-    
+
     - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
+      uses: amyu/setup-android@v3
+      with:   
+        cache-disabled: true
+        sdk-version: '28'
+        build-tools-version: '28.0.3'
+        ndk-version: '22.1.7171670'
     
     - name: Install Rust
       uses: actions-rs/toolchain@v1
