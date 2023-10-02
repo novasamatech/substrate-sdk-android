@@ -10,13 +10,9 @@ runs:
         java-version: '8'
         cache: 'gradle'
 
-    - name: Setup Android SDK
-      uses: amyu/setup-android@v3
-      with:   
-        cache-disabled: true
-        sdk-version: '28'
-        build-tools-version: '28.0.3'
-        ndk-version: '22.1.7171670'
+    - name: Install android dependencies
+      run: bash .github/setup_android.sh
+      shell: bash
     
     - name: Install Rust
       uses: actions-rs/toolchain@v1
