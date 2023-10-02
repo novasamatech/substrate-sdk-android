@@ -9,12 +9,14 @@ runs:
         distribution: 'temurin'
         java-version: '8'
         cache: 'gradle'
-
-    - name: Install android dependencies
-      run: |
-        bash .github/setup_android.sh
-        echo 'ANDROID_HOME=/home/runner/Android/sdk'  >> "$GITHUB_ENV"
-        echo 'ANDROID_NDK_HOME=/home/runner/Android/ndk/r21d/android-ndk-r21d'  >> "$GITHUB_ENV"
+    
+    - uses: nttld/setup-ndk@v1
+      id: setup-ndk
+      with:
+        ndk-version: r21d
+        add-to-path: false
+    
+    - run: echo ${{ steps.setup-ndk.outputs.ndk-path }}
       shell: bash
     
     - name: Install Rust
