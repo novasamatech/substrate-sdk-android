@@ -38,6 +38,9 @@ unzip -d "$NDK_DIR" "$NDK_DIR.zip"
 rm "$NDK_DIR.zip"
 
 # Add the bin directories to the PATH
-echo 'export ANDROID_HOME=$HOME/Android/sdk' >> "$GITHUB_ENV"
-echo 'export ANDROID_NDK_HOME=$HOME/Android/ndk/$NDK_VERSION' >> "$GITHUB_ENV"
-echo 'export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$ANDROID_NDK_HOME' >> "$GITHUB_ENV"
+echo 'export ANDROID_HOME=$HOME/Android/sdk' >> ~/.bashrc
+echo 'export ANDROID_NDK_HOME=$HOME/Android/ndk/$NDK_VERSION' >> ~/.bashrc
+echo 'export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$ANDROID_NDK_HOME' >> ~/.bashrc
+
+# Source the bashrc file
+source ~/.bashrc

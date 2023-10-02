@@ -11,7 +11,14 @@ runs:
         cache: 'gradle'
 
     - name: Install android dependencies
-      run: bash .github/setup_android.sh
+      run: |
+        bash .github/setup_android.sh
+        echo 'ANDROID_HOME=$ANDROID_HOME'
+        echo 'ANDROID_NDK_HOME=$ANDROID_NDK_HOME'
+        echo 'PATH=$PATH'
+        echo 'export ANDROID_HOME=$ANDROID_HOME' >> "$GITHUB_ENV"
+        echo 'export ANDROID_NDK_HOME=$ANDROID_NDK_HOME' >> "$GITHUB_ENV"
+        echo 'export PATH=$PATH' >> "$GITHUB_ENV"
       shell: bash
     
     - name: Install Rust
