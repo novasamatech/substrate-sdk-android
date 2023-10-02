@@ -1,41 +1,78 @@
 #!/bin/bash
 
 # Set the versions
-SDK_VERSION="commandlinetools-linux-7583922_latest.zip"
-BUILD_TOOLS_VERSION="28.0.3"
-NDK_VERSION="r21d"
+ANDROID_HOME="$HOME/Android"
+ANDROID_SDK_TOOLS_VERSION="4333796"
+ANDROID_NDK_VERSION="r21d"
+ANDROID_SDK_HOME="$ANDROID_HOME"
+ANDROID_NDK_HOME="$ANDROID_NDK/android-ndk-$ANDROID_NDK_VERSION"
 
-# Set the download URLs
-SDK_URL="https://dl.google.com/android/repository/$SDK_VERSION"
-BUILD_TOOLS_URL="https://dl.google.com/android/repository/build-tools_r$BUILD_TOOLS_VERSION-linux.zip"
-NDK_URL="http://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux-x86_64.zip"
+# Download and install Android SDK Tools
+wget --quiet --output-document=sdk-tools.zip \
+    "https://dl.google.com/android/repository/sdk-tools-linux-${ANDROID_SDK_TOOLS_VERSION}.zip"
+mkdir --parents "$ANDROID_HOME"
+unzip -q sdk-tools.zip -d "$ANDROID_HOME"
+rm --force sdk-tools.zip
 
+# Download and install Android NDK
+wget --quiet --output-document=android-ndk.zip \
+    "http://dl.google.com/android/repository/android-ndk-${ANDROID_NDK_VERSION}-linux-x86_64.zip"
+mkdir --parents "$ANDROID_NDK_HOME"
+unzip -q android-ndk.zip -d "$ANDROID_NDK"
+rm --force android-ndk.zip
 
-# Set the installation directories
-INSTALL_DIR="$HOME/Android"
-SDK_DIR="$INSTALL_DIR/sdk"
-BUILD_TOOLS_DIR="$SDK_DIR/build-tools/$BUILD_TOOLS_VERSION"
-NDK_DIR="$INSTALL_DIR/ndk/$NDK_VERSION"
+# Accept Android SDK licenses
+mkdir --parents "$HOME/.android/"
+echo '### User Sources for Android SDK Manager' > "$HOME/.android/repositories.cfg"
 
-# Create the installation directories
-mkdir -p "$SDK_DIR"
-mkdir -p "$BUILD_TOOLS_DIR"
-mkdir -p "$NDK_DIR"
+# Download and install Android platforms
+wget --quiet --output-document=platforms.zip \
+    "https://dl.google.com/android/repository/platforms;android-30"
+unzip -q platforms.zip -d "$ANDROID_HOME"
+rm --force platforms.zip
 
-# Download and extract the SDK
-wget -O "$SDK_DIR/$SDK_VERSION" "$SDK_URL"
-unzip -d "$SDK_DIR" "$SDK_DIR/$SDK_VERSION"
-rm "$SDK_DIR/$SDK_VERSION"
+wget --quiet --output-document=platforms.zip \
+    "https://dl.google.com/android/repository/platforms;android-29"
+unzip -q platforms.zip -d "$ANDROID_HOME"
+rm --force platforms.zip
 
-# Download and extract the build tools
-wget -O "$BUILD_TOOLS_DIR.zip" "$BUILD_TOOLS_URL"
-unzip -d "$BUILD_TOOLS_DIR" "$BUILD_TOOLS_DIR.zip"
-rm "$BUILD_TOOLS_DIR.zip"
+# Download and install Android platform tools
+wget --quiet --output-document=platform-tools.zip \
+    "https://dl.google.com/android/repository/platform-tools"
+unzip -q platform-tools.zip -d "$ANDROID_HOME"
+rm --force platform-tools.zip
 
-# Download and extract the NDK
-wget -O "$NDK_DIR.zip" "$NDK_URL"
-unzip -d "$NDK_DIR" "$NDK_DIR.zip"
-rm "$NDK_DIR.zip"
+# Download and install Android build tools
+wget --quiet --output-document=build-tools.zip \
+    "https://dl.google.com/android/repository/build-tools;30.0.0"
+unzip -q build-tools.zip -d "$ANDROID_HOME"
+rm --force build-tools.zip
+
+wget --quiet --output-document=build-tools.zip \
+    "https://dl.google.com/android/repository/build-tools;29.0.3"
+unzip -q build-tools.zip -d "$ANDROID_HOME"
+rm --force build-tools.zip
+
+wget --quiet --output-document=build-tools.zip \
+    "https://dl.google.com/android/repository/build-tools;29.0.2"
+unzip -q build-tools.zip -d "$ANDROID_HOME"
+rm --force build-tools.zip
+
+wget --quiet --output-document=build-tools.zip \
+    "https://dl.google.com/android/repository/build-tools;28.0.3"
+unzip -q build-tools.zip -d "$ANDROID_HOME"
+rm --force build-tools.zip
+
+wget --quiet --output-document=build-tools.zip \
+    "https://dl.google.com/android/repository/build-tools;28.0.2"
+unzip -q build-tools.zip -d "$ANDROID_HOME"
+rm --force build-tools.zip
+
+# Download and install Android emulator
+wget --quiet --output-document=emulator.zip \
+    "https://dl.google.com/android/repository/emulator"
+unzip -q emulator.zip -d "$ANDROID_HOME"
+rm --force emulator.zip
 
 # Add the bin directories to the PATH
 echo 'export ANDROID_HOME=$HOME/Android/sdk' >> ~/.bashrc
