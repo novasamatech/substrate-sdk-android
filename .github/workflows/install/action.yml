@@ -15,6 +15,9 @@ runs:
         ndk-version: r21d
         local-cache: true
     
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+    
     - name: Install Rust
       uses: actions-rs/toolchain@v1
       with:
