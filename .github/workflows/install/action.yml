@@ -8,7 +8,11 @@ runs:
       with:
         distribution: 'temurin'
         java-version: '8'
-        cache: 'gradle'
+        # cache: 'gradle'
+    
+    - name: Check Java version
+      run: java -version
+      shell: bash
     
     - uses: nttld/setup-ndk@v1
       id: setup-ndk
@@ -17,6 +21,19 @@ runs:
         add-to-path: false
     
     - run: echo ${{ steps.setup-ndk.outputs.ndk-path }}
+      shell: bash
+
+    - name: Check NDK path sequentially
+      run: |
+        path="/usr/local/lib/android/sdk/ndk/26.0.10792818/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android-strip"
+        while [ "$path" != "." ]; do
+          if [ -d "$path" ]; then
+            echo "$path - available"
+          else
+            echo "$path - not available"
+          fi
+          path=$(dirname "$path")
+        done
       shell: bash
     
     - name: Install Rust

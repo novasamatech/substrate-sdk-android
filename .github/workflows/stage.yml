@@ -30,4 +30,4 @@ jobs:
         run: ./gradlew testDebugUnitTest
 
       - name: Publish to staging Maven
-        run: ./gradlew publishReleasePublicationToSonatypeRepository --max-workers 1 closeSonatypeStagingRepository
+        run: ./gradlew publishReleasePublicationToSonatypeRepository --max-workers 1 closeSonatypeStagingRepository --scan
