@@ -129,7 +129,7 @@ class ExtrinsicBuilderTest {
         }
 
         val encoded = extrinsicBuilder.build(useBatchAll = true)
-        val decoded = Extrinsic().fromHex(runtime, encoded)
+        val decoded = Extrinsic.fromHex(runtime, encoded)
 
         assertEquals(decoded.call.function.name, "batch_all")
     }
@@ -157,11 +157,6 @@ class ExtrinsicBuilderTest {
         val extrinsicInHex =
             "0x45028400fdc41550fb5186d71cae699c31731b3e1baa10680c7bd6b3831a6d222cf4d1680045ba1f9d291fff7dddf36f7ec060405d5e87ac8fab8832cfcc66858e6975141748ce89c41bda6c3a84204d3c6f929b928702168ca38bbed69b172044b599a10ab5038800000a0000bcc5ecf679ebd776866a04c212a4ec5dc45cefab57d7aa858c389844e212693f0700e40b5402"
 
-        val chargeAssetTxPayment = SignedExtension(
-            name = "ChargeAssetTxPayment",
-            type = runtime.typeRegistry["pallet_asset_tx_payment.ChargeAssetTxPayment"]!!
-        )
-
         val builder = ExtrinsicBuilder(
             runtime = runtime,
             nonce = 34.toBigInteger(),
@@ -171,7 +166,7 @@ class ExtrinsicBuilderTest {
             accountId = KEYPAIR.publicKey.publicKeyToSubstrateAccountId(),
             era = Era.Mortal(64, 59),
             customSignedExtensions = mapOf(
-                chargeAssetTxPayment to Struct.Instance(
+                "ChargeAssetTxPayment" to Struct.Instance(
                     mapOf(
                         "tip" to BigInteger.ZERO,
                         "assetId" to null

@@ -11,6 +11,7 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Null
 import jp.co.soramitsu.fearless_utils.runtime.metadata.ExtrinsicMetadata
 import jp.co.soramitsu.fearless_utils.runtime.metadata.RuntimeMetadata
 import jp.co.soramitsu.fearless_utils.runtime.metadata.RuntimeMetadataReader
+import jp.co.soramitsu.fearless_utils.runtime.metadata.SignedExtensionMetadata
 import jp.co.soramitsu.fearless_utils.runtime.metadata.groupByName
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module.Constant
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module.Error
@@ -40,14 +41,18 @@ object V14RuntimeBuilder : RuntimeBuilder {
 
     override fun buildMetadata(
         reader: RuntimeMetadataReader,
-        typeRegistry: TypeRegistry
+        typeRegistry: TypeRegistry,
+        knownSignedExtensions: List<SignedExtensionMetadata>,
     ): RuntimeMetadata {
         val metadataStruct = reader.metadata
 
         require(metadataStruct.schema is RuntimeMetadataSchemaV14)
 
         return RuntimeMetadata(
-            extrinsic = buildExtrinsic(metadataStruct[RuntimeMetadataSchemaV14.extrinsic]),
+            extrinsic = buildExtrinsic(
+                metadataStruct[RuntimeMetadataSchemaV14.extrinsic],
+                typeRegistry
+            ),
             modules = buildModules(metadataStruct[RuntimeMetadataSchemaV14.pallets], typeRegistry),
             runtimeVersion = reader.metadataVersion.toBigInteger()
         )
@@ -242,11 +247,16 @@ object V14RuntimeBuilder : RuntimeBuilder {
     }
 
     private fun buildExtrinsic(
-        struct: EncodableStruct<ExtrinsicMetadataV14>
+        struct: EncodableStruct<ExtrinsicMetadataV14>,
+        typeRegistry: TypeRegistry,
     ) = ExtrinsicMetadata(
         version = struct[ExtrinsicMetadataV14.version].toInt().toBigInteger(),
         signedExtensions = struct[ExtrinsicMetadataV14.signedExtensions].map {
-            it[SignedExtensionMetadataV14.identifier]
+            SignedExtensionMetadata(
+                id = it[SignedExtensionMetadataV14.identifier],
+                type = typeRegistry[it[SignedExtensionMetadataV14.type].toString()],
+                additionalSigned = typeRegistry[it[SignedExtensionMetadataV14.additionalSigned].toString()]
+            )
         }
     )
 
