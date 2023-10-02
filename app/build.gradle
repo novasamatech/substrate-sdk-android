@@ -4,6 +4,7 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
+    ndkVersion "21.3.6528147"
     compileSdkVersion rootProject.compileVersion
     defaultConfig {
         minSdkVersion rootProject.minVersion
