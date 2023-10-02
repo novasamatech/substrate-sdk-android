@@ -10,22 +10,11 @@ runs:
         java-version: '8'
         # cache: 'gradle'
     
-    - name: Check Java version
-      run: java -version
-      shell: bash
-
-    - name: Install Android NDK
-      uses: uraimo/run-on-arch-action@v2.1.1
+    - uses: nttld/setup-ndk@v1
+      id: setup-ndk
       with:
-        arch: amd64
-        distro: ubuntu20.04
-        dockerRunArgs: |
-          -e ANDROID_NDK_HOME=/usr/local/lib/android/sdk/ndk/26.0.10792818
-        install: |
-          wget https://dl.google.com/android/repository/android-ndk-r21d-linux-x86_64.zip
-          unzip android-ndk-r21d-linux-x86_64.zip -d $ANDROID_NDK_HOME
-        run: |
-          echo "Android NDK installed at $ANDROID_NDK_HOME"
+        ndk-version: r26
+        add-to-path: true
     
     - name: Install Rust
       uses: actions-rs/toolchain@v1
