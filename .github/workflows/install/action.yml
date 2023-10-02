@@ -13,33 +13,19 @@ runs:
     - name: Check Java version
       run: java -version
       shell: bash
-    
-    - uses: nttld/setup-ndk@v1
-      id: setup-ndk
-      with:
-        ndk-version: r21d
-        add-to-path: false
-    
-    - run: echo ${{ steps.setup-ndk.outputs.ndk-path }}
-      shell: bash
 
-    - name: Check NDK path sequentially
-      run: |
-        path="/usr/local/lib/android/sdk/ndk/26.0.10792818/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android-strip"
-        while [ "$path" != "." ] && [ "$path" != "/" ]; do
-          if [ -d "$path" ]; then
-            echo "$path - available"
-          else
-            echo "$path - not available"
-          fi
-          path=$(dirname "$path")
-        done
-        if [ -d "/" ]; then
-          echo "/ - available"
-        else
-          echo "/ - not available"
-        fi
-      shell: bash
+    - name: Install Android NDK
+      uses: uraimo/run-on-arch-action@v2.1.1
+      with:
+        arch: amd64
+        distro: ubuntu20.04
+        dockerRunArgs: |
+          -e ANDROID_NDK_HOME=/usr/local/lib/android/sdk/ndk/26.0.10792818
+        install: |
+          wget https://dl.google.com/android/repository/android-ndk-r21d-linux-x86_64.zip
+          unzip android-ndk-r21d-linux-x86_64.zip -d $ANDROID_NDK_HOME
+        run: |
+          echo "Android NDK installed at $ANDROID_NDK_HOME"
     
     - name: Install Rust
       uses: actions-rs/toolchain@v1
