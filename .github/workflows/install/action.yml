@@ -13,12 +13,8 @@ runs:
     - name: Install android dependencies
       run: |
         bash .github/setup_android.sh
-        echo 'ANDROID_HOME=/home/runner/Android/sdk'
-        echo 'ANDROID_NDK_HOME=/home/runner/Android/ndk/r21d'
-        echo 'PATH=${{env.PATH}}:/home/runner/Android/sdk/tools:/home/runner/Android/sdk/platform-tools:/home/runner/Android/ndk/r21d'
         echo 'ANDROID_HOME=/home/runner/Android/sdk'  >> "$GITHUB_ENV"
         echo 'ANDROID_NDK_HOME=/home/runner/Android/ndk/r21d'  >> "$GITHUB_ENV"
-        echo 'PATH=${{env.PATH}}:/home/runner/Android/sdk/tools:/home/runner/Android/sdk/platform-tools:/home/runner/Android/ndk/r21d' >> "$GITHUB_ENV"
       shell: bash
     
     - name: Install Rust
