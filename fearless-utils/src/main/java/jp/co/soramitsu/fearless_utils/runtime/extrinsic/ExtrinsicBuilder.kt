@@ -20,6 +20,7 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.toHexUntyped
 import jp.co.soramitsu.fearless_utils.runtime.extrinsic.signer.Signer
 import jp.co.soramitsu.fearless_utils.runtime.extrinsic.signer.SignerPayloadExtrinsic
 import jp.co.soramitsu.fearless_utils.runtime.metadata.SignedExtensionId
+import jp.co.soramitsu.fearless_utils.runtime.metadata.SignedExtensionValue
 import jp.co.soramitsu.fearless_utils.runtime.metadata.call
 import jp.co.soramitsu.fearless_utils.runtime.metadata.findSignedExtension
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module
@@ -38,12 +39,15 @@ class ExtrinsicBuilder(
     private val blockHash: ByteArray = genesisHash,
     private val era: Era = Era.Immortal,
     private val tip: BigInteger = DEFAULT_TIP,
-    private val customSignedExtensions: Map<SignedExtensionId, Any?> = emptyMap(),
+    customSignedExtensions: Map<SignedExtensionId, SignedExtensionValue> = emptyMap(),
     private val addressInstanceConstructor: RuntimeType.InstanceConstructor<AccountId> = AddressInstanceConstructor,
     private val signatureConstructor: RuntimeType.InstanceConstructor<SignatureWrapper> = SignatureInstanceConstructor
 ) {
 
     private val calls = mutableListOf<GenericCall.Instance>()
+
+    private val _customSignedExtensions = mutableMapOf<SignedExtensionId, SignedExtensionValue>()
+        .apply { putAll(customSignedExtensions) }
 
     fun call(
         moduleIndex: Int,
@@ -77,7 +81,20 @@ class ExtrinsicBuilder(
         return this
     }
 
-    fun reset(): ExtrinsicBuilder {
+    fun signedExtension(
+        id: SignedExtensionId,
+        value: SignedExtensionValue
+    ) {
+        _customSignedExtensions[id] = value
+    }
+
+    @Deprecated(
+        message = "Use restCalls() for better readability",
+        replaceWith = ReplaceWith(expression = "resetCalls()")
+    )
+    fun reset(): ExtrinsicBuilder = resetCalls()
+
+    fun resetCalls(): ExtrinsicBuilder {
         calls.clear()
 
         return this
@@ -153,24 +170,34 @@ class ExtrinsicBuilder(
 
     private suspend fun buildSignatureObject(callRepresentation: CallRepresentation): Any? {
         val signedExtrasInstance = buildSignedExtras()
-
-        val additionalExtrasInstance = mapOf(
-            DefaultSignedExtensions.CHECK_MORTALITY to blockHash,
-            DefaultSignedExtensions.CHECK_GENESIS to genesisHash,
-            DefaultSignedExtensions.CHECK_SPEC_VERSION to runtimeVersion.specVersion.toBigInteger(),
-            DefaultSignedExtensions.CHECK_TX_VERSION to runtimeVersion.transactionVersion.toBigInteger()
-        )
+        val additionalSignedInstance = buildAdditionalSigned()
 
         val signerPayload = SignerPayloadExtrinsic(
             runtime = runtime,
             accountId = accountId,
             call = callRepresentation,
             signedExtras = signedExtrasInstance,
-            additionalSignedExtras = additionalExtrasInstance,
+            additionalSignedExtras = additionalSignedInstance,
         )
         val signatureWrapper = signer.signExtrinsic(signerPayload)
 
         return signatureConstructor.constructInstance(runtime.typeRegistry, signatureWrapper)
+    }
+
+    private fun buildAdditionalSigned(): Map<String, Any?> {
+        val default = mapOf(
+            DefaultSignedExtensions.CHECK_MORTALITY to blockHash,
+            DefaultSignedExtensions.CHECK_GENESIS to genesisHash,
+            DefaultSignedExtensions.CHECK_SPEC_VERSION to runtimeVersion.specVersion.toBigInteger(),
+            DefaultSignedExtensions.CHECK_TX_VERSION to
+                    runtimeVersion.transactionVersion.toBigInteger()
+        )
+
+        val custom = _customSignedExtensions.mapValues { (_, extensionValues) ->
+            extensionValues.additionalSigned
+        }
+
+        return default + custom
     }
 
     private fun wrapInBatch(useBatchAll: Boolean): GenericCall.Instance {
@@ -198,7 +225,11 @@ class ExtrinsicBuilder(
             DefaultSignedExtensions.CHECK_NONCE to encodeNonce(nonce)
         )
 
-        return default + customSignedExtensions
+        val custom = _customSignedExtensions.mapValues { (_, extensionValues) ->
+            extensionValues.signedExtra
+        }
+
+        return default + custom
     }
 
     private fun encodeNonce(nonce: BigInteger): Any {
