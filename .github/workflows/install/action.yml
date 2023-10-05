@@ -12,9 +12,10 @@ runs:
         
     - name: Setup NDK
       uses: nttld/setup-ndk@v1
+      id: setup-ndk
       with:
-        ndk-version: 'latest'
-        local-cache: true
+        ndk-version: r26
+        link-to-sdk: true
     
     - name: Install Rust
       uses: actions-rs/toolchain@v1
