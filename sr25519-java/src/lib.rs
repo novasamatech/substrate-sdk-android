@@ -47,7 +47,7 @@ macro_rules! r#try_or_throw {
 
 macro_rules! r#try_or_throw_null {
     ($jni_env: ident, $expr:expr) => {
-        try_or_throw!($jni_env, $expr, ptr::null_mut());
+        try_or_throw!($jni_env, $expr, ptr::null_mut())
     }
 }
 

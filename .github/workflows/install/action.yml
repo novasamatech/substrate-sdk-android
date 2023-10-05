@@ -1,0 +1,32 @@
+name: Install dependencies for Android build
+description: Contains all dependencies for Android build
+runs:
+  using: "composite"
+  steps:
+    - name: ☕️ Install Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '8'
+        cache: 'gradle'
+        
+    - uses: nttld/setup-ndk@v1
+      with:
+        ndk-version: r21d
+        local-cache: true
+    
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+        components: rustfmt, clippy
+
+    - name: Add targets
+      run: |
+        rustup target add armv7-linux-androideabi
+        rustup target add i686-linux-android
+        rustup target add x86_64-linux-android
+        rustup target add aarch64-linux-android
+      shell: bash

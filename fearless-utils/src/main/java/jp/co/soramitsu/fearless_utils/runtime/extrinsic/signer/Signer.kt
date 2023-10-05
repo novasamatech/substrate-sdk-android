@@ -4,7 +4,6 @@ import jp.co.soramitsu.fearless_utils.encrypt.SignatureWrapper
 import jp.co.soramitsu.fearless_utils.extensions.fromHex
 import jp.co.soramitsu.fearless_utils.runtime.AccountId
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Extrinsic
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Extrinsic.EncodingInstance.CallRepresentation
 
 class SignerPayloadRaw(
@@ -17,13 +16,12 @@ class SignerPayloadRaw(
 
 class SignerPayloadExtrinsic(
     val runtime: RuntimeSnapshot,
-    val extrinsicType: Extrinsic,
 
     val accountId: AccountId,
 
     val call: CallRepresentation,
     val signedExtras: Map<String, Any?>,
-    val additionalExtras: Map<String, Any?>
+    val additionalSignedExtras: Map<String, Any?>
 )
 
 fun SignerPayloadRaw.Companion.fromUtf8(
