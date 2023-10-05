@@ -10,12 +10,8 @@ runs:
         java-version: '11'
         cache: 'gradle'
         
-    - name: Setup NDK
-      uses: nttld/setup-ndk@v1
-      id: setup-ndk
-      with:
-        ndk-version: r26
-        link-to-sdk: true
+    - name: Install NDK
+      run: echo "y" | sudo ${ANDROID_HOME}/tools/bin/sdkmanager --install "ndk;20.0.5594570" --sdk_root=${ANDROID_SDK_ROOT}
     
     - name: Install Rust
       uses: actions-rs/toolchain@v1
