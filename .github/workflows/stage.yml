@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - "develop"
+  pull_request:
 
 env:
   OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
@@ -15,7 +16,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
 
