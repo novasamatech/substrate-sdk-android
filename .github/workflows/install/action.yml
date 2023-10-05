@@ -10,9 +10,10 @@ runs:
         java-version: '11'
         cache: 'gradle'
         
-    - uses: nttld/setup-ndk@v1
+    - name: Setup NDK
+      uses: nttld/setup-ndk@v1
       with:
-        ndk-version: r21d
+        ndk-version: 'latest'
         local-cache: true
     
     - name: Install Rust
