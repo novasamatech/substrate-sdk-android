@@ -24,6 +24,11 @@ class ExtrinsicMetadata(
 
 typealias SignedExtensionId = String
 
+class SignedExtensionValue(
+    val signedExtra: Any? = null,
+    val additionalSigned: Any? = null
+)
+
 class SignedExtensionMetadata(
     val id: SignedExtensionId,
     val type: RuntimeType<*, *>?,
@@ -32,10 +37,20 @@ class SignedExtensionMetadata(
 
     companion object {
 
+        /**
+         * SignedExtras is signature params that are both signed
+         * and put separately in payload for verification
+         * Examples: tip, mortality
+         */
         fun onlySigned(id: String, type: RuntimeType<*, *>): SignedExtensionMetadata {
             return SignedExtensionMetadata(id, type, Null)
         }
 
+        /**
+         * AdditionalSigned is signature params that are signed
+         * and that are verified by runtime based on-chain state
+         * Examples: genesis hash, runtime version
+         */
         fun onlyAdditional(id: String, additionalSigned: RuntimeType<*, *>): SignedExtensionMetadata {
             return SignedExtensionMetadata(id, Null, additionalSigned)
         }
