@@ -79,8 +79,9 @@ object MnemonicCreator {
         val bits = words.joinToString(separator = "") {
             val index = EnglishWordList.INSTANCE.getIndex(it)
 
-            if (index == -1)
+            if (index == -1) {
                 throw Bip39Exception()
+            }
 
             index.toString(radix = 2).padStart(length = 11, padChar = '0')
         }
@@ -105,8 +106,9 @@ object MnemonicCreator {
 
         val newChecksum = deriveChecksumBits(entropyBytes)
 
-        if (newChecksum != checksumBits)
+        if (newChecksum != checksumBits) {
             throw Bip39Exception()
+        }
 
         return entropyBytes
     }

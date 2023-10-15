@@ -37,7 +37,6 @@ object ScryptKeyGenerator : JsonEncryptionKeyGenerator {
         encrypted: ByteArray,
         password: ByteArray
     ): JsonTypeDecoder.KeyGenerationResult {
-
         val salt = encrypted.copyBytes(SALT_OFFSET, SALT_SIZE)
         val N = encrypted.copyBytes(N_OFFSET, N_SIZE).asLittleEndianInt()
         val p = encrypted.copyBytes(P_OFFSET, P_SIZE).asLittleEndianInt()

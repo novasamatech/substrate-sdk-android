@@ -69,7 +69,6 @@ fun UInt.toUnsignedBytes(order: ByteOrder = ByteOrder.BIG_ENDIAN): ByteArray {
 }
 
 fun ByteArray.split(divider: ByteArray): List<ByteArray> {
-
     var elementStart = 0
 
     val dividerSize = divider.size

@@ -25,6 +25,7 @@ import kotlin.experimental.or
 object Keys {
     const val KEY_LEN = 32
     private val HSALSA20_SEED = ByteArray(16)
+
     /**
      * Generates a 32-byte secret key.
      *

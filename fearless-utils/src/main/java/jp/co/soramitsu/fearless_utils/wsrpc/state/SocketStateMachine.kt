@@ -343,7 +343,9 @@ object SocketStateMachine {
 
                     is Event.ConnectionError -> {
                         val toResend = getRequestsToResendAndReportErrorToOthers(
-                            state, sideEffects, event.throwable
+                            state,
+                            sideEffects,
+                            event.throwable
                         )
 
                         sideEffects += SideEffect.ScheduleReconnect(attempt = 0)
@@ -353,7 +355,9 @@ object SocketStateMachine {
                     is Event.Stop -> handleStop(sideEffects)
                     is Event.SwitchUrl -> {
                         val toResend = getRequestsToResendAndReportErrorToOthers(
-                            state, sideEffects, ConnectionClosedException
+                            state,
+                            sideEffects,
+                            ConnectionClosedException
                         )
 
                         applySwitchUrlSideEffects(event.url, sideEffects)
@@ -362,7 +366,9 @@ object SocketStateMachine {
                     }
                     is Event.Pause -> {
                         val toResend = getRequestsToResendAndReportErrorToOthers(
-                            state, sideEffects, ConnectionClosedException
+                            state,
+                            sideEffects,
+                            ConnectionClosedException
                         )
 
                         applyPauseEffects(sideEffects)

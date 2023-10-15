@@ -43,7 +43,8 @@ suspend fun SocketService.executeAsync(
 ) = suspendCancellableCoroutine<RpcResponse> { cont ->
     val cancellable =
         executeRequest(
-            request, deliveryType,
+            request,
+            deliveryType,
             object : SocketService.ResponseListener<RpcResponse> {
                 override fun onNext(response: RpcResponse) {
                     cont.resume(response)

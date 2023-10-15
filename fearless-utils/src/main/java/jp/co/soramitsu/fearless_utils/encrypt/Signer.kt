@@ -35,15 +35,12 @@ object Signer {
         skipHashing: Boolean = false
     ): SignatureWrapper {
         return when (multiChainEncryption) {
-
             is MultiChainEncryption.Ethereum -> {
                 signEcdsa(message, keypair, MessageHashing.ETHEREUM.hasher, skipHashing)
             }
 
             is MultiChainEncryption.Substrate -> {
-
                 when (multiChainEncryption.encryptionType) {
-
                     EncryptionType.SR25519 -> {
                         require(keypair is Sr25519Keypair) {
                             "Sr25519Keypair is needed to sign with SR25519"

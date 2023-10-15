@@ -52,7 +52,6 @@ class IconGenerator {
         isAlternative: Boolean = false,
         backgroundColor: Int
     ): List<Circle> {
-
         val r1 = if (isAlternative) {
             MAIN_RADIUS / 8 * 5
         } else {

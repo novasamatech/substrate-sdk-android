@@ -113,7 +113,6 @@ internal object V13RuntimeBuilder : RuntimeBuilder {
         callsRaw: List<EncodableStruct<FunctionMetadataSchema>>,
         moduleIndex: Int,
     ): Map<String, MetadataFunction> {
-
         return callsRaw.mapIndexed { index, callStruct ->
             MetadataFunction(
                 name = callStruct[FunctionMetadataSchema.name],
@@ -134,7 +133,6 @@ internal object V13RuntimeBuilder : RuntimeBuilder {
         eventsRaw: List<EncodableStruct<EventMetadataSchema>>,
         moduleIndex: Int,
     ): Map<String, Event> {
-
         return eventsRaw.mapIndexed { index, eventStruct ->
             Event(
                 name = eventStruct[EventMetadataSchema.name],
@@ -149,7 +147,6 @@ internal object V13RuntimeBuilder : RuntimeBuilder {
         typeRegistry: TypeRegistry,
         constantsRaw: List<EncodableStruct<ModuleConstantMetadataSchema>>,
     ): Map<String, Constant> {
-
         return constantsRaw.map { constantStruct ->
             Constant(
                 name = constantStruct[ModuleConstantMetadataSchema.name],

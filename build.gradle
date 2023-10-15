@@ -9,7 +9,9 @@ buildscript {
         minVersion = 21
         targetVersion = 28
 
-        kotlinVersion = '1.4.31'
+        kotlinVersion = '1.7.10'
+
+        ktlintPinterestVersion = '0.47.0'
 
         supportVersion = '1.0.0'
         constraintVersion = '1.1.3'
@@ -71,7 +73,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.6.0'
+        classpath 'com.android.tools.build:gradle:7.3.1'
         classpath 'org.mozilla.rust-android-gradle:plugin:0.9.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath 'io.github.gradle-nexus:publish-plugin:1.1.0'
@@ -101,14 +103,21 @@ task clean(type: Delete) {
 }
 
 dependencies {
-    ktlint "com.pinterest:ktlint:0.40.0"
+    ktlint("com.pinterest:ktlint:$ktlintPinterestVersion") {
+        attributes {
+            attribute(Bundling.BUNDLING_ATTRIBUTE, getObjects().named(Bundling, Bundling.EXTERNAL))
+        }
+    }
 }
 
 task ktlint(type: JavaExec, group: "verification") {
     description = "Check Kotlin code style."
     classpath = configurations.ktlint
     main = "com.pinterest.ktlint.Main"
-    args "$project.rootDir/**/src/main/**/*.kt", "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/reports/checkstyle/kotlin-checkstyle-report.xml"
+    args "--reporter=plain"
+    args "--android"
+    args "--reporter=checkstyle,output=${project.buildDir}/reports/checkstyle/ktlint.xml"
+    args "$project.rootDir/**/src/main/**/*.kt"
 }
 
 task ktlintFormat(type: JavaExec, group: "formatting") {
@@ -116,6 +125,6 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
     classpath = configurations.ktlint
     main = "com.pinterest.ktlint.Main"
     args "-F", "$project.rootDir/**/src/main/**/*.kt"
+    args "--android"
 }
-
 apply from: "${rootDir}/scripts/publish-root.gradle"
