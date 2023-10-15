@@ -17,6 +17,7 @@ runs:
         add-to-path: true
         local-cache: false
     - runs: ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=./Android.mk NDK_APPLICATION_MK=./Application.mk
+      shell: bash
 
     - name: Install Rust
       uses: actions-rs/toolchain@v1
