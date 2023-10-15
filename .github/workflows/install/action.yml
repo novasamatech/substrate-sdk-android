@@ -10,13 +10,14 @@ runs:
         java-version: '11'
         # cache: 'gradle'
         
-    # - uses: nttld/setup-ndk@v1
-    #   with:
-    #     ndk-version: r25c
-    #     link-to-sdk: true
-    #     add-to-path: true
-    #     local-cache: false
-    
+    - uses: nttld/setup-ndk@v1
+      with:
+        ndk-version: r25c
+        link-to-sdk: true
+        add-to-path: true
+        local-cache: false
+    - runs: ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=./Android.mk NDK_APPLICATION_MK=./Application.mk
+
     - name: Install Rust
       uses: actions-rs/toolchain@v1
       with:
