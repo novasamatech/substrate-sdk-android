@@ -11,12 +11,15 @@ runs:
         # cache: 'gradle'
         
     - uses: nttld/setup-ndk@v1
+      id: setup-ndk
       with:
         ndk-version: r25c
         link-to-sdk: true
         add-to-path: true
         local-cache: false
-    - runs: ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=./Android.mk NDK_APPLICATION_MK=./Application.mk
+    
+    - name: Set ndk.dir in local.properties
+      run: echo "ndk.dir=${{ steps.setup-ndk.outputs.ndk-path }}" >> local.properties
       shell: bash
 
     - name: Install Rust
