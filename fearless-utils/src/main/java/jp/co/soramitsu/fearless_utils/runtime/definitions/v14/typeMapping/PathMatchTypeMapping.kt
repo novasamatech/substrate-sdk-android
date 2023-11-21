@@ -5,12 +5,10 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.TypePresetBui
 import jp.co.soramitsu.fearless_utils.runtime.definitions.registry.getOrCreate
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.RuntimeType
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.Type
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.TypeReference
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.aliasedAs
 import jp.co.soramitsu.fearless_utils.runtime.definitions.v14.typeMapping.PathMatchTypeMapping.Matcher
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.PortableType
 import jp.co.soramitsu.fearless_utils.scale.EncodableStruct
-
 
 typealias PathMatchTypeMappingReplacement<T> = Pair<T, PathMatchTypeMapping.Replacement>
 
@@ -44,7 +42,6 @@ class PathMatchTypeMapping(
             }
         }
     }
-
 
     sealed class Matcher {
 

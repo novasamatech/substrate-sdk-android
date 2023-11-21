@@ -9,10 +9,6 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Alias
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Option
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.SetType
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.aliasedAs
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Data
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.EraType
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.GenericCall
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.GenericEvent
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.DynamicByteArray
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.FixedByteArray
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u8
@@ -238,4 +234,3 @@ private val EncodableStruct<PortableType>.id: BigInteger
 
 private val EncodableStruct<PortableType>.type: EncodableStruct<RegistryType>
     get() = get(PortableType.type)
-
