@@ -28,3 +28,7 @@ class Alias(alias: String, val aliasedReference: TypeReference) : Type<Any?>(ali
 fun RuntimeType<*, *>.aliasedAs(newName: String): Alias {
     return Alias(newName, TypeReference(this))
 }
+
+fun TypeReference.aliasedAs(newName: String): Alias {
+    return Alias(newName, this)
+}

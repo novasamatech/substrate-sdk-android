@@ -8,12 +8,10 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEn
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.MULTI_ADDRESS_ID
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.FixedByteArray
 
-private const val ADDRESS_TYPE = "Address"
-
 object AddressInstanceConstructor : RuntimeType.InstanceConstructor<AccountId> {
 
     override fun constructInstance(typeRegistry: TypeRegistry, value: AccountId): Any {
-        return when (val addressType = typeRegistry.getOrThrow(ADDRESS_TYPE)) {
+        return when (val addressType = typeRegistry.getOrThrow(ExtrinsicTypes.ADDRESS)) {
             is DictEnum -> { // MultiAddress
                 DictEnum.Entry(MULTI_ADDRESS_ID, value)
             }

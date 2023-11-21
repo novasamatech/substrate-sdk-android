@@ -9,13 +9,13 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.DictEn
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.MultiSignature
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.prepareForEncoding
-
-private const val EXTRINSIC_SIGNATURE_TYPE = "ExtrinsicSignature"
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.FixedByteArray
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.skipAliases
 
 object SignatureInstanceConstructor : RuntimeType.InstanceConstructor<SignatureWrapper> {
 
     override fun constructInstance(typeRegistry: TypeRegistry, value: SignatureWrapper): Any {
-        return when (val type = typeRegistry.getOrThrow(EXTRINSIC_SIGNATURE_TYPE)) {
+        return when (val type = typeRegistry.getOrThrow(ExtrinsicTypes.SIGNATURE).skipAliases()) {
             is DictEnum -> { // MultiSignature
                 MultiSignature(value.encryptionType, value.signature).prepareForEncoding()
             }
@@ -32,7 +32,9 @@ object SignatureInstanceConstructor : RuntimeType.InstanceConstructor<SignatureW
 
                 Struct.Instance(fields)
             }
-            else -> throw UnsupportedOperationException("Unknown signature type: ${type.name}")
+            is FixedByteArray -> value.signature
+
+            else -> throw UnsupportedOperationException("Unknown signature type: ${type?.name}")
         }
     }
 }
