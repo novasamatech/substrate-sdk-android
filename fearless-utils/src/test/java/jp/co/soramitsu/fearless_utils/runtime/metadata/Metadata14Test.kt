@@ -21,6 +21,7 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.Fixed
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.UIntType
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u32
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u64
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u128
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.GenericCall
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Data
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u8
@@ -169,6 +170,10 @@ class Metadata14Test {
         assertEquals("sp_runtime.multiaddress.MultiAddress", address?.skipAliases()?.name)
         val signature = typeRegistry["ExtrinsicSignature"]
         assertEquals("sp_runtime.MultiSignature", signature?.skipAliases()?.name)
+
+        // Balance type should be present
+        val balanceType = typeRegistry["Balance"]
+        assertEquals(u128, balanceType?.skipAliases())
     }
 
     @Test
