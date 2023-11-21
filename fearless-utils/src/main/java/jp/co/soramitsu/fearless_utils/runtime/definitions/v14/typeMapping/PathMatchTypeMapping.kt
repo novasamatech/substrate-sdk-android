@@ -85,8 +85,8 @@ class PathMatchTypeMapping(
  * Can be used to pass wildcard strings instead of [Matcher] instances
  *
  * "full.name" -> Matcher.Exact("full.name")
- * "*prefix.name" -> Matcher.Prefix("prefix.name")
- * "suffix.name*" -> Matcher.Suggix("suffix.name)
+ * "*suffix.name" -> Matcher.Suffix("suffix.name")
+ * "prefix.name*" -> Matcher.Prefix("prefix.name)
  *
  * Wildcards are only considered at the beginning or at the end of the string,
  * others will be considered as a part of the content
