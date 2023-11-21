@@ -100,6 +100,8 @@ fun v14Preset() = typePreset {
 
     type(Data(this))
     type(GenericAccountId)
+
+    alias("Balance", "u128")
 }
 
 fun v13Preset(): TypePreset = typePreset {
