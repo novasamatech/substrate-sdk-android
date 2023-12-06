@@ -21,6 +21,9 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.Fixed
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.UIntType
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u32
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u64
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u128
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.GenericCall
+import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Data
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u8
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.i64
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.skipAliases
@@ -87,8 +90,6 @@ class Metadata14Test {
         assertInstance<Struct>(accountInfo)
         val accountData = accountInfo.get<Struct>("data")
         requireNotNull(accountData)
-        val misFrozenType = accountData.get<UIntType>("miscFrozen")
-        assertNotNull(misFrozenType) // test that snake case -> camel case is performed
 
         val systemRemarkType =
             metadata.module("System").call("remark").arguments.first().type?.skipAliases()
@@ -119,7 +120,7 @@ class Metadata14Test {
         assertInstance<Vec>(batchArgument)
         val callType = batchArgument.innerType
         assertInstance<Alias>(callType)
-        assertEquals("westend_runtime.Call", callType.aliasedReference.value?.name)
+        assertEquals("westend_runtime.RuntimeCall", callType.aliasedReference.value?.name)
 
         // Options should not be path-based
         val optionType = typeRegistry["Option"]
@@ -152,6 +153,27 @@ class Metadata14Test {
         // id-based types with empty path should not be aliased
         val u8Primitive = typeRegistry["2"]
         assertNotInstance<Alias>(u8Primitive)
+
+        // Call type should alias to GenericCall
+        assertInstance<GenericCall>(callType.skipAliases())
+
+        // Identity data type should be aliased to Data
+        val identityType = typeRegistry["pallet_identity.types.Data"]
+        assertInstance<Data>(identityType?.skipAliases())
+
+        // RuntimeDispatchInfo should be crated based on DispatchInfo
+        val runtimeDispatchInfo = typeRegistry["RuntimeDispatchInfo"]
+        assertNotNull(runtimeDispatchInfo)
+
+        // Exrinsic types should be crated based on UncheckedExtrinsic
+        val address = typeRegistry["Address"]
+        assertEquals("sp_runtime.multiaddress.MultiAddress", address?.skipAliases()?.name)
+        val signature = typeRegistry["ExtrinsicSignature"]
+        assertEquals("sp_runtime.MultiSignature", signature?.skipAliases()?.name)
+
+        // Balance type should be present
+        val balanceType = typeRegistry["Balance"]
+        assertEquals(u128, balanceType?.skipAliases())
     }
 
     @Test

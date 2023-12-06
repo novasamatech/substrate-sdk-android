@@ -12,6 +12,7 @@ import jp.co.soramitsu.fearless_utils.scale.string
 import jp.co.soramitsu.fearless_utils.scale.uint32
 import jp.co.soramitsu.fearless_utils.scale.uint8
 import jp.co.soramitsu.fearless_utils.scale.vector
+import java.math.BigInteger
 
 object RuntimeMetadataSchemaV14 : Schema<RuntimeMetadataSchemaV14>() {
     val lookup by schema(LookupSchema)
@@ -59,6 +60,21 @@ val EncodableStruct<RegistryType>.def
 
 val EncodableStruct<RegistryType>.params
     get() = get(RegistryType.params)
+
+fun EncodableStruct<RegistryType>.paramType(name: String): BigInteger? {
+    return params.find { it[TypeParameter.name] == name }?.get(TypeParameter.type)
+}
+
+@Suppress("UNCHECKED_CAST")
+fun EncodableStruct<RegistryType>.asCompositeOrNull(): EncodableStruct<TypeDefComposite>? {
+    val typeDef = def
+
+    if (typeDef is EncodableStruct<*> && typeDef.schema is TypeDefComposite) {
+        return typeDef as EncodableStruct<TypeDefComposite>
+    }
+
+    return null
+}
 
 enum class TypeDefEnum(val localName: String) {
     bool("bool"),
@@ -113,6 +129,10 @@ object TypeDefComposite : Schema<TypeDefComposite>() {
 
 val EncodableStruct<TypeDefComposite>.fields
     get() = get(TypeDefComposite.fields2)
+
+fun EncodableStruct<TypeDefComposite>.fieldType(name: String): BigInteger? {
+    return fields.find { it[TypeDefCompositeField.name] == name }?.get(TypeDefCompositeField.type)
+}
 
 val EncodableStruct<TypeDefCompositeField>.type
     get() = get(TypeDefCompositeField.type)

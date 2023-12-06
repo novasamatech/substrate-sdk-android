@@ -96,9 +96,12 @@ fun v14Preset() = typePreset {
 
     type(GenericCall)
     type(GenericEvent)
+    type(EraType)
 
     type(Data(this))
     type(GenericAccountId)
+
+    alias("Balance", "u128")
 }
 
 fun v13Preset(): TypePreset = typePreset {

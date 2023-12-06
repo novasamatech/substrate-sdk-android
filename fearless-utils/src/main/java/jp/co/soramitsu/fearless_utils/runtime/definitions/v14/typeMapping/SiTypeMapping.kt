@@ -9,11 +9,11 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Alias
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Option
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.SetType
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.aliasedAs
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.EraType
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.DynamicByteArray
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.FixedByteArray
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.primitives.u8
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.skipAliases
+import jp.co.soramitsu.fearless_utils.runtime.definitions.v14.typeMapping.PathMatchTypeMapping.Replacement.AliasTo
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.PortableType
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.RegistryType
 import jp.co.soramitsu.fearless_utils.runtime.metadata.v14.TypeDefArray
@@ -173,17 +173,10 @@ object SiByteArrayMapping : SiTypeMapping {
     }
 }
 
+@Deprecated("Use PathMatchTypeMapping instead")
 class ReplaceTypesSiTypeMapping(
     vararg cases: Pair<String, Type<*>>
 ) : SiTypeMapping {
-
-    companion object {
-        fun default(): SiTypeMapping {
-            return ReplaceTypesSiTypeMapping(
-                "sp_runtime.generic.era.Era" to EraType
-            )
-        }
-    }
 
     private val casesById = cases.toMap()
 
@@ -199,12 +192,29 @@ class ReplaceTypesSiTypeMapping(
 fun SiTypeMapping.Companion.default(): OneOfSiTypeMapping {
     return OneOfSiTypeMapping(
         listOf(
+            AddExtrinsicTypesSiTypeMapping(),
+            AddRuntimeDispatchInfoSiTypeMapping(),
             SiByteArrayMapping,
             SiOptionTypeMapping,
             SiSetTypeMapping,
             SiCompositeNoneToAliasTypeMapping,
-            ReplaceTypesSiTypeMapping.default(),
+            knownReplacements(),
         )
+    )
+}
+
+private fun knownReplacements(): PathMatchTypeMapping {
+    val callAlias = AliasTo("GenericCall")
+    val eventAlias = AliasTo("GenericEvent")
+
+    return PathMatchTypeMapping(
+        "*_runtime.RuntimeCall" to callAlias,
+        "*_runtime.Call" to callAlias,
+        "*_runtime.RuntimeEvent" to eventAlias,
+        "*_runtime.Event" to eventAlias,
+
+        "pallet_identity.types.Data" to AliasTo("Data"),
+        "sp_runtime.generic.era.Era" to AliasTo("Era")
     )
 }
 
