@@ -17,6 +17,7 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.instances.Signat
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.skipAliases
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.toHex
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.toHexUntyped
+import jp.co.soramitsu.fearless_utils.runtime.extrinsic.signer.SignedExtrinsic
 import jp.co.soramitsu.fearless_utils.runtime.extrinsic.signer.Signer
 import jp.co.soramitsu.fearless_utils.runtime.extrinsic.signer.SignerPayloadExtrinsic
 import jp.co.soramitsu.fearless_utils.runtime.metadata.SignedExtensionId
@@ -132,19 +133,21 @@ class ExtrinsicBuilder(
         return buildSignature(CallRepresentation.Bytes(rawCallBytes))
     }
 
-    private suspend fun build(
-        callRepresentation: CallRepresentation
-    ): String {
-        val multiSignature = buildSignatureObject(callRepresentation)
-        val signedExtras = buildSignedExtras()
+    private suspend fun build(callRepresentation: CallRepresentation): String {
+        val signedExtrinsic = buildSignedExtrinsic(callRepresentation)
+
+        val multiSignature = signatureConstructor.constructInstance(
+            runtime.typeRegistry,
+            signedExtrinsic.signatureWrapper
+        )
 
         val extrinsic = Extrinsic.EncodingInstance(
             signature = Extrinsic.Signature.new(
-                accountIdentifier = buildEncodableAddressInstance(),
+                accountIdentifier = buildEncodableAddressInstance(signedExtrinsic.payload.accountId),
                 signature = multiSignature,
-                signedExtras = signedExtras
+                signedExtras = signedExtrinsic.payload.signedExtras
             ),
-            callRepresentation = callRepresentation
+            callRepresentation = signedExtrinsic.payload.call
         )
 
         return Extrinsic.toHex(runtime, extrinsic)
@@ -153,7 +156,11 @@ class ExtrinsicBuilder(
     private suspend fun buildSignature(
         callRepresentation: CallRepresentation
     ): String {
-        val multiSignature = buildSignatureObject(callRepresentation)
+        val signedExtrinsic = buildSignedExtrinsic(callRepresentation)
+        val multiSignature = signatureConstructor.constructInstance(
+            runtime.typeRegistry,
+            signedExtrinsic.signatureWrapper
+        )
 
         val signatureType = Extrinsic.signatureType(runtime)
 
@@ -168,7 +175,7 @@ class ExtrinsicBuilder(
         }
     }
 
-    private suspend fun buildSignatureObject(callRepresentation: CallRepresentation): Any? {
+    private suspend fun buildSignedExtrinsic(callRepresentation: CallRepresentation): SignedExtrinsic {
         val signedExtrasInstance = buildSignedExtras()
         val additionalSignedInstance = buildAdditionalSigned()
 
@@ -179,9 +186,8 @@ class ExtrinsicBuilder(
             signedExtras = signedExtrasInstance,
             additionalSignedExtras = additionalSignedInstance,
         )
-        val signatureWrapper = signer.signExtrinsic(signerPayload)
 
-        return signatureConstructor.constructInstance(runtime.typeRegistry, signatureWrapper)
+        return signer.signExtrinsic(signerPayload)
     }
 
     private fun buildAdditionalSigned(): Map<String, Any?> {
@@ -214,7 +220,7 @@ class ExtrinsicBuilder(
         )
     }
 
-    private fun buildEncodableAddressInstance(): Any? {
+    private fun buildEncodableAddressInstance(accountId: AccountId): Any? {
         return addressInstanceConstructor.constructInstance(runtime.typeRegistry, accountId)
     }
 
@@ -244,6 +250,7 @@ class ExtrinsicBuilder(
 
                 Struct.Instance(mapOf(fieldName to nonce))
             }
+
             else -> nonce
         }
     }
