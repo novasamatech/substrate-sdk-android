@@ -97,6 +97,7 @@ dependencies {
 
     testImplementation jUnitDep
     testImplementation mockitoDep
+    testImplementation project(path: ':fearless-utils')
 
     androidTestImplementation androidTestRunnerDep
     androidTestImplementation androidTestRulesDep
