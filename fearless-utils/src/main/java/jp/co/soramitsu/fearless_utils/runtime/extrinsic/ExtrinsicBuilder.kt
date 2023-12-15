@@ -4,7 +4,6 @@ import jp.co.soramitsu.fearless_utils.encrypt.SignatureWrapper
 import jp.co.soramitsu.fearless_utils.runtime.AccountId
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.RuntimeType
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.composite.Struct
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.DefaultSignedExtensions
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Era
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Extrinsic
@@ -14,7 +13,6 @@ import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Generic
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.new
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.instances.AddressInstanceConstructor
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.instances.SignatureInstanceConstructor
-import jp.co.soramitsu.fearless_utils.runtime.definitions.types.skipAliases
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.toHex
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.toHexUntyped
 import jp.co.soramitsu.fearless_utils.runtime.extrinsic.signer.SignedExtrinsic
@@ -23,13 +21,11 @@ import jp.co.soramitsu.fearless_utils.runtime.extrinsic.signer.SignerPayloadExtr
 import jp.co.soramitsu.fearless_utils.runtime.metadata.SignedExtensionId
 import jp.co.soramitsu.fearless_utils.runtime.metadata.SignedExtensionValue
 import jp.co.soramitsu.fearless_utils.runtime.metadata.call
-import jp.co.soramitsu.fearless_utils.runtime.metadata.findSignedExtension
 import jp.co.soramitsu.fearless_utils.runtime.metadata.module
 import jp.co.soramitsu.fearless_utils.wsrpc.request.runtime.chain.RuntimeVersion
 import java.math.BigInteger
 
 private val DEFAULT_TIP = BigInteger.ZERO
-
 
 class ExtrinsicBuilder(
     val runtime: RuntimeSnapshot,

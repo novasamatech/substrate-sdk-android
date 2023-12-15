@@ -15,7 +15,7 @@ data class Nonce(
      */
     val offset: BigInteger
 ) {
-    
+
     val nonce: BigInteger = baseNonce + offset
 
     companion object {
