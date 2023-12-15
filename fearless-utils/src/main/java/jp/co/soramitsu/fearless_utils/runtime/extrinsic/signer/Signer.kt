@@ -5,6 +5,7 @@ import jp.co.soramitsu.fearless_utils.extensions.fromHex
 import jp.co.soramitsu.fearless_utils.runtime.AccountId
 import jp.co.soramitsu.fearless_utils.runtime.RuntimeSnapshot
 import jp.co.soramitsu.fearless_utils.runtime.definitions.types.generics.Extrinsic.EncodingInstance.CallRepresentation
+import jp.co.soramitsu.fearless_utils.runtime.extrinsic.Nonce
 
 class SignedExtrinsic(
     val payload: SignerPayloadExtrinsic,
@@ -29,7 +30,8 @@ data class SignerPayloadExtrinsic(
     val accountId: AccountId,
     val call: CallRepresentation,
     val signedExtras: Map<String, Any?>,
-    val additionalSignedExtras: Map<String, Any?>
+    val additionalSignedExtras: Map<String, Any?>,
+    val nonce: Nonce,
 )
 
 fun SignerPayloadRaw.Companion.fromUtf8(

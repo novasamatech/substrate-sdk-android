@@ -159,7 +159,7 @@ class ExtrinsicBuilderTest {
 
         val builder = ExtrinsicBuilder(
             runtime = runtime,
-            nonce = 34.toBigInteger(),
+            nonce = Nonce.singleTx(34.toBigInteger()),
             runtimeVersion = RuntimeVersion(601, 4),
             genesisHash = "48239ef607d7928874027a43a67689209727dfb3d3dc5e5b03a39bdc2eda771a".fromHex(),
             signer = keypairSigner(),
@@ -197,7 +197,7 @@ class ExtrinsicBuilderTest {
 
         val builder = ExtrinsicBuilder(
             runtime = runtime,
-            nonce = 34.toBigInteger(),
+            nonce = Nonce.singleTx(34.toBigInteger()),
             runtimeVersion = RuntimeVersion(601, 4),
             genesisHash = "48239ef607d7928874027a43a67689209727dfb3d3dc5e5b03a39bdc2eda771a".fromHex(),
             signer = keypairSigner(),
@@ -229,7 +229,7 @@ class ExtrinsicBuilderTest {
     private fun createExtrinsicBuilder() = ExtrinsicBuilder(
         runtime = runtime,
         signer = keypairSigner(),
-        nonce = 34.toBigInteger(),
+        nonce = Nonce.singleTx(34.toBigInteger()),
         runtimeVersion = RuntimeVersion(48, 4),
         genesisHash = "e143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e".fromHex(),
         accountId = KEYPAIR.publicKey.publicKeyToSubstrateAccountId(),

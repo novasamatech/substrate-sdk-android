@@ -30,9 +30,10 @@ import java.math.BigInteger
 
 private val DEFAULT_TIP = BigInteger.ZERO
 
+
 class ExtrinsicBuilder(
     val runtime: RuntimeSnapshot,
-    private val nonce: BigInteger,
+    private val nonce: Nonce,
     private val runtimeVersion: RuntimeVersion,
     private val genesisHash: ByteArray,
     private val accountId: AccountId,
@@ -185,6 +186,7 @@ class ExtrinsicBuilder(
             call = callRepresentation,
             signedExtras = signedExtrasInstance,
             additionalSignedExtras = additionalSignedInstance,
+            nonce = nonce
         )
 
         return signer.signExtrinsic(signerPayload)
@@ -228,7 +230,7 @@ class ExtrinsicBuilder(
         val default = mapOf(
             DefaultSignedExtensions.CHECK_MORTALITY to era,
             DefaultSignedExtensions.CHECK_TX_PAYMENT to tip,
-            DefaultSignedExtensions.CHECK_NONCE to encodeNonce(nonce)
+            DefaultSignedExtensions.CHECK_NONCE to runtime.encodeNonce(nonce.nonce)
         )
 
         val custom = _customSignedExtensions.mapValues { (_, extensionValues) ->
@@ -236,23 +238,6 @@ class ExtrinsicBuilder(
         }
 
         return default + custom
-    }
-
-    private fun encodeNonce(nonce: BigInteger): Any {
-        val nonceExtension = runtime.metadata.extrinsic
-            .findSignedExtension(DefaultSignedExtensions.CHECK_NONCE) ?: return nonce
-
-        val nonceType = nonceExtension.type?.skipAliases()
-
-        return when {
-            nonceType is Struct && nonceType.mapping.size == 1 -> {
-                val fieldName = nonceType.mapping.keys.single()
-
-                Struct.Instance(mapOf(fieldName to nonce))
-            }
-
-            else -> nonce
-        }
     }
 
     private fun requireNotMixingBytesAndInstanceCalls() {
