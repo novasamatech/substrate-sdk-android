@@ -208,10 +208,15 @@ private fun knownReplacements(): PathMatchTypeMapping {
     val eventAlias = AliasTo("GenericEvent")
 
     return PathMatchTypeMapping(
-        "*_runtime.RuntimeCall" to callAlias,
-        "*_runtime.Call" to callAlias,
-        "*_runtime.RuntimeEvent" to eventAlias,
-        "*_runtime.Event" to eventAlias,
+        // We can use broad wild-card since there should only be one `RuntimeCall` type in runtime
+        "*.RuntimeCall" to callAlias,
+        // We cannot use `*.Call` wild-card since per-pallet call enums
+        // have paths like `pallet_identity.pallet.Call`
+        // Chains that have paths not complying with this wild-card should be handled via types file
+        "*runtime.Call" to callAlias,
+        "*.RuntimeEvent" to eventAlias,
+        // Same wild card situation as per `runtime.Call`
+        "*runtime.Event" to eventAlias,
 
         "pallet_identity.types.Data" to AliasTo("Data"),
         "sp_runtime.generic.era.Era" to AliasTo("Era")
