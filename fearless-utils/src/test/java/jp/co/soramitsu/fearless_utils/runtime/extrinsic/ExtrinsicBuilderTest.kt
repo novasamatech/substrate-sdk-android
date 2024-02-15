@@ -128,7 +128,7 @@ class ExtrinsicBuilderTest {
             )
         }
 
-        val encoded = extrinsicBuilder.build(useBatchAll = true)
+        val encoded = extrinsicBuilder.build(batchMode = BatchMode.BATCH_ALL)
         val decoded = Extrinsic.fromHex(runtime, encoded)
 
         assertEquals(decoded.call.function.name, "batch_all")
@@ -145,7 +145,7 @@ class ExtrinsicBuilderTest {
             )
         }
 
-        val encoded = extrinsicBuilder.build(useBatchAll = true)
+        val encoded = extrinsicBuilder.build(batchMode = BatchMode.BATCH_ALL)
 
         assertEquals(BIG_TRANSACTION, encoded)
     }

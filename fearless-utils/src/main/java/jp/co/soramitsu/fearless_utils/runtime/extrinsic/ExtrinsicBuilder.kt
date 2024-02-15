@@ -99,9 +99,9 @@ class ExtrinsicBuilder(
     }
 
     suspend fun build(
-        useBatchAll: Boolean = false
+        batchMode: BatchMode = BatchMode.BATCH
     ): String {
-        val call = maybeWrapInBatch(useBatchAll)
+        val call = maybeWrapInBatch(batchMode)
 
         return build(CallRepresentation.Instance(call))
     }
@@ -115,9 +115,9 @@ class ExtrinsicBuilder(
     }
 
     suspend fun buildSignature(
-        useBatchAll: Boolean = false
+        batchMode: BatchMode = BatchMode.BATCH
     ): String {
-        val call = maybeWrapInBatch(useBatchAll)
+        val call = maybeWrapInBatch(batchMode)
 
         return buildSignature(CallRepresentation.Instance(call))
     }
@@ -164,11 +164,11 @@ class ExtrinsicBuilder(
         return signatureType.toHexUntyped(runtime, multiSignature)
     }
 
-    private fun maybeWrapInBatch(useBatchAll: Boolean): GenericCall.Instance {
+    private fun maybeWrapInBatch(batchMode: BatchMode): GenericCall.Instance {
         return if (calls.size == 1) {
             calls.first()
         } else {
-            wrapInBatch(useBatchAll)
+            wrapInBatch(batchMode)
         }
     }
 
@@ -204,9 +204,14 @@ class ExtrinsicBuilder(
         return default + custom
     }
 
-    private fun wrapInBatch(useBatchAll: Boolean): GenericCall.Instance {
+    private fun wrapInBatch(batchMode: BatchMode): GenericCall.Instance {
         val batchModule = runtime.metadata.module("Utility")
-        val batchFunctionName = if (useBatchAll) "batch_all" else "batch"
+
+        val batchFunctionName = when (batchMode) {
+            BatchMode.BATCH -> "batch"
+            BatchMode.BATCH_ALL -> "batch_all"
+            BatchMode.FORCE_BATCH -> "force_batch"
+        }
         val batchFunction = batchModule.call(batchFunctionName)
 
         return GenericCall.Instance(
