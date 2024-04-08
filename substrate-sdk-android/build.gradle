@@ -58,7 +58,6 @@ cargo {
     module = "../sr25519-java/"
     libname = "sr25519java"
     targets = ["arm", "arm64", "x86", "x86_64"]
-    profile = "release"
 }
 
 tasks.whenTaskAdded { task ->
