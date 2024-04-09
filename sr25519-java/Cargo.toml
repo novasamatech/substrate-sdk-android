@@ -13,7 +13,6 @@ schnorrkel = { version="<=0.9.1" }
 
 [profile.release]
 lto = true
-opt-level = "s"
 
 [lib]
 name = "sr25519java"
