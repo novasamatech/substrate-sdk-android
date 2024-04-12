@@ -2,7 +2,6 @@ package io.novasama.substrate_sdk_android.runtime.definitions.types.generics
 
 import io.novasama.substrate_sdk_android.encrypt.EncryptionType
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.DictEnum
-import java.util.Locale
 
 class MultiSignature(val encryptionType: EncryptionType, val value: ByteArray)
 
@@ -17,7 +16,7 @@ fun Extrinsic.Signature.tryExtractMultiSignature(): MultiSignature? {
 }
 
 private val EncryptionType.multiSignatureName
-    get() = rawName.capitalize(Locale.ROOT)
+    get() = rawName.capitalize()
 
 fun MultiSignature.prepareForEncoding(): Any {
     return DictEnum.Entry(encryptionType.multiSignatureName, value)
