@@ -4,6 +4,7 @@ import io.novasama.substrate_sdk_android.hash.isNegative
 import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.util.Locale
 
 inline fun <T, R> Iterable<T>.tryFindNonNull(transform: (T) -> R?): R? {
     for (item in this) {
@@ -108,7 +109,7 @@ fun ByteArray.split(divider: ByteArray): List<ByteArray> {
 internal fun String.snakeCaseToCamelCase(): String {
     return split("_").mapIndexed { index, segment ->
         if (index > 0) { // do not capitalize first segment
-            segment.capitalize()
+            segment.capitalize(Locale.ROOT)
         } else {
             segment
         }
