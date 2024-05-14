@@ -2,7 +2,6 @@ package io.novasama.substrate_sdk_android.runtime.metadata
 
 import io.emeraldpay.polkaj.scale.ScaleCodecReader
 import io.novasama.substrate_sdk_android.extensions.fromHex
-import io.novasama.substrate_sdk_android.runtime.metadata.v14.LookupSchema
 import io.novasama.substrate_sdk_android.runtime.metadata.v14.PostV14MetadataSchema
 import io.novasama.substrate_sdk_android.runtime.metadata.v14.RuntimeMetadataSchemaV14
 import io.novasama.substrate_sdk_android.runtime.metadata.v14.RuntimeMetadataSchemaV15
@@ -62,7 +61,7 @@ class RuntimeMetadataReader private constructor(
         private fun read(reader: ScaleCodecReader): RuntimeMetadataReader {
             val runtimeVersion = Magic.read(reader)[Magic.runtimeVersion].toInt()
 
-            val metadata = when{
+            val metadata = when {
                 runtimeVersion < 14 -> {
                     RuntimeMetadataSchema.read(reader)
                 }

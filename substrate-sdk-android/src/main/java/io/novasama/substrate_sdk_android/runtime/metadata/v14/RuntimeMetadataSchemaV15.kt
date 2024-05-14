@@ -9,14 +9,12 @@ import io.novasama.substrate_sdk_android.scale.string
 import io.novasama.substrate_sdk_android.scale.uint8
 import io.novasama.substrate_sdk_android.scale.vector
 
-
 object RuntimeMetadataSchemaV15 : PostV14MetadataSchema<RuntimeMetadataSchemaV15>() {
     override val lookup by schema(LookupSchema)
     override val pallets by vector(PalletMetadataV15)
     override val extrinsic by schema(ExtrinsicMetadataV15)
     val type by compactInt()
 }
-
 
 object ExtrinsicMetadataV15 : PostV14ExtrinsicMetadataSchema<ExtrinsicMetadataV15>() {
     override val version by uint8()

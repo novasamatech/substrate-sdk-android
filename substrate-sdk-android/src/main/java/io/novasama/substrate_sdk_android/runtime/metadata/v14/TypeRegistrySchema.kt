@@ -14,7 +14,6 @@ import io.novasama.substrate_sdk_android.scale.uint8
 import io.novasama.substrate_sdk_android.scale.vector
 import java.math.BigInteger
 
-
 object LookupSchema : Schema<LookupSchema>() {
     val types by vector(PortableType)
 }
