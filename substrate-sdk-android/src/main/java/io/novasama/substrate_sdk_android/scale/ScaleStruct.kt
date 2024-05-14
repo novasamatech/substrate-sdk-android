@@ -3,10 +3,10 @@ package io.novasama.substrate_sdk_android.scale
 import io.novasama.substrate_sdk_android.scale.dataType.DataType
 import io.novasama.substrate_sdk_android.scale.dataType.optional
 
-class Field<T>(val dataType: DataType<T>, val defaultValue: T? = null)
+class Field<out T>(val dataType: DataType<out T>, val defaultValue: T? = null)
 
 @Suppress("UNCHECKED_CAST", "unused")
-class EncodableStruct<S : Schema<S>>(val schema: S) {
+class EncodableStruct<out S : Schema<out S>>(val schema: S) {
     internal val fieldsWithValues: MutableMap<Field<*>, Any?> = mutableMapOf()
 
     private val fields = schema.fields
