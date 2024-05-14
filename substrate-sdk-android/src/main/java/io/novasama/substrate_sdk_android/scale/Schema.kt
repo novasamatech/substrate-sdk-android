@@ -1,6 +1,5 @@
 package io.novasama.substrate_sdk_android.scale
 
-import android.util.Log
 import io.emeraldpay.polkaj.scale.ScaleCodecReader
 import io.emeraldpay.polkaj.scale.ScaleCodecWriter
 import io.emeraldpay.polkaj.scale.ScaleReader
@@ -57,15 +56,8 @@ abstract class Schema<S : Schema<S>> :
         val struct = EncodableStruct(this as S)
 
         for (field in fields) {
-            try {
-                val value = field.dataType.read(reader)
-                struct[field as Field<Any?>] = value
-            } catch (e: Exception) {
-                println("Error reading ${this::class.simpleName}")
-
-                throw e
-            }
-
+            val value = field.dataType.read(reader)
+            struct[field] = value
         }
 
         return struct
