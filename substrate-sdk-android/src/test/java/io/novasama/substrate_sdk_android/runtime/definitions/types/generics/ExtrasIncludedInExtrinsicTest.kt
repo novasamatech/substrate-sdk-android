@@ -17,7 +17,7 @@ import org.mockito.junit.MockitoJUnitRunner
 import java.math.BigInteger
 
 @RunWith(MockitoJUnitRunner::class)
-class SignedExtrasTest {
+class ExtrasIncludedInExtrinsicTest {
 
     @Mock
     lateinit var runtime: RuntimeSnapshot
@@ -48,7 +48,7 @@ class SignedExtrasTest {
             DefaultSignedExtensions.CHECK_MORTALITY to Era.Immortal
         )
 
-        val encoded = SignedExtras.toHex(runtime, extras)
+        val encoded = ExtrasIncludedInExtrinsic.toHex(runtime, extras)
 
         assertEquals("0x002804", encoded)
     }
@@ -66,7 +66,7 @@ class SignedExtrasTest {
             DefaultSignedExtensions.CHECK_MORTALITY to Era.Immortal // CheckMortality is unused
         )
 
-        val encoded = SignedExtras.toHex(runtime, extras)
+        val encoded = ExtrasIncludedInExtrinsic.toHex(runtime, extras)
 
         assertEquals("0x2804", encoded)
     }
@@ -82,7 +82,7 @@ class SignedExtrasTest {
             DefaultSignedExtensions.CHECK_MORTALITY to Era.Immortal
         )
 
-        val encoded = SignedExtras.toHex(runtime, extras)
+        val encoded = ExtrasIncludedInExtrinsic.toHex(runtime, extras)
 
         assertEquals("0x", encoded)
     }
@@ -99,7 +99,7 @@ class SignedExtrasTest {
         )
 
         assertThrows<EncodeDecodeException> {
-            SignedExtras.toHex(runtime, extras)
+            ExtrasIncludedInExtrinsic.toHex(runtime, extras)
         }
     }
 
@@ -109,7 +109,7 @@ class SignedExtrasTest {
 
         val inHex = "0x002804"
 
-        val decoded = SignedExtras.fromHex(runtime, inHex)
+        val decoded = ExtrasIncludedInExtrinsic.fromHex(runtime, inHex)
 
         assertEquals(decoded.size, 3)
     }
@@ -120,7 +120,7 @@ class SignedExtrasTest {
 
         val inHex = "0x2804"
 
-        val decoded = SignedExtras.fromHex(runtime, inHex)
+        val decoded = ExtrasIncludedInExtrinsic.fromHex(runtime, inHex)
 
         assertEquals(decoded.size, 2)
     }
@@ -131,7 +131,7 @@ class SignedExtrasTest {
 
         val inHex = "0x"
 
-        val decoded = SignedExtras.fromHex(runtime, inHex)
+        val decoded = ExtrasIncludedInExtrinsic.fromHex(runtime, inHex)
 
         assertEquals(decoded.size, 0)
     }

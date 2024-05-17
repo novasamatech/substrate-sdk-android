@@ -219,7 +219,10 @@ class ExtrinsicBuilderTest {
             )
         )
 
-        builder.signedExtra("ChargeAssetTxPayment", chargeAssetTxPaymentValue)
+        builder.signedExtension(
+            id = "ChargeAssetTxPayment",
+            value = SignedExtensionValue(includedInExtrinsic = chargeAssetTxPaymentValue)
+        )
 
         val encoded = builder.build()
 

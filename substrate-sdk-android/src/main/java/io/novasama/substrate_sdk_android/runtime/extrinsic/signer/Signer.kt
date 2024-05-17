@@ -29,10 +29,15 @@ data class SignerPayloadExtrinsic(
     val runtime: RuntimeSnapshot,
     val accountId: AccountId,
     val call: CallRepresentation,
-    val signedExtras: Map<String, Any?>,
-    val additionalSignedExtras: Map<String, Any?>,
+    val signedExtras: SignedExtras,
     val nonce: Nonce,
-)
+) {
+
+    class SignedExtras(
+        val includedInExtrinsic: Map<String, Any?>,
+        val includedInSignature: Map<String, Any?>,
+    )
+}
 
 fun SignerPayloadRaw.Companion.fromUtf8(
     utf8Message: String,

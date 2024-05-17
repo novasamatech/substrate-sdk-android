@@ -219,7 +219,11 @@ private fun knownReplacements(): PathMatchTypeMapping {
         "*runtime.Event" to eventAlias,
 
         "pallet_identity.types.Data" to AliasTo("Data"),
-        "sp_runtime.generic.era.Era" to AliasTo("Era")
+        "sp_runtime.generic.era.Era" to AliasTo("Era"),
+
+        // For CheckMetadataHash signed extension
+        // Otherwise the type will be encoded&decoded as [u8; 32] which is not correct
+        "*EncodeNoneToEmpty" to AliasTo("EncodeNoneToEmpty")
     )
 }
 

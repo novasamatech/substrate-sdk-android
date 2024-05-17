@@ -10,17 +10,23 @@ import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.isE
 import io.novasama.substrate_sdk_android.runtime.metadata.SignedExtensionId
 import io.novasama.substrate_sdk_android.runtime.metadata.SignedExtensionMetadata
 
-object SignedExtras : ExtrinsicPayloadExtras("ExtrinsicPayloadExtras.SignedExtras") {
+/**
+ * @see [SignedExtensionMetadata.includedInExtrinsic]
+ */
+object ExtrasIncludedInExtrinsic : ExtrinsicPayloadExtras("ExtrinsicPayloadExtras.ExtrasIncludedInExtrinsic") {
 
     override fun getTypeFrom(signedExtension: SignedExtensionMetadata): Type<*>? {
-        return signedExtension.type
+        return signedExtension.includedInExtrinsic
     }
 }
 
-object AdditionalSignedExtras :
-    ExtrinsicPayloadExtras("ExtrinsicPayloadExtras.AdditionalSignedExtras") {
+/**
+ * @see [SignedExtensionMetadata.includedInSignature]
+ */
+object ExtrasIncludedInSignature :
+    ExtrinsicPayloadExtras("ExtrinsicPayloadExtras.ExtrasIncludedInSignature") {
     override fun getTypeFrom(signedExtension: SignedExtensionMetadata): Type<*>? {
-        return signedExtension.additionalSigned
+        return signedExtension.includedInSignature
     }
 }
 
