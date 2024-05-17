@@ -13,7 +13,7 @@ private const val MODE_DISABLED = 0
 private const val MODE_ENABLED = 1
 
 fun CheckMetadataHash.toSignedExtensionValue(): SignedExtensionValue {
-    return when(this) {
+    return when (this) {
         CheckMetadataHash.Disabled -> SignedExtensionValue(
             includedInSignature = MODE_DISABLED,
             includedInExtrinsic = null
