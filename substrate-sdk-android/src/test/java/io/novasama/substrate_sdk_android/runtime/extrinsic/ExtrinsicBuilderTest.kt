@@ -6,11 +6,14 @@ import io.novasama.substrate_sdk_android.encrypt.keypair.BaseKeypair
 import io.novasama.substrate_sdk_android.extensions.fromHex
 import io.novasama.substrate_sdk_android.integration.transfer
 import io.novasama.substrate_sdk_android.runtime.RealRuntimeProvider
+import io.novasama.substrate_sdk_android.runtime.RuntimeSnapshot
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
 import io.novasama.substrate_sdk_android.runtime.definitions.types.fromHex
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Era
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Extrinsic
 import io.novasama.substrate_sdk_android.runtime.extrinsic.signer.KeyPairSigner
+import io.novasama.substrate_sdk_android.runtime.metadata.MetadataTestCommon
+import io.novasama.substrate_sdk_android.runtime.metadata.RuntimeMetadata
 import io.novasama.substrate_sdk_android.runtime.metadata.SignedExtensionValue
 import io.novasama.substrate_sdk_android.ss58.SS58Encoder.publicKeyToSubstrateAccountId
 import io.novasama.substrate_sdk_android.ss58.SS58Encoder.toAccountId
@@ -229,8 +232,17 @@ class ExtrinsicBuilderTest {
         assertEquals(extrinsicInHex, encoded)
     }
 
-    private fun createExtrinsicBuilder() = ExtrinsicBuilder(
-        runtime = runtime,
+    @Test
+    fun `should build extrinsic with check metadata extension`() = runBlockingTest {
+        val runtime = MetadataTestCommon.buildPost14TestRuntime("check_metadata_runtime_v15")
+
+        createExtrinsicBuilder(runtime)
+            .testSingleTransfer()
+            .build()
+    }
+
+    private fun createExtrinsicBuilder(usedRuntime: RuntimeSnapshot = runtime) = ExtrinsicBuilder(
+        runtime = usedRuntime,
         signer = keypairSigner(),
         nonce = Nonce.singleTx(34.toBigInteger()),
         runtimeVersion = RuntimeVersion(48, 4),
