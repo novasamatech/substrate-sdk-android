@@ -1,6 +1,9 @@
 package io.novasama.substrate_sdk_android.runtime.definitions.types.generics
 
+import io.novasama.substrate_sdk_android.runtime.definitions.types.TypeReference
+import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Option
 import io.novasama.substrate_sdk_android.runtime.definitions.types.primitives.Compact
+import io.novasama.substrate_sdk_android.runtime.definitions.types.primitives.FixedByteArray
 import io.novasama.substrate_sdk_android.runtime.definitions.types.primitives.u32
 import io.novasama.substrate_sdk_android.runtime.definitions.types.primitives.u8
 import io.novasama.substrate_sdk_android.runtime.metadata.SignedExtensionMetadata
@@ -35,7 +38,10 @@ object DefaultSignedExtensions {
         SignedExtensionMetadata(
             id = CHECK_METADATA_HASH,
             includedInExtrinsic = u8,
-            includedInSignature = EncodeNoneToEmpty
+            includedInSignature = Option(
+                "OptionMetadataHash",
+                TypeReference(FixedByteArray("MetadataHash", 32))
+            )
         )
     )
 }

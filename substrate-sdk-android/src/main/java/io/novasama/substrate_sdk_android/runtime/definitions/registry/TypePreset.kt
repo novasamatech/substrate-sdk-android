@@ -7,7 +7,6 @@ import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.BitV
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Bytes
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.CallBytes
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Data
-import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.EncodeNoneToEmpty
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.EraType
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.EventRecord
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Extrinsic
@@ -101,8 +100,6 @@ fun v14Preset() = typePreset {
 
     type(Data(this))
     type(GenericAccountId)
-
-    type(EncodeNoneToEmpty)
 
     alias("Balance", "u128")
 }
