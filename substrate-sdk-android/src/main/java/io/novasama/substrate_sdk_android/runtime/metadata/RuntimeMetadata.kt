@@ -12,7 +12,7 @@ interface WithName {
 fun <T : WithName> List<T>.groupByName() = associateBy(WithName::name).toMap()
 
 class RuntimeMetadata(
-    val runtimeVersion: BigInteger,
+    val metadataVersion: Int,
     val modules: Map<String, Module>,
     val extrinsic: ExtrinsicMetadata
 )

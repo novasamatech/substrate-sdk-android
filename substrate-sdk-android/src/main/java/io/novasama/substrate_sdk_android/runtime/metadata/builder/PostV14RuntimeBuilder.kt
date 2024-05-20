@@ -53,7 +53,7 @@ object PostV14RuntimeBuilder : RuntimeBuilder {
                 typeRegistry
             ),
             modules = buildModules(metadataStruct[schema.pallets], typeRegistry),
-            runtimeVersion = reader.metadataVersion.toBigInteger()
+            metadataVersion = reader.metadataVersion
         )
     }
 

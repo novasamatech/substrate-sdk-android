@@ -48,7 +48,7 @@ internal object V13RuntimeBuilder : RuntimeBuilder {
                 knownSignedExtensions = knownSignedExtensions
             ),
             modules = buildModules(metadataStruct[RuntimeMetadataSchema.modules], typeRegistry),
-            runtimeVersion = reader.metadataVersion.toBigInteger()
+            metadataVersion = reader.metadataVersion
         )
     }
 
