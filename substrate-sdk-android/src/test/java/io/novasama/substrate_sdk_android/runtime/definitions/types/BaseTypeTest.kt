@@ -28,7 +28,7 @@ abstract class BaseTypeTest {
     protected val runtime: RuntimeSnapshot = RuntimeSnapshot(
         typeRegistry = typeRegistry,
         metadata = RuntimeMetadata(
-            runtimeVersion = BigInteger.ONE,
+            metadataVersion = 1,
             modules = mapOf(
                 "A" to Module(
                     name = "A",
