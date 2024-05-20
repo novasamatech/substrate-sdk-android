@@ -33,7 +33,7 @@ data class SignerPayloadExtrinsic(
     val nonce: Nonce,
 ) {
 
-    class SignedExtras(
+    data class SignedExtras(
         val includedInExtrinsic: Map<String, Any?>,
         val includedInSignature: Map<String, Any?>,
     )
