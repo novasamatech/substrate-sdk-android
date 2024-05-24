@@ -1,153 +1,121 @@
+@file:OptIn(ExperimentalUnsignedTypes::class)
+
 package io.novasama.substrate_sdk_android.runtime.metadata.v14
 
+import io.novasama.substrate_sdk_android.runtime.metadata.StorageEntryModifier
+import io.novasama.substrate_sdk_android.runtime.metadata.StorageHasher
 import io.novasama.substrate_sdk_android.scale.EncodableStruct
+import io.novasama.substrate_sdk_android.scale.Field
 import io.novasama.substrate_sdk_android.scale.Schema
+import io.novasama.substrate_sdk_android.scale.byteArray
 import io.novasama.substrate_sdk_android.scale.compactInt
 import io.novasama.substrate_sdk_android.scale.dataType.EnumType
-import io.novasama.substrate_sdk_android.scale.dataType.list
 import io.novasama.substrate_sdk_android.scale.dataType.scalable
 import io.novasama.substrate_sdk_android.scale.enum
 import io.novasama.substrate_sdk_android.scale.schema
 import io.novasama.substrate_sdk_android.scale.string
-import io.novasama.substrate_sdk_android.scale.uint32
 import io.novasama.substrate_sdk_android.scale.uint8
 import io.novasama.substrate_sdk_android.scale.vector
-import java.math.BigInteger
 
-object RuntimeMetadataSchemaV14 : Schema<RuntimeMetadataSchemaV14>() {
-    val lookup by schema(LookupSchema)
-    val pallets by vector(PalletMetadataV14)
-    val extrinsic by schema(ExtrinsicMetadataV14)
+abstract class PostV14MetadataSchema<S : PostV14MetadataSchema<S>> : Schema<S>() {
+
+    abstract val lookup: Field<EncodableStruct<LookupSchema>>
+
+    abstract val pallets: Field<List<EncodableStruct<PostV14PalletMetadataSchema<*>>>>
+
+    abstract val extrinsic: Field<EncodableStruct<PostV14ExtrinsicMetadataSchema<*>>>
+}
+
+abstract class PostV14ExtrinsicMetadataSchema<S : PostV14ExtrinsicMetadataSchema<S>> : Schema<S>() {
+
+    abstract val version: Field<UByte>
+
+    abstract val signedExtensions: Field<List<EncodableStruct<SignedExtensionMetadataV14>>>
+}
+
+abstract class PostV14PalletMetadataSchema<S : PostV14PalletMetadataSchema<S>> : Schema<S>() {
+
+    abstract val name: Field<String>
+
+    abstract val storage: Field<EncodableStruct<StorageMetadataV14>?>
+
+    abstract val calls: Field<EncodableStruct<PalletCallMetadataV14>?>
+
+    abstract val events: Field<EncodableStruct<PalletEventMetadataV14>?>
+
+    abstract val constants: Field<List<EncodableStruct<PalletConstantMetadataV14>>>
+
+    abstract val errors: Field<EncodableStruct<PalletErrorMetadataV14>?>
+
+    abstract val index: Field<UByte>
+}
+
+object RuntimeMetadataSchemaV14 : PostV14MetadataSchema<RuntimeMetadataSchemaV14>() {
+    override val lookup by schema(LookupSchema)
+    override val pallets by vector(PalletMetadataV14)
+    override val extrinsic by schema(ExtrinsicMetadataV14)
     val type by compactInt()
 }
 
-object LookupSchema : Schema<LookupSchema>() {
-    val types by vector(PortableType)
+object PalletMetadataV14 : PostV14PalletMetadataSchema<PalletMetadataV14>() {
+    override val name by string()
+    override val storage by schema(StorageMetadataV14).optional()
+    override val calls by schema(PalletCallMetadataV14).optional()
+    override val events by schema(PalletEventMetadataV14).optional()
+    override val constants by vector(PalletConstantMetadataV14)
+    override val errors by schema(PalletErrorMetadataV14).optional()
+    override val index by uint8()
 }
 
-object PortableType : Schema<PortableType>() {
-    val id by compactInt()
-    val type by schema(RegistryType)
+object StorageMetadataV14 : Schema<StorageMetadataV14>() {
+    val prefix by string()
+    val entries by vector(StorageEntryMetadataV14)
 }
 
-val EncodableStruct<PortableType>.id
-    get() = get(PortableType.id)
-
-val EncodableStruct<PortableType>.type
-    get() = get(PortableType.type)
-
-object RegistryType : Schema<RegistryType>() {
-    val path by vector(io.novasama.substrate_sdk_android.scale.dataType.string)
-    val params by vector(TypeParameter)
-    val def by enum(
-        scalable(TypeDefComposite),
-        scalable(TypeDefVariant),
-        scalable(TypeDefSequence),
-        scalable(TypeDefArray),
-        list(io.novasama.substrate_sdk_android.scale.dataType.compactInt),
-        EnumType(TypeDefEnum::class.java),
-        scalable(TypeDefCompact),
-        scalable(TypeDefBitSequence),
+object StorageEntryMetadataV14 : Schema<StorageEntryMetadataV14>() {
+    val name by string()
+    val modifier by enum(StorageEntryModifier::class)
+    val type by enum(
+        io.novasama.substrate_sdk_android.scale.dataType.compactInt,
+        scalable(MapTypeV14),
     )
-    val docs by vector(io.novasama.substrate_sdk_android.scale.dataType.string)
+    val default by byteArray()
+    val documentation by vector(io.novasama.substrate_sdk_android.scale.dataType.string)
 }
 
-val EncodableStruct<RegistryType>.path
-    get() = get(RegistryType.path)
-
-val EncodableStruct<RegistryType>.def
-    get() = get(RegistryType.def)
-
-val EncodableStruct<RegistryType>.params
-    get() = get(RegistryType.params)
-
-fun EncodableStruct<RegistryType>.paramType(name: String): BigInteger? {
-    return params.find { it[TypeParameter.name] == name }?.get(TypeParameter.type)
+object MapTypeV14 : Schema<MapTypeV14>() {
+    val hashers by vector(EnumType(StorageHasher::class.java))
+    val key by compactInt()
+    val value by compactInt()
 }
 
-@Suppress("UNCHECKED_CAST")
-fun EncodableStruct<RegistryType>.asCompositeOrNull(): EncodableStruct<TypeDefComposite>? {
-    val typeDef = def
-
-    if (typeDef is EncodableStruct<*> && typeDef.schema is TypeDefComposite) {
-        return typeDef as EncodableStruct<TypeDefComposite>
-    }
-
-    return null
-}
-
-enum class TypeDefEnum(val localName: String) {
-    bool("bool"),
-    char(""),
-    str(""),
-    u8("u8"),
-    u16("u16"),
-    u32("u32"),
-    u64("u64"),
-    u128("u128"),
-    u256("u256"),
-    i8("i8"),
-    i16("i16"),
-    i32("i32"),
-    i64("i64"),
-    i128("i128"),
-    i256("i256")
-}
-
-object TypeDefBitSequence : Schema<TypeDefBitSequence>() {
-    val bit_store_type by compactInt()
-    val bit_order_type by compactInt()
-}
-
-object TypeDefCompact : Schema<TypeDefCompact>() {
+object PalletCallMetadataV14 : Schema<PalletCallMetadataV14>() {
     val type by compactInt()
 }
 
-object TypeDefArray : Schema<TypeDefArray>() {
-    val len by uint32()
+object PalletEventMetadataV14 : Schema<PalletEventMetadataV14>() {
     val type by compactInt()
 }
 
-object TypeDefSequence : Schema<TypeDefSequence>() {
+object PalletErrorMetadataV14 : Schema<PalletErrorMetadataV14>() {
     val type by compactInt()
 }
 
-object TypeDefVariant : Schema<TypeDefVariant>() {
-    val variants by vector(TypeDefVariantItem)
-}
-
-object TypeDefVariantItem : Schema<TypeDefVariantItem>() {
+object PalletConstantMetadataV14 : Schema<PalletConstantMetadataV14>() {
     val name by string()
-    val fields2 by vector(TypeDefCompositeField)
-    val index by uint8()
-    val docs by vector(io.novasama.substrate_sdk_android.scale.dataType.string)
-}
-
-object TypeDefComposite : Schema<TypeDefComposite>() {
-    val fields2 by vector(TypeDefCompositeField)
-}
-
-val EncodableStruct<TypeDefComposite>.fields
-    get() = get(TypeDefComposite.fields2)
-
-fun EncodableStruct<TypeDefComposite>.fieldType(name: String): BigInteger? {
-    return fields.find { it[TypeDefCompositeField.name] == name }?.get(TypeDefCompositeField.type)
-}
-
-val EncodableStruct<TypeDefCompositeField>.type
-    get() = get(TypeDefCompositeField.type)
-
-val EncodableStruct<TypeDefCompositeField>.name
-    get() = get(TypeDefCompositeField.name)
-
-object TypeDefCompositeField : Schema<TypeDefCompositeField>() {
-    val name by string().optional()
     val type by compactInt()
-    val typeName by string().optional()
-    val docs by vector(io.novasama.substrate_sdk_android.scale.dataType.string)
+    val value by byteArray() // vector<u8>
+    val documentation by vector(io.novasama.substrate_sdk_android.scale.dataType.string)
 }
 
-object TypeParameter : Schema<TypeParameter>() {
-    val name by string()
-    val type by compactInt().optional()
+object ExtrinsicMetadataV14 : PostV14ExtrinsicMetadataSchema<ExtrinsicMetadataV14>() {
+    val type by compactInt()
+    override val version by uint8()
+    override val signedExtensions by vector(SignedExtensionMetadataV14)
+}
+
+object SignedExtensionMetadataV14 : Schema<SignedExtensionMetadataV14>() {
+    val identifier by string()
+    val type by compactInt()
+    val additionalSigned by compactInt()
 }

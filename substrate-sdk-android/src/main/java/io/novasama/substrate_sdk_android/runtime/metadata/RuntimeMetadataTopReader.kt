@@ -2,7 +2,9 @@ package io.novasama.substrate_sdk_android.runtime.metadata
 
 import io.emeraldpay.polkaj.scale.ScaleCodecReader
 import io.novasama.substrate_sdk_android.extensions.fromHex
+import io.novasama.substrate_sdk_android.runtime.metadata.v14.PostV14MetadataSchema
 import io.novasama.substrate_sdk_android.runtime.metadata.v14.RuntimeMetadataSchemaV14
+import io.novasama.substrate_sdk_android.runtime.metadata.v14.RuntimeMetadataSchemaV15
 import io.novasama.substrate_sdk_android.scale.EncodableStruct
 import io.novasama.substrate_sdk_android.scale.Schema
 import io.novasama.substrate_sdk_android.scale.uint32
@@ -18,21 +20,56 @@ class RuntimeMetadataReader private constructor(
     val metadata: EncodableStruct<*>
 ) {
 
+    @Suppress("UNCHECKED_CAST")
+    val metadataPostV14: EncodableStruct<PostV14MetadataSchema<*>>
+        get() {
+            require(metadata.schema is PostV14MetadataSchema<*>) {
+                "Metadata is pre v14"
+            }
+
+            return metadata as EncodableStruct<PostV14MetadataSchema<*>>
+        }
+
     companion object {
 
-        @OptIn(ExperimentalUnsignedTypes::class)
         fun read(metadaScale: String): RuntimeMetadataReader {
+            return read(metadaScale.fromHex())
+        }
 
-            val scaleCoderReader = ScaleCodecReader(metadaScale.fromHex())
+        /**
+         * Can be used to read Option<OpaqueMetadata>, which is the response of
+         * runtime call metadata_versionedMetadata()
+         */
+        fun readOpaque(opaqueBytes: ByteArray): RuntimeMetadataReader {
+            val scaleCoderReader = ScaleCodecReader(opaqueBytes)
+            val exists = scaleCoderReader.readBoolean()
+            require(exists) {
+                "Non existent metadata"
+            }
+            // Skip opaque vec length
+            scaleCoderReader.readCompactInt()
 
-            val runtimeVersion = Magic.read(scaleCoderReader)[Magic.runtimeVersion].toInt()
+            return read(scaleCoderReader)
+        }
+
+        fun read(metadataBytes: ByteArray): RuntimeMetadataReader {
+            val scaleCoderReader = ScaleCodecReader(metadataBytes)
+            return read(scaleCoderReader)
+        }
+
+        @OptIn(ExperimentalUnsignedTypes::class)
+        private fun read(reader: ScaleCodecReader): RuntimeMetadataReader {
+            val runtimeVersion = Magic.read(reader)[Magic.runtimeVersion].toInt()
 
             val metadata = when {
                 runtimeVersion < 14 -> {
-                    RuntimeMetadataSchema.read(scaleCoderReader)
+                    RuntimeMetadataSchema.read(reader)
+                }
+                runtimeVersion == 14 -> {
+                    RuntimeMetadataSchemaV14.read(reader)
                 }
                 else -> {
-                    RuntimeMetadataSchemaV14.read(scaleCoderReader)
+                    RuntimeMetadataSchemaV15.read(reader)
                 }
             }
 

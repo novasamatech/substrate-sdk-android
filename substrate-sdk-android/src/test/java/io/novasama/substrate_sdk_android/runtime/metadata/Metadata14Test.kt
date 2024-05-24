@@ -29,6 +29,7 @@ import io.novasama.substrate_sdk_android.runtime.metadata.builder.VersionedRunti
 import io.novasama.substrate_sdk_android.runtime.metadata.module.StorageEntryType
 import io.novasama.substrate_sdk_android.runtime.metadata.v14.RuntimeMetadataSchemaV14
 import io.novasama.substrate_sdk_android.runtime.RuntimeSnapshot
+import io.novasama.substrate_sdk_android.runtime.metadata.MetadataTestCommon.buildPost14TestRuntime
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -75,7 +76,7 @@ class Metadata14Test {
 
     @Test
     fun `should decode westend metadata v14`() {
-        val runtime = buildTestRuntime("westend_metadata_v14")
+        val runtime = buildPost14TestRuntime("westend_metadata_v14")
         val metadata = runtime.metadata
         val typeRegistry = runtime.typeRegistry
 
@@ -174,28 +175,11 @@ class Metadata14Test {
 
     @Test
     fun `should decode gov2 testnet runtime v14`() {
-        val runtime = buildTestRuntime("gov2_testnet_runtime_v14")
+        val runtime = buildPost14TestRuntime("gov2_testnet_runtime_v14")
         val typeRegistry = runtime.typeRegistry
 
         // should parse signed primitives to IntType
         val fixedI64 = typeRegistry["sp_arithmetic.fixed_point.FixedI64"]?.skipAliases()
         assertEquals(i64, fixedI64)
-    }
-
-    private fun buildTestRuntime(fileName: String): RuntimeSnapshot {
-        val inHex = getFileContentFromResources(fileName)
-        val metadataReader = RuntimeMetadataReader.read(inHex)
-        val typePreset = TypesParserV14.parse(
-            lookup = metadataReader.metadata[RuntimeMetadataSchemaV14.lookup],
-            typePreset = v14Preset()
-        )
-
-        val typeRegistry = TypeRegistry(
-            typePreset,
-            DynamicTypeResolver.defaultCompoundResolver()
-        )
-        val metadata = VersionedRuntimeBuilder.buildMetadata(metadataReader, typeRegistry)
-
-        return RuntimeSnapshot(typeRegistry, metadata)
     }
 }

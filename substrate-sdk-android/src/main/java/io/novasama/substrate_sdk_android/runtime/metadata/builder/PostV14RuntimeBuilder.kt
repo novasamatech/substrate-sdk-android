@@ -22,14 +22,13 @@ import io.novasama.substrate_sdk_android.runtime.metadata.module.Module
 import io.novasama.substrate_sdk_android.runtime.metadata.module.Storage
 import io.novasama.substrate_sdk_android.runtime.metadata.module.StorageEntry
 import io.novasama.substrate_sdk_android.runtime.metadata.module.StorageEntryType
-import io.novasama.substrate_sdk_android.runtime.metadata.v14.ExtrinsicMetadataV14
 import io.novasama.substrate_sdk_android.runtime.metadata.v14.MapTypeV14
 import io.novasama.substrate_sdk_android.runtime.metadata.v14.PalletCallMetadataV14
 import io.novasama.substrate_sdk_android.runtime.metadata.v14.PalletConstantMetadataV14
 import io.novasama.substrate_sdk_android.runtime.metadata.v14.PalletErrorMetadataV14
 import io.novasama.substrate_sdk_android.runtime.metadata.v14.PalletEventMetadataV14
-import io.novasama.substrate_sdk_android.runtime.metadata.v14.PalletMetadataV14
-import io.novasama.substrate_sdk_android.runtime.metadata.v14.RuntimeMetadataSchemaV14
+import io.novasama.substrate_sdk_android.runtime.metadata.v14.PostV14ExtrinsicMetadataSchema
+import io.novasama.substrate_sdk_android.runtime.metadata.v14.PostV14PalletMetadataSchema
 import io.novasama.substrate_sdk_android.runtime.metadata.v14.SignedExtensionMetadataV14
 import io.novasama.substrate_sdk_android.runtime.metadata.v14.StorageEntryMetadataV14
 import io.novasama.substrate_sdk_android.runtime.metadata.v14.StorageMetadataV14
@@ -37,7 +36,7 @@ import io.novasama.substrate_sdk_android.scale.EncodableStruct
 import java.math.BigInteger
 
 @OptIn(ExperimentalUnsignedTypes::class)
-object V14RuntimeBuilder : RuntimeBuilder {
+object PostV14RuntimeBuilder : RuntimeBuilder {
 
     override fun buildMetadata(
         reader: RuntimeMetadataReader,
@@ -46,20 +45,20 @@ object V14RuntimeBuilder : RuntimeBuilder {
     ): RuntimeMetadata {
         val metadataStruct = reader.metadata
 
-        require(metadataStruct.schema is RuntimeMetadataSchemaV14)
+        val schema = reader.metadataPostV14.schema
 
         return RuntimeMetadata(
             extrinsic = buildExtrinsic(
-                metadataStruct[RuntimeMetadataSchemaV14.extrinsic],
+                metadataStruct[schema.extrinsic],
                 typeRegistry
             ),
-            modules = buildModules(metadataStruct[RuntimeMetadataSchemaV14.pallets], typeRegistry),
+            modules = buildModules(metadataStruct[schema.pallets], typeRegistry),
             runtimeVersion = reader.metadataVersion.toBigInteger()
         )
     }
 
     private fun buildModules(
-        modulesRaw: List<EncodableStruct<PalletMetadataV14>>,
+        modulesRaw: List<EncodableStruct<PostV14PalletMetadataSchema<*>>>,
         typeRegistry: TypeRegistry
     ): Map<String, Module> {
         return modulesRaw.map {
@@ -69,25 +68,26 @@ object V14RuntimeBuilder : RuntimeBuilder {
 
     private fun buildModule(
         typeRegistry: TypeRegistry,
-        struct: EncodableStruct<PalletMetadataV14>,
+        struct: EncodableStruct<PostV14PalletMetadataSchema<*>>,
     ): Module {
-        val moduleName = struct[PalletMetadataV14.name]
-        val moduleIndex = struct[PalletMetadataV14.index].toInt()
+        val schema = struct.schema
+        val moduleName = struct[schema.name]
+        val moduleIndex = struct[schema.index].toInt()
 
         return Module(
             name = moduleName,
             index = moduleIndex.toBigInteger(),
-            storage = struct[PalletMetadataV14.storage]?.let {
+            storage = struct[schema.storage]?.let {
                 buildStorage(typeRegistry, it, moduleName)
             },
-            calls = struct[PalletMetadataV14.calls]?.let {
+            calls = struct[schema.calls]?.let {
                 buildCalls(typeRegistry, it, moduleIndex)
             },
-            events = struct[PalletMetadataV14.events]?.let {
+            events = struct[schema.events]?.let {
                 buildEvents(typeRegistry, it, moduleIndex)
             },
-            constants = buildConstants(typeRegistry, struct[PalletMetadataV14.constants]),
-            errors = struct[PalletMetadataV14.errors]?.let {
+            constants = buildConstants(typeRegistry, struct[schema.constants]),
+            errors = struct[schema.errors]?.let {
                 buildErrors(typeRegistry, it)
             } ?: emptyMap()
         )
@@ -251,18 +251,22 @@ object V14RuntimeBuilder : RuntimeBuilder {
     }
 
     private fun buildExtrinsic(
-        struct: EncodableStruct<ExtrinsicMetadataV14>,
+        struct: EncodableStruct<PostV14ExtrinsicMetadataSchema<*>>,
         typeRegistry: TypeRegistry,
-    ) = ExtrinsicMetadata(
-        version = struct[ExtrinsicMetadataV14.version].toInt().toBigInteger(),
-        signedExtensions = struct[ExtrinsicMetadataV14.signedExtensions].map {
-            SignedExtensionMetadata(
-                id = it[SignedExtensionMetadataV14.identifier],
-                type = typeRegistry[it[SignedExtensionMetadataV14.type].toString()],
-                additionalSigned = typeRegistry[it[SignedExtensionMetadataV14.additionalSigned].toString()]
-            )
-        }
-    )
+    ): ExtrinsicMetadata {
+        val schema = struct.schema
+
+        return ExtrinsicMetadata(
+            version = struct[schema.version].toInt().toBigInteger(),
+            signedExtensions = struct[schema.signedExtensions].map {
+                SignedExtensionMetadata(
+                    id = it[SignedExtensionMetadataV14.identifier],
+                    type = typeRegistry[it[SignedExtensionMetadataV14.type].toString()],
+                    additionalSigned = typeRegistry[it[SignedExtensionMetadataV14.additionalSigned].toString()]
+                )
+            }
+        )
+    }
 
     private fun cannotConstructStorageEntry(from: Any?): Nothing {
         throw IllegalArgumentException("Cannot construct StorageEntryType from $from")

@@ -23,7 +23,7 @@ object VersionedRuntimeBuilder : RuntimeBuilder {
         knownSignedExtensions: List<SignedExtensionMetadata>,
     ): RuntimeMetadata {
         return when (reader.metadataVersion) {
-            14 -> V14RuntimeBuilder.buildMetadata(reader, typeRegistry, knownSignedExtensions)
+            14, 15 -> PostV14RuntimeBuilder.buildMetadata(reader, typeRegistry, knownSignedExtensions)
             else -> V13RuntimeBuilder.buildMetadata(reader, typeRegistry, knownSignedExtensions)
         }
     }
