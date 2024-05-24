@@ -65,7 +65,7 @@ object Extrinsic : RuntimeType<Extrinsic.EncodingInstance, Extrinsic.DecodedInst
             Signature(
                 accountIdentifier = addressType(runtime).decode(scaleCodecReader, runtime),
                 signature = signatureType(runtime).decode(scaleCodecReader, runtime),
-                signedExtras = SignedExtras.decode(scaleCodecReader, runtime)
+                signedExtras = ExtrasIncludedInExtrinsic.decode(scaleCodecReader, runtime)
             )
         } else {
             null
@@ -107,7 +107,7 @@ object Extrinsic : RuntimeType<Extrinsic.EncodingInstance, Extrinsic.DecodedInst
 
             val addressBytes = addressType(runtime).bytes(runtime, signature.accountIdentifier)
             val signatureBytes = signatureType(runtime).bytes(runtime, signature.signature)
-            val signedExtrasBytes = SignedExtras.bytes(runtime, signature.signedExtras)
+            val signedExtrasBytes = ExtrasIncludedInExtrinsic.bytes(runtime, signature.signedExtras)
 
             addressBytes + signatureBytes + signedExtrasBytes
         } else {

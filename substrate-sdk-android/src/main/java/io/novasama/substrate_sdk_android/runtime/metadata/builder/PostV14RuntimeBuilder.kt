@@ -53,7 +53,7 @@ object PostV14RuntimeBuilder : RuntimeBuilder {
                 typeRegistry
             ),
             modules = buildModules(metadataStruct[schema.pallets], typeRegistry),
-            runtimeVersion = reader.metadataVersion.toBigInteger()
+            metadataVersion = reader.metadataVersion
         )
     }
 
@@ -261,8 +261,8 @@ object PostV14RuntimeBuilder : RuntimeBuilder {
             signedExtensions = struct[schema.signedExtensions].map {
                 SignedExtensionMetadata(
                     id = it[SignedExtensionMetadataV14.identifier],
-                    type = typeRegistry[it[SignedExtensionMetadataV14.type].toString()],
-                    additionalSigned = typeRegistry[it[SignedExtensionMetadataV14.additionalSigned].toString()]
+                    includedInExtrinsic = typeRegistry[it[SignedExtensionMetadataV14.type].toString()],
+                    includedInSignature = typeRegistry[it[SignedExtensionMetadataV14.additionalSigned].toString()]
                 )
             }
         )

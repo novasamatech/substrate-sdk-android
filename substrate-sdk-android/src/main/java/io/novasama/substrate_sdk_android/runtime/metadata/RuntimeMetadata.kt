@@ -12,7 +12,7 @@ interface WithName {
 fun <T : WithName> List<T>.groupByName() = associateBy(WithName::name).toMap()
 
 class RuntimeMetadata(
-    val runtimeVersion: BigInteger,
+    val metadataVersion: Int,
     val modules: Map<String, Module>,
     val extrinsic: ExtrinsicMetadata
 )
@@ -25,34 +25,42 @@ class ExtrinsicMetadata(
 typealias SignedExtensionId = String
 
 class SignedExtensionValue(
-    val signedExtra: Any? = null,
-    val additionalSigned: Any? = null
+    val includedInExtrinsic: Any? = null,
+    val includedInSignature: Any? = null,
 )
 
 class SignedExtensionMetadata(
     val id: SignedExtensionId,
-    val type: RuntimeType<*, *>?,
-    val additionalSigned: RuntimeType<*, *>?
+
+    /**
+     * Additional information that is included both into extrinsic and signature payload
+     * Those values are configurable by the user and can be extracted from signed extrinsic open decoding
+     *
+     * Examples: tip, mortality, nonce
+     */
+    val includedInExtrinsic: RuntimeType<*, *>?,
+
+    /**
+     * Additional information, that is only included into signature
+     * Those values are non-configurable by the user and should always be equal to those used by runtime that verifies the signature
+     * They cannot be extracted from the signed extrinsic
+     *
+     * Examples: genesis hash, runtime version
+     */
+    val includedInSignature: RuntimeType<*, *>?
 ) {
 
     companion object {
 
-        /**
-         * SignedExtras is signature params that are both signed
-         * and put separately in payload for verification
-         * Examples: tip, mortality
-         */
-        fun onlySigned(id: String, type: RuntimeType<*, *>): SignedExtensionMetadata {
-            return SignedExtensionMetadata(id, type, Null)
+        fun onlyInExtrinsic(id: String, includedInExtrinsic: RuntimeType<*, *>): SignedExtensionMetadata {
+            return SignedExtensionMetadata(id, includedInExtrinsic, Null)
         }
 
-        /**
-         * AdditionalSigned is signature params that are signed
-         * and that are verified by runtime based on-chain state
-         * Examples: genesis hash, runtime version
-         */
-        fun onlyAdditional(id: String, additionalSigned: RuntimeType<*, *>): SignedExtensionMetadata {
-            return SignedExtensionMetadata(id, Null, additionalSigned)
+        fun onlyInSignature(
+            id: String,
+            includedInSignature: RuntimeType<*, *>
+        ): SignedExtensionMetadata {
+            return SignedExtensionMetadata(id, Null, includedInSignature)
         }
     }
 }

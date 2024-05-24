@@ -37,6 +37,7 @@ class ExtrinsicBuilder(
     private val blockHash: ByteArray = genesisHash,
     private val era: Era = Era.Immortal,
     private val tip: BigInteger = DEFAULT_TIP,
+    private val checkMetadataHash: CheckMetadataHash = CheckMetadataHash.Disabled,
     customSignedExtensions: Map<SignedExtensionId, SignedExtensionValue> = emptyMap(),
     private val addressInstanceConstructor: RuntimeType.InstanceConstructor<AccountId> = AddressInstanceConstructor,
     private val signatureConstructor: RuntimeType.InstanceConstructor<SignatureWrapper> = SignatureInstanceConstructor
@@ -142,7 +143,7 @@ class ExtrinsicBuilder(
             signature = Extrinsic.Signature.new(
                 accountIdentifier = buildEncodableAddressInstance(signedExtrinsic.payload.accountId),
                 signature = multiSignature,
-                signedExtras = signedExtrinsic.payload.signedExtras
+                signedExtras = signedExtrinsic.payload.signedExtras.includedInExtrinsic
             ),
             callRepresentation = signedExtrinsic.payload.call
         )
@@ -173,32 +174,34 @@ class ExtrinsicBuilder(
     }
 
     private suspend fun buildSignedExtrinsic(callRepresentation: CallRepresentation): SignedExtrinsic {
-        val signedExtrasInstance = buildSignedExtras()
-        val additionalSignedInstance = buildAdditionalSigned()
-
         val signerPayload = SignerPayloadExtrinsic(
             runtime = runtime,
             accountId = accountId,
             call = callRepresentation,
-            signedExtras = signedExtrasInstance,
-            additionalSignedExtras = additionalSignedInstance,
+            signedExtras = SignerPayloadExtrinsic.SignedExtras(
+                includedInExtrinsic = buildIncludedInExtrinsic(),
+                includedInSignature = buildIncludedInSignature()
+
+            ),
             nonce = nonce
         )
 
         return signer.signExtrinsic(signerPayload)
     }
 
-    private fun buildAdditionalSigned(): Map<String, Any?> {
+    private fun buildIncludedInSignature(): Map<String, Any?> {
         val default = mapOf(
             DefaultSignedExtensions.CHECK_MORTALITY to blockHash,
             DefaultSignedExtensions.CHECK_GENESIS to genesisHash,
             DefaultSignedExtensions.CHECK_SPEC_VERSION to runtimeVersion.specVersion.toBigInteger(),
             DefaultSignedExtensions.CHECK_TX_VERSION to
-                runtimeVersion.transactionVersion.toBigInteger()
+                runtimeVersion.transactionVersion.toBigInteger(),
+            DefaultSignedExtensions.CHECK_METADATA_HASH to
+                checkMetadataHash.toSignedExtensionValue().includedInSignature
         )
 
         val custom = _customSignedExtensions.mapValues { (_, extensionValues) ->
-            extensionValues.additionalSigned
+            extensionValues.includedInSignature
         }
 
         return default + custom
@@ -227,15 +230,17 @@ class ExtrinsicBuilder(
         return addressInstanceConstructor.constructInstance(runtime.typeRegistry, accountId)
     }
 
-    private fun buildSignedExtras(): ExtrinsicPayloadExtrasInstance {
+    private fun buildIncludedInExtrinsic(): ExtrinsicPayloadExtrasInstance {
         val default = mapOf(
             DefaultSignedExtensions.CHECK_MORTALITY to era,
             DefaultSignedExtensions.CHECK_TX_PAYMENT to tip,
-            DefaultSignedExtensions.CHECK_NONCE to runtime.encodeNonce(nonce.nonce)
+            DefaultSignedExtensions.CHECK_NONCE to runtime.encodeNonce(nonce.nonce),
+            DefaultSignedExtensions.CHECK_METADATA_HASH to
+                checkMetadataHash.toSignedExtensionValue().includedInExtrinsic
         )
 
         val custom = _customSignedExtensions.mapValues { (_, extensionValues) ->
-            extensionValues.signedExtra
+            extensionValues.includedInExtrinsic
         }
 
         return default + custom
