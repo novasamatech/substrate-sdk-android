@@ -99,6 +99,12 @@ class ExtrinsicBuilder(
         return this
     }
 
+    fun getCall(
+        batchMode: BatchMode = BatchMode.BATCH
+    ): GenericCall.Instance {
+        return maybeWrapInBatch(batchMode)
+    }
+
     suspend fun build(
         batchMode: BatchMode = BatchMode.BATCH
     ): String {
