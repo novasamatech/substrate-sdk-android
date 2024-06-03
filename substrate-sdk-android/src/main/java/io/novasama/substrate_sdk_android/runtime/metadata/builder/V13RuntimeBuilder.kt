@@ -20,7 +20,7 @@ import io.novasama.substrate_sdk_android.runtime.metadata.StorageEntryMetadataSc
 import io.novasama.substrate_sdk_android.runtime.metadata.StorageMetadataSchema
 import io.novasama.substrate_sdk_android.runtime.metadata.groupByName
 import io.novasama.substrate_sdk_android.runtime.metadata.module.Constant
-import io.novasama.substrate_sdk_android.runtime.metadata.module.Error
+import io.novasama.substrate_sdk_android.runtime.metadata.module.ErrorMetadata
 import io.novasama.substrate_sdk_android.runtime.metadata.module.Event
 import io.novasama.substrate_sdk_android.runtime.metadata.module.FunctionArgument
 import io.novasama.substrate_sdk_android.runtime.metadata.module.MetadataFunction
@@ -162,13 +162,14 @@ internal object V13RuntimeBuilder : RuntimeBuilder {
 
     private fun buildErrors(
         errorsRaw: List<EncodableStruct<ErrorMetadataSchema>>,
-    ): Map<String, Error> {
-        return errorsRaw.map { errorStruct ->
-            Error(
+    ): Map<Int, ErrorMetadata> {
+        return errorsRaw.mapIndexed { index, errorStruct ->
+            ErrorMetadata(
+                index = index,
                 name = errorStruct[ErrorMetadataSchema.name],
                 documentation = errorStruct[ErrorMetadataSchema.documentation]
             )
-        }.groupByName()
+        }.associateBy { it.index }
     }
 
     private fun buildEntryType(
