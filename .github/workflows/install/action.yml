@@ -20,7 +20,11 @@ runs:
         link-to-sdk: true
         
     - name: Set ndk.dir in local.properties
-      run: echo "ndk.dir=${{ steps.setup-ndk.outputs.ndk-dir }}" >> local.properties
+      run: echo "ndk.dir=${{ steps.setup-ndk.outputs.ndk-path }}" >> local.properties
+      shell: bash
+
+    - name: Set ndk.dir in local.properties
+      run: echo "ndk.dir=${{ steps.setup-ndk.outputs.ndk-full-version }}"
       shell: bash
     
     - name: Install Rust
