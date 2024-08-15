@@ -14,7 +14,7 @@ import io.novasama.substrate_sdk_android.runtime.metadata.RuntimeMetadataReader
 import io.novasama.substrate_sdk_android.runtime.metadata.SignedExtensionMetadata
 import io.novasama.substrate_sdk_android.runtime.metadata.groupByName
 import io.novasama.substrate_sdk_android.runtime.metadata.module.Constant
-import io.novasama.substrate_sdk_android.runtime.metadata.module.Error
+import io.novasama.substrate_sdk_android.runtime.metadata.module.ErrorMetadata
 import io.novasama.substrate_sdk_android.runtime.metadata.module.Event
 import io.novasama.substrate_sdk_android.runtime.metadata.module.FunctionArgument
 import io.novasama.substrate_sdk_android.runtime.metadata.module.MetadataFunction
@@ -194,18 +194,19 @@ object PostV14RuntimeBuilder : RuntimeBuilder {
     private fun buildErrors(
         typeRegistry: TypeRegistry,
         errorsRaw: EncodableStruct<PalletErrorMetadataV14>,
-    ): Map<String, Error> {
+    ): Map<Int, ErrorMetadata> {
 
         val type = typeRegistry[errorsRaw[PalletErrorMetadataV14.type].toString()]
 
         if (type !is DictEnum) return emptyMap()
 
-        return type.elements.values.map {
-            Error(
-                name = it.name,
+        return type.elements.entries.map { (variantIndex, variantValue) ->
+            ErrorMetadata(
+                index = variantIndex,
+                name = variantValue.name,
                 documentation = emptyList(),
             )
-        }.groupByName()
+        }.associateBy { it.index }
     }
 
     private fun buildEntryType(
