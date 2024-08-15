@@ -7,13 +7,18 @@ runs:
       uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
-        java-version: '8'
+        java-version: '11'
         cache: 'gradle'
         
-    - uses: nttld/setup-ndk@v1
+    - name: 🛠️ Install NDK
+      id: setup-ndk
+      uses: nttld/setup-ndk@v1
       with:
-        ndk-version: r21d
-        local-cache: true
+        ndk-version: 'r25c'
+        
+    - name: Set ndk.dir in local.properties
+      run: echo "ndk.dir=${{ steps.setup-ndk.outputs.ndk-path }}" >> local.properties
+      shell: bash
     
     - name: Install Rust
       uses: actions-rs/toolchain@v1
