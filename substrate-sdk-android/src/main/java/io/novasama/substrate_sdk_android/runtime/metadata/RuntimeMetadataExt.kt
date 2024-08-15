@@ -8,6 +8,7 @@ import io.novasama.substrate_sdk_android.runtime.RuntimeSnapshot
 import io.novasama.substrate_sdk_android.runtime.definitions.types.RuntimeType
 import io.novasama.substrate_sdk_android.runtime.definitions.types.bytes
 import io.novasama.substrate_sdk_android.runtime.definitions.types.errors.EncodeDecodeException
+import io.novasama.substrate_sdk_android.runtime.metadata.module.ErrorMetadata
 import io.novasama.substrate_sdk_android.runtime.metadata.module.Event
 import io.novasama.substrate_sdk_android.runtime.metadata.module.MetadataFunction
 import io.novasama.substrate_sdk_android.runtime.metadata.module.Module
@@ -67,6 +68,11 @@ fun Module.eventOrNull(index: Int): Event? = nullOnException { event(index) }
 fun Module.event(name: String): Event = eventOrNull(name) ?: throw NoSuchElementException()
 
 fun Module.eventOrNull(name: String): Event? = events?.get(name)
+
+fun Module.error(index: Int): ErrorMetadata = errorOrNull(index)
+    ?: throw NoSuchElementException("Error $index was not found in module $name")
+
+fun Module.errorOrNull(index: Int): ErrorMetadata? = errors[index]
 
 /**
  * Unified representation of [StorageEntryType] argument types

@@ -12,7 +12,7 @@ class Module(
     val calls: Map<String, MetadataFunction>?,
     val events: Map<String, Event>?,
     val constants: Map<String, Constant>,
-    val errors: Map<String, Error>,
+    val errors: Map<Int, ErrorMetadata>,
     val index: BigInteger
 ) : WithName
 
@@ -72,7 +72,8 @@ class Constant(
     val documentation: List<String>
 ) : WithName
 
-class Error(
+class ErrorMetadata(
+    val index: Int,
     override val name: String,
     val documentation: List<String>
 ) : WithName
