@@ -18,6 +18,7 @@ runs:
         
     - name: Set ndk.dir in local.properties
       run: echo "ndk.dir=${{ steps.setup-ndk.outputs.ndk-dir }}" >> local.properties
+      shell: bash
     
     - name: Install Rust
       uses: actions-rs/toolchain@v1
