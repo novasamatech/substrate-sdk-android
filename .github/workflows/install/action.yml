@@ -7,7 +7,7 @@ runs:
       uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
-        java-version: '8'
+        java-version: '11'
         cache: 'gradle'
         
     - uses: nttld/setup-ndk@v1
