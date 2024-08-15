@@ -12,7 +12,7 @@ runs:
         
     - name: 🛠️ Install NDK
       id: setup-ndk
-      uses: nttld/setup-ndk@v1.4.2
+      uses: nttld/setup-ndk@v1
       with:
         ndk-version: 'r25c'
         add-to-path: true
