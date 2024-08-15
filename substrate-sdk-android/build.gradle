@@ -72,16 +72,24 @@ dependencies {
     implementation bouncyCastleDep
     implementation ed25519Dep
     implementation svgDep
-    implementation bip39Dep
-    implementation secureStringDep
     implementation wsDep
+    implementation secureStringDep
     implementation gsonDep
     implementation web3jDep
-    implementation gsonDep
     implementation apacheXercesDep
     implementation xxHashDep
 
     implementation coroutinesDep
+
+    // See https://github.com/NovaCrypto/BIP39/issues/43
+    implementation("com.github.NovaCrypto:BIP39:0e7fa95f80") {
+        exclude group: "io.github.novacrypto", module: "ToRuntime"
+        exclude group: "io.github.novacrypto", module: "SHA256"
+    }
+    implementation("com.github.NovaCrypto:Sha256:57bed72da5") {
+        exclude group: "io.github.novacrypto", module: "ToRuntime"
+    }
+    implementation "com.github.NovaCrypto:ToRuntime:c3ae3080eb"
 
     testImplementation jUnitDep
     testImplementation mockitoDep
