@@ -7,7 +7,6 @@ import io.novasama.substrate_sdk_android.exceptions.Bip39Exception
 import java.security.SecureRandom
 import java.text.Normalizer
 import java.text.Normalizer.normalize
-import java.util.Arrays
 import kotlin.math.floor
 
 private val DELIMITER_REGEX = "[\\s,]+".toRegex()
@@ -21,11 +20,15 @@ object MnemonicCreator {
         SecureRandom().nextBytes(entropy)
         MnemonicGenerator(EnglishWordList.INSTANCE)
             .createMnemonic(entropy, secure::append)
-        Arrays.fill(entropy, 0.toByte())
 
         val words = secure.toStringAble().toString()
+        val normalizedWords = normalizeWords(words)
 
-        fromWords(words)
+        Mnemonic(
+            words = normalizedWords,
+            wordList = toWordList(normalizedWords),
+            entropy = entropy
+        )
     }
 
     fun fromWords(words: String): Mnemonic {
@@ -61,11 +64,10 @@ object MnemonicCreator {
     }
 
     private fun generateWords(entropy: ByteArray): String {
-        SecureCharBuffer().use { secure ->
+        return SecureCharBuffer().use { secure ->
             MnemonicGenerator(EnglishWordList.INSTANCE)
                 .createMnemonic(entropy, secure::append)
-            Arrays.fill(entropy, 0.toByte())
-            return secure.toStringAble().toString()
+            secure.toStringAble().toString()
         }
     }
 

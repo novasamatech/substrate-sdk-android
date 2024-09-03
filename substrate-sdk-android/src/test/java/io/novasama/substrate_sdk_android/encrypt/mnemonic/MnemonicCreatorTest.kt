@@ -14,6 +14,7 @@ class MnemonicCreatorTest {
     fun `should generate mnemonic of different length`() {
         val mnemonic = MnemonicCreator.randomMnemonic(Mnemonic.Length.TWELVE)
         assertEquals(12,  mnemonic.wordList.size)
+        assertFalse(mnemonic.entropy.all { it.toInt() == 0 })
 
         val mnemonic2 = MnemonicCreator.randomMnemonic(Mnemonic.Length.TWENTY_ONE)
         assertEquals(21, mnemonic2.wordList.size)
@@ -29,6 +30,7 @@ class MnemonicCreatorTest {
         val mnemonic = MnemonicCreator.fromEntropy(expectedEntropyHex.fromHex())
 
         assertEquals(expectedMnemonicWords, mnemonic.words)
+        assertArrayEquals(expectedEntropyHex.fromHex(), mnemonic.entropy)
     }
 
     @Test
