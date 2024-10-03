@@ -51,9 +51,9 @@ class SendIntegrationTest : BaseIntegrationTest(WESTEND_URL) {
             )
         }
 
-        val extrinsic = builder.build()
+        val extrinsic = builder.buildExtrinsic()
 
-        print(socketService.executeAsync(SubmitExtrinsicRequest(extrinsic)).result!!)
+        print(socketService.executeAsync(SubmitExtrinsicRequest(extrinsic.extrinsicHex)).result!!)
     }
 }
 
