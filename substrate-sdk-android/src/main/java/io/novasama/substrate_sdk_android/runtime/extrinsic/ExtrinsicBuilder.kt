@@ -15,6 +15,7 @@ import io.novasama.substrate_sdk_android.runtime.definitions.types.instances.Add
 import io.novasama.substrate_sdk_android.runtime.definitions.types.instances.SignatureInstanceConstructor
 import io.novasama.substrate_sdk_android.runtime.definitions.types.toHex
 import io.novasama.substrate_sdk_android.runtime.definitions.types.toHexUntyped
+import io.novasama.substrate_sdk_android.runtime.extrinsic.signer.SendableExtrinsic
 import io.novasama.substrate_sdk_android.runtime.extrinsic.signer.SignedExtrinsic
 import io.novasama.substrate_sdk_android.runtime.extrinsic.signer.Signer
 import io.novasama.substrate_sdk_android.runtime.extrinsic.signer.SignerPayloadExtrinsic
@@ -87,12 +88,6 @@ class ExtrinsicBuilder(
         _customSignedExtensions[id] = value
     }
 
-    @Deprecated(
-        message = "Use restCalls() for better readability",
-        replaceWith = ReplaceWith(expression = "resetCalls()")
-    )
-    fun reset(): ExtrinsicBuilder = resetCalls()
-
     fun resetCalls(): ExtrinsicBuilder {
         calls.clear()
 
@@ -105,70 +100,18 @@ class ExtrinsicBuilder(
         return maybeWrapInBatch(batchMode)
     }
 
-    suspend fun build(
+    suspend fun buildExtrinsic(
         batchMode: BatchMode = BatchMode.BATCH
-    ): String {
+    ): SendableExtrinsic {
         val call = maybeWrapInBatch(batchMode)
-
-        return build(CallRepresentation.Instance(call))
+        return buildSendableExtrinsic(CallRepresentation.Instance(call))
     }
 
-    suspend fun build(
+    suspend fun buildExtrinsic(
         rawCallBytes: ByteArray
-    ): String {
+    ): SendableExtrinsic {
         requireNotMixingBytesAndInstanceCalls()
-
-        return build(CallRepresentation.Bytes(rawCallBytes))
-    }
-
-    suspend fun buildSignature(
-        batchMode: BatchMode = BatchMode.BATCH
-    ): String {
-        val call = maybeWrapInBatch(batchMode)
-
-        return buildSignature(CallRepresentation.Instance(call))
-    }
-
-    suspend fun buildSignature(
-        rawCallBytes: ByteArray
-    ): String {
-        requireNotMixingBytesAndInstanceCalls()
-
-        return buildSignature(CallRepresentation.Bytes(rawCallBytes))
-    }
-
-    private suspend fun build(callRepresentation: CallRepresentation): String {
-        val signedExtrinsic = buildSignedExtrinsic(callRepresentation)
-
-        val multiSignature = signatureConstructor.constructInstance(
-            runtime.typeRegistry,
-            signedExtrinsic.signatureWrapper
-        )
-
-        val extrinsic = Extrinsic.EncodingInstance(
-            signature = Extrinsic.Signature.new(
-                accountIdentifier = buildEncodableAddressInstance(signedExtrinsic.payload.accountId),
-                signature = multiSignature,
-                signedExtras = signedExtrinsic.payload.signedExtras.includedInExtrinsic
-            ),
-            callRepresentation = signedExtrinsic.payload.call
-        )
-
-        return Extrinsic.toHex(runtime, extrinsic)
-    }
-
-    private suspend fun buildSignature(
-        callRepresentation: CallRepresentation
-    ): String {
-        val signedExtrinsic = buildSignedExtrinsic(callRepresentation)
-        val multiSignature = signatureConstructor.constructInstance(
-            runtime.typeRegistry,
-            signedExtrinsic.signatureWrapper
-        )
-
-        val signatureType = Extrinsic.signatureType(runtime)
-
-        return signatureType.toHexUntyped(runtime, multiSignature)
+        return buildSendableExtrinsic(CallRepresentation.Bytes(rawCallBytes))
     }
 
     private fun maybeWrapInBatch(batchMode: BatchMode): GenericCall.Instance {
@@ -179,7 +122,9 @@ class ExtrinsicBuilder(
         }
     }
 
-    private suspend fun buildSignedExtrinsic(callRepresentation: CallRepresentation): SignedExtrinsic {
+    private suspend fun buildSendableExtrinsic(
+        callRepresentation: CallRepresentation
+    ): SendableExtrinsic {
         val signerPayload = SignerPayloadExtrinsic(
             runtime = runtime,
             accountId = accountId,
@@ -192,7 +137,9 @@ class ExtrinsicBuilder(
             nonce = nonce
         )
 
-        return signer.signExtrinsic(signerPayload)
+        val signedExtrinsic = signer.signExtrinsic(signerPayload)
+
+        return RealSendableExtrinsic(signedExtrinsic)
     }
 
     private fun buildIncludedInSignature(): Map<String, Any?> {
@@ -255,6 +202,43 @@ class ExtrinsicBuilder(
     private fun requireNotMixingBytesAndInstanceCalls() {
         require(calls.isEmpty()) {
             "Cannot mix instance and raw bytes calls"
+        }
+    }
+
+    private inner class RealSendableExtrinsic(
+        private val signedExtrinsic: SignedExtrinsic
+    ) : SendableExtrinsic {
+
+        private val multiSignature = signatureConstructor.constructInstance(
+            runtime.typeRegistry,
+            signedExtrinsic.signatureWrapper
+        )
+
+        override val extrinsicHex by lazy {
+            createExtrinsicHex()
+        }
+
+        override val signatureHex by lazy {
+            createSignatureHex()
+        }
+
+        private fun createExtrinsicHex(): String {
+            val address = buildEncodableAddressInstance(signedExtrinsic.payload.accountId)
+            val extrinsic = Extrinsic.EncodingInstance(
+                signature = Extrinsic.Signature.new(
+                    accountIdentifier = address,
+                    signature = multiSignature,
+                    signedExtras = signedExtrinsic.payload.signedExtras.includedInExtrinsic
+                ),
+                callRepresentation = signedExtrinsic.payload.call
+            )
+
+            return Extrinsic.toHex(runtime, extrinsic)
+        }
+
+        private fun createSignatureHex(): String {
+            val signatureType = Extrinsic.signatureType(runtime)
+            return signatureType.toHexUntyped(runtime, multiSignature)
         }
     }
 }

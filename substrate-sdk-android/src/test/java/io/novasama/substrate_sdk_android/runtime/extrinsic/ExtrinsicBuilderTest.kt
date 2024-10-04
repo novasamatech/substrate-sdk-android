@@ -13,7 +13,6 @@ import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Era
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Extrinsic
 import io.novasama.substrate_sdk_android.runtime.extrinsic.signer.KeyPairSigner
 import io.novasama.substrate_sdk_android.runtime.metadata.MetadataTestCommon
-import io.novasama.substrate_sdk_android.runtime.metadata.RuntimeMetadata
 import io.novasama.substrate_sdk_android.runtime.metadata.SignedExtensionValue
 import io.novasama.substrate_sdk_android.ss58.SS58Encoder.publicKeyToSubstrateAccountId
 import io.novasama.substrate_sdk_android.ss58.SS58Encoder.toAccountId
@@ -52,35 +51,35 @@ class ExtrinsicBuilderTest {
     @Test
     fun `should build extrinsic from raw call bytes`() = runBlockingTest {
         val extrinsic = createExtrinsicBuilder()
-            .build(TRANSFER_CALL_BYTES)
+            .buildExtrinsic(TRANSFER_CALL_BYTES)
 
-        assertEquals(SINGLE_TRANSFER_EXTRINSIC, extrinsic)
+        assertEquals(SINGLE_TRANSFER_EXTRINSIC, extrinsic.extrinsicHex)
     }
 
     @Test
     fun `should build single transfer extrinsic`() = runBlockingTest {
-        val encoded = createExtrinsicBuilder()
+        val extrinsic = createExtrinsicBuilder()
             .testSingleTransfer()
-            .build()
+            .buildExtrinsic()
 
-        assertEquals(SINGLE_TRANSFER_EXTRINSIC, encoded)
+        assertEquals(SINGLE_TRANSFER_EXTRINSIC, extrinsic.extrinsicHex)
     }
 
     @Test
     fun `should build extrinsic signature from call instance`() = runBlockingTest {
-        val actualSignature = createExtrinsicBuilder()
+        val extrinsic = createExtrinsicBuilder()
             .testSingleTransfer()
-            .buildSignature()
+            .buildExtrinsic()
 
-        assertEquals(EXTRINSIC_SIGNATURE, actualSignature)
+        assertEquals(EXTRINSIC_SIGNATURE, extrinsic.signatureHex)
     }
 
     @Test
     fun `should build extrinsic signature from raw call bytes`() = runBlockingTest {
         val extrinsic = createExtrinsicBuilder()
-            .buildSignature(TRANSFER_CALL_BYTES)
+            .buildExtrinsic(TRANSFER_CALL_BYTES)
 
-        assertEquals(EXTRINSIC_SIGNATURE, extrinsic)
+        assertEquals(EXTRINSIC_SIGNATURE, extrinsic.signatureHex)
     }
 
     @Test
@@ -89,16 +88,16 @@ class ExtrinsicBuilderTest {
         val recipientAccountId =
             "340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c63".fromHex()
 
-        val encoded = createExtrinsicBuilder()
+        val extrinsic = createExtrinsicBuilder()
             .transfer(
                 recipientAccountId = recipientAccountId,
                 amount = wrongAMount
             )
-            .reset()
+            .resetCalls()
             .testSingleTransfer()
-            .build()
+            .buildExtrinsic()
 
-        assertEquals(SINGLE_TRANSFER_EXTRINSIC, encoded)
+        assertEquals(SINGLE_TRANSFER_EXTRINSIC, extrinsic.extrinsicHex)
     }
 
     @Test
@@ -115,9 +114,9 @@ class ExtrinsicBuilderTest {
             )
         }
 
-        val encoded = builder.build()
+        val extrinsic = builder.buildExtrinsic()
 
-        assertEquals(extrinsicInHex, encoded)
+        assertEquals(extrinsicInHex, extrinsic.extrinsicHex)
     }
 
     @Test
@@ -131,8 +130,8 @@ class ExtrinsicBuilderTest {
             )
         }
 
-        val encoded = extrinsicBuilder.build(batchMode = BatchMode.BATCH_ALL)
-        val decoded = Extrinsic.fromHex(runtime, encoded)
+        val extrinsic = extrinsicBuilder.buildExtrinsic(batchMode = BatchMode.BATCH_ALL)
+        val decoded = Extrinsic.fromHex(runtime, extrinsic.extrinsicHex)
 
         assertEquals(decoded.call.function.name, "batch_all")
     }
@@ -148,9 +147,9 @@ class ExtrinsicBuilderTest {
             )
         }
 
-        val encoded = extrinsicBuilder.build(batchMode = BatchMode.BATCH_ALL)
+        val extrinsic = extrinsicBuilder.buildExtrinsic(batchMode = BatchMode.BATCH_ALL)
 
-        assertEquals(BIG_TRANSACTION, encoded)
+        assertEquals(BIG_TRANSACTION, extrinsic.extrinsicHex)
     }
 
     @Test
@@ -186,9 +185,9 @@ class ExtrinsicBuilderTest {
             amount = BigInteger("10000000000")
         )
 
-        val encoded = builder.build()
-
-        assertEquals(extrinsicInHex, encoded)
+        val extrinsic = builder.buildExtrinsic()
+        
+        assertEquals(extrinsicInHex, extrinsic.extrinsicHex)
     }
 
     @Test
@@ -227,9 +226,9 @@ class ExtrinsicBuilderTest {
             value = SignedExtensionValue(includedInExtrinsic = chargeAssetTxPaymentValue)
         )
 
-        val encoded = builder.build()
+        val extrinsic = builder.buildExtrinsic()
 
-        assertEquals(extrinsicInHex, encoded)
+        assertEquals(extrinsicInHex, extrinsic.extrinsicHex)
     }
 
     @Test
@@ -238,7 +237,7 @@ class ExtrinsicBuilderTest {
 
         createExtrinsicBuilder(runtime)
             .testSingleTransfer()
-            .build()
+            .buildExtrinsic()
     }
 
     private fun createExtrinsicBuilder(usedRuntime: RuntimeSnapshot = runtime) = ExtrinsicBuilder(
