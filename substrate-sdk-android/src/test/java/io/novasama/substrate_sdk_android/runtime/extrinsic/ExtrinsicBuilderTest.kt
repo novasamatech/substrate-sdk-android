@@ -240,6 +240,20 @@ class ExtrinsicBuilderTest {
             .buildExtrinsic()
     }
 
+    @Test
+    fun `should not allow to add call to itself`() = runBlockingTest {
+        val extrinsicBuilder = createExtrinsicBuilder()
+        repeat(2) {
+            extrinsicBuilder.testSingleTransfer()
+        }
+
+        val call = extrinsicBuilder.getWrappedCall()
+        extrinsicBuilder.call(call)
+
+        // This will fail with StackOverflow is call was added to itself
+        extrinsicBuilder.buildExtrinsic()
+    }
+
     private fun createExtrinsicBuilder(usedRuntime: RuntimeSnapshot = runtime) = ExtrinsicBuilder(
         runtime = usedRuntime,
         signer = keypairSigner(),

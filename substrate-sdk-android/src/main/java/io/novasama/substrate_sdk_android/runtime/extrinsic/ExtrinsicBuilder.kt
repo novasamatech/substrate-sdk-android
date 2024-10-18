@@ -44,7 +44,7 @@ class ExtrinsicBuilder(
     private val signatureConstructor: RuntimeType.InstanceConstructor<SignatureWrapper> = SignatureInstanceConstructor
 ) {
 
-    private val calls = mutableListOf<GenericCall.Instance>()
+    private val mutableCalls = mutableListOf<GenericCall.Instance>()
 
     private val _customSignedExtensions = mutableMapOf<SignedExtensionId, SignedExtensionValue>()
         .apply { putAll(customSignedExtensions) }
@@ -57,7 +57,7 @@ class ExtrinsicBuilder(
         val module = runtime.metadata.module(moduleIndex)
         val function = module.call(callIndex)
 
-        calls.add(GenericCall.Instance(module, function, args))
+        mutableCalls.add(GenericCall.Instance(module, function, args))
 
         return this
     }
@@ -70,13 +70,19 @@ class ExtrinsicBuilder(
         val module = runtime.metadata.module(moduleName)
         val function = module.call(callName)
 
-        calls.add(GenericCall.Instance(module, function, arguments))
+        mutableCalls.add(GenericCall.Instance(module, function, arguments))
 
         return this
     }
 
     fun call(call: GenericCall.Instance): ExtrinsicBuilder {
-        calls.add(call)
+        mutableCalls.add(call)
+
+        return this
+    }
+
+    fun calls(calls: List<GenericCall.Instance>): ExtrinsicBuilder {
+        mutableCalls.addAll(calls)
 
         return this
     }
@@ -89,15 +95,19 @@ class ExtrinsicBuilder(
     }
 
     fun resetCalls(): ExtrinsicBuilder {
-        calls.clear()
+        mutableCalls.clear()
 
         return this
     }
 
-    fun getCall(
+    fun getWrappedCall(
         batchMode: BatchMode = BatchMode.BATCH
     ): GenericCall.Instance {
         return maybeWrapInBatch(batchMode)
+    }
+
+    fun getCalls(): List<GenericCall.Instance> {
+        return takeCallSnapshot()
     }
 
     suspend fun buildExtrinsic(
@@ -115,10 +125,12 @@ class ExtrinsicBuilder(
     }
 
     private fun maybeWrapInBatch(batchMode: BatchMode): GenericCall.Instance {
+        val calls = takeCallSnapshot()
+
         return if (calls.size == 1) {
             calls.first()
         } else {
-            wrapInBatch(batchMode)
+            wrapInBatch(calls, batchMode)
         }
     }
 
@@ -148,9 +160,9 @@ class ExtrinsicBuilder(
             DefaultSignedExtensions.CHECK_GENESIS to genesisHash,
             DefaultSignedExtensions.CHECK_SPEC_VERSION to runtimeVersion.specVersion.toBigInteger(),
             DefaultSignedExtensions.CHECK_TX_VERSION to
-                runtimeVersion.transactionVersion.toBigInteger(),
+                    runtimeVersion.transactionVersion.toBigInteger(),
             DefaultSignedExtensions.CHECK_METADATA_HASH to
-                checkMetadataHash.toSignedExtensionValue().includedInSignature
+                    checkMetadataHash.toSignedExtensionValue().includedInSignature
         )
 
         val custom = _customSignedExtensions.mapValues { (_, extensionValues) ->
@@ -160,7 +172,10 @@ class ExtrinsicBuilder(
         return default + custom
     }
 
-    private fun wrapInBatch(batchMode: BatchMode): GenericCall.Instance {
+    private fun wrapInBatch(
+        calls: List<GenericCall.Instance>,
+        batchMode: BatchMode
+    ): GenericCall.Instance {
         val batchModule = runtime.metadata.module("Utility")
 
         val batchFunctionName = when (batchMode) {
@@ -179,6 +194,10 @@ class ExtrinsicBuilder(
         )
     }
 
+    private fun takeCallSnapshot(): List<GenericCall.Instance> {
+        return mutableCalls.toMutableList()
+    }
+
     private fun buildEncodableAddressInstance(accountId: AccountId): Any? {
         return addressInstanceConstructor.constructInstance(runtime.typeRegistry, accountId)
     }
@@ -189,7 +208,7 @@ class ExtrinsicBuilder(
             DefaultSignedExtensions.CHECK_TX_PAYMENT to tip,
             DefaultSignedExtensions.CHECK_NONCE to runtime.encodeNonce(nonce.nonce),
             DefaultSignedExtensions.CHECK_METADATA_HASH to
-                checkMetadataHash.toSignedExtensionValue().includedInExtrinsic
+                    checkMetadataHash.toSignedExtensionValue().includedInExtrinsic
         )
 
         val custom = _customSignedExtensions.mapValues { (_, extensionValues) ->
@@ -200,7 +219,7 @@ class ExtrinsicBuilder(
     }
 
     private fun requireNotMixingBytesAndInstanceCalls() {
-        require(calls.isEmpty()) {
+        require(mutableCalls.isEmpty()) {
             "Cannot mix instance and raw bytes calls"
         }
     }
