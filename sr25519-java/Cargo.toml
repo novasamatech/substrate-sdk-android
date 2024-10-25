@@ -2,7 +2,7 @@
 name = "sr25519java"
 version = "0.1.0"
 authors = ['Novasama Technologies']
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 zeroize = { version="<=1.1.1" }
