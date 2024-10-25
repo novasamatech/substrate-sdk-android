@@ -57,7 +57,7 @@ abstract class Schema<S : Schema<S>> :
 
         for (field in fields) {
             val value = field.dataType.read(reader)
-            struct[field] = value
+            struct[field as Field<Any?>] = value
         }
 
         return struct

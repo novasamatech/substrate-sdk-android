@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalUnsignedTypes::class)
-
 package io.novasama.substrate_sdk_android.runtime.metadata.v14
 
 import io.novasama.substrate_sdk_android.scale.compactInt

@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalUnsignedTypes::class)
-
 package io.novasama.substrate_sdk_android.runtime.metadata.v14
 
 import io.novasama.substrate_sdk_android.runtime.metadata.StorageEntryModifier
@@ -19,11 +17,11 @@ import io.novasama.substrate_sdk_android.scale.vector
 
 abstract class PostV14MetadataSchema<S : PostV14MetadataSchema<S>> : Schema<S>() {
 
-    abstract val lookup: Field<EncodableStruct<LookupSchema>>
+    abstract val lookup: Field<out EncodableStruct<LookupSchema>>
 
-    abstract val pallets: Field<List<EncodableStruct<PostV14PalletMetadataSchema<*>>>>
+    abstract val pallets: Field<out List<EncodableStruct<PostV14PalletMetadataSchema<*>>>>
 
-    abstract val extrinsic: Field<EncodableStruct<PostV14ExtrinsicMetadataSchema<*>>>
+    abstract val extrinsic: Field<out EncodableStruct<PostV14ExtrinsicMetadataSchema<*>>>
 }
 
 abstract class PostV14ExtrinsicMetadataSchema<S : PostV14ExtrinsicMetadataSchema<S>> : Schema<S>() {
