@@ -139,6 +139,7 @@ class CollectionEnumType(
     }
 }
 
+@Deprecated("Use keyedUnion instead")
 class union(val dataTypes: Array<out DataType<*>>) : DataType<Any?>() {
     override fun read(reader: ScaleCodecReader): Any? {
         val typeIndex = reader.readByte()
@@ -168,5 +169,28 @@ class union(val dataTypes: Array<out DataType<*>>) : DataType<Any?>() {
 
     override fun conformsType(value: Any?): Boolean {
         return dataTypes.any { it.conformsType(value) }
+    }
+}
+
+class keyedUnion(val dataTypes: Map<Int, DataType<*>>) : DataType<Pair<Int, Any?>>() {
+    override fun conformsType(value: Any?): Boolean {
+        val (index, originalValue) = value as Pair<Int, Any?>
+        return dataTypes.getValue(index).conformsType(originalValue)
+    }
+
+    override fun read(reader: ScaleCodecReader): Pair<Int, Any?> {
+        val typeIndex = reader.readByte().toInt()
+        val type = dataTypes.getValue(typeIndex)
+
+        return typeIndex to type.read(reader)
+    }
+
+    override fun write(writer: ScaleCodecWriter, value: Pair<Int, Any?>) {
+        val (typeIndex, originalValue) = value
+
+        val type = dataTypes[typeIndex] as DataType<Any?>
+
+        writer.write(uint8, typeIndex.toUByte())
+        writer.write(type, originalValue)
     }
 }

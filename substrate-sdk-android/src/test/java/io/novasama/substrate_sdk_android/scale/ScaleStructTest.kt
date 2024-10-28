@@ -21,6 +21,7 @@ import io.novasama.substrate_sdk_android.scale.DefaultValues.bytes
 import io.novasama.substrate_sdk_android.scale.DefaultValues.text
 import io.novasama.substrate_sdk_android.scale.Vector.numbers
 import io.novasama.substrate_sdk_android.scale.dataType.DataType
+import io.novasama.substrate_sdk_android.scale.dataType.byteArraySized
 import io.novasama.substrate_sdk_android.scale.dataType.compactInt
 import io.novasama.substrate_sdk_android.scale.dataType.scalable
 import io.novasama.substrate_sdk_android.scale.dataType.string
@@ -127,6 +128,18 @@ object DefaultValues : Schema<DefaultValues>() {
     val text by string(default = STRING_DEFAULT)
 
     val bigInteger by uint128(default = BIG_INT_DEFAULT)
+}
+
+object KeyedEnumSameTypeTest : Schema<KeyedEnumSameTypeTest>() {
+    const val FIRST_VALUE_INDEX = 0
+
+    val value by keyedEnum(byteArraySized(3), byteArraySized(2))
+}
+
+object KeyedEnumDifferentTypeTest : Schema<KeyedEnumDifferentTypeTest>() {
+    const val SECOND_VALUE_INDEX = 1
+
+    val value by keyedEnum(Bool, byteArraySized(2))
 }
 
 @RunWith(MockitoJUnitRunner::class)
@@ -262,6 +275,19 @@ class ScaleStructTest {
 
         assertEquals(enum1.toHexString(), "0x0101")
         assertEquals(enum2.toHexString(), "0x002a")
+    }
+
+    @Test
+    fun `should handle keyed enum`() {
+        val sameTypeEnum = KeyedEnumSameTypeTest {
+            it[KeyedEnumSameTypeTest.value] = KeyedEnumSameTypeTest.FIRST_VALUE_INDEX to byteArrayOf(1, 2, 3)
+        }
+        assertEquals(sameTypeEnum.toHexString(), "0x00010203")
+
+        val differentTypeEnum = KeyedEnumDifferentTypeTest {
+            it[KeyedEnumDifferentTypeTest.value] = KeyedEnumDifferentTypeTest.SECOND_VALUE_INDEX to byteArrayOf(1, 2)
+        }
+        assertEquals(differentTypeEnum.toHexString(), "0x010102")
     }
 
     @Test

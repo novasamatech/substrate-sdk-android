@@ -9,6 +9,7 @@ import io.novasama.substrate_sdk_android.scale.dataType.byte
 import io.novasama.substrate_sdk_android.scale.dataType.byteArray
 import io.novasama.substrate_sdk_android.scale.dataType.byteArraySized
 import io.novasama.substrate_sdk_android.scale.dataType.compactInt
+import io.novasama.substrate_sdk_android.scale.dataType.keyedUnion
 import io.novasama.substrate_sdk_android.scale.dataType.list
 import io.novasama.substrate_sdk_android.scale.dataType.long
 import io.novasama.substrate_sdk_android.scale.dataType.scalable
@@ -84,7 +85,17 @@ fun <S : Schema<S>> S.byteArray(default: ByteArray? = null): NonNullFieldDelegat
 
 fun <S : Schema<S>> S.long(default: Long? = null) = NonNullFieldDelegate(long, this, default)
 
+@Deprecated(
+    message = "Use keyedEnum instead. Check API changes",
+    replaceWith = ReplaceWith("keyedEnum(*types)")
+)
 fun <S : Schema<S>> S.enum(vararg types: DataType<*>, default: Any? = null) = NonNullFieldDelegate(union(types), this, default)
+
+fun <S : Schema<S>> S.keyedEnum(vararg types: DataType<*>, default: Pair<Int, Any?>? = null) = NonNullFieldDelegate(
+    keyedUnion(types.withIndex().associate { (index, dataType) -> index to dataType }),
+    this,
+    default
+)
 
 fun <S : Schema<S>, E : Enum<E>> S.enum(enumClass: KClass<E>, default: E? = null) = NonNullFieldDelegate(EnumType(enumClass.java), this, default)
 
