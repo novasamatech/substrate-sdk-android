@@ -160,9 +160,9 @@ class ExtrinsicBuilder(
             DefaultSignedExtensions.CHECK_GENESIS to genesisHash,
             DefaultSignedExtensions.CHECK_SPEC_VERSION to runtimeVersion.specVersion.toBigInteger(),
             DefaultSignedExtensions.CHECK_TX_VERSION to
-                    runtimeVersion.transactionVersion.toBigInteger(),
+                runtimeVersion.transactionVersion.toBigInteger(),
             DefaultSignedExtensions.CHECK_METADATA_HASH to
-                    checkMetadataHash.toSignedExtensionValue().includedInSignature
+                checkMetadataHash.toSignedExtensionValue().includedInSignature
         )
 
         val custom = _customSignedExtensions.mapValues { (_, extensionValues) ->
@@ -208,7 +208,7 @@ class ExtrinsicBuilder(
             DefaultSignedExtensions.CHECK_TX_PAYMENT to tip,
             DefaultSignedExtensions.CHECK_NONCE to runtime.encodeNonce(nonce.nonce),
             DefaultSignedExtensions.CHECK_METADATA_HASH to
-                    checkMetadataHash.toSignedExtensionValue().includedInExtrinsic
+                checkMetadataHash.toSignedExtensionValue().includedInExtrinsic
         )
 
         val custom = _customSignedExtensions.mapValues { (_, extensionValues) ->

@@ -3,7 +3,6 @@ package io.novasama.substrate_sdk_android.runtime.metadata
 import io.emeraldpay.polkaj.scale.ScaleCodecReader
 import io.novasama.substrate_sdk_android.extensions.fromHex
 import io.novasama.substrate_sdk_android.runtime.metadata.v14.PostV14MetadataSchema
-import io.novasama.substrate_sdk_android.runtime.metadata.v14.PostV14PalletMetadataSchema
 import io.novasama.substrate_sdk_android.runtime.metadata.v14.RuntimeMetadataSchemaV14
 import io.novasama.substrate_sdk_android.runtime.metadata.v15.RuntimeMetadataSchemaV15
 import io.novasama.substrate_sdk_android.scale.EncodableStruct

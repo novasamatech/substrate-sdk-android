@@ -18,7 +18,6 @@ import io.novasama.substrate_sdk_android.runtime.metadata.module.RuntimeApi
 import io.novasama.substrate_sdk_android.runtime.metadata.module.RuntimeApiMethod
 import io.novasama.substrate_sdk_android.runtime.metadata.module.StorageEntry
 import io.novasama.substrate_sdk_android.runtime.metadata.module.StorageEntryType
-import io.novasama.substrate_sdk_android.wsrpc.request.runtime.RuntimeRequest
 import io.novasama.substrate_sdk_android.wsrpc.request.runtime.state.StateCallRequest
 import java.io.ByteArrayOutputStream
 
@@ -266,7 +265,7 @@ fun RuntimeApiMethod.createRequest(
     inputValues: Map<String, Any?>
 ): StateCallRequest {
     return StateCallRequest(
-        runtimeRpcName = "${apiName}_${name}",
+        runtimeRpcName = "${apiName}_$name",
         encodedArguments = encodeInputs(runtime, inputValues)
     )
 }

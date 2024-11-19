@@ -11,7 +11,6 @@ import io.novasama.substrate_sdk_android.runtime.metadata.v14.PostV14PalletMetad
 import io.novasama.substrate_sdk_android.runtime.metadata.v14.SignedExtensionMetadataV14
 import io.novasama.substrate_sdk_android.runtime.metadata.v14.StorageMetadataV14
 import io.novasama.substrate_sdk_android.scale.EncodableStruct
-import io.novasama.substrate_sdk_android.scale.Field
 import io.novasama.substrate_sdk_android.scale.Schema
 import io.novasama.substrate_sdk_android.scale.compactInt
 import io.novasama.substrate_sdk_android.scale.dataType.string
@@ -60,7 +59,7 @@ object RuntimeApiMetadataV15 : Schema<RuntimeApiMetadataV15>() {
     val docs by vector(string)
 }
 
-object RuntimeApiMethodMetadata: Schema<RuntimeApiMethodMetadata>() {
+object RuntimeApiMethodMetadata : Schema<RuntimeApiMethodMetadata>() {
 
     val name by string()
 

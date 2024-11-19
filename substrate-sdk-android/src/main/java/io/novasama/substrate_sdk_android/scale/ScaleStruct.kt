@@ -2,7 +2,6 @@ package io.novasama.substrate_sdk_android.scale
 
 import io.novasama.substrate_sdk_android.scale.dataType.DataType
 import io.novasama.substrate_sdk_android.scale.dataType.optional
-import io.novasama.substrate_sdk_android.scale.dataType.string
 
 class Field<T>(val dataType: DataType<T>, val defaultValue: T? = null)
 
