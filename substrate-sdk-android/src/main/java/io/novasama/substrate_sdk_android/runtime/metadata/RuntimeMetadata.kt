@@ -3,6 +3,7 @@ package io.novasama.substrate_sdk_android.runtime.metadata
 import io.novasama.substrate_sdk_android.runtime.definitions.types.RuntimeType
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Null
 import io.novasama.substrate_sdk_android.runtime.metadata.module.Module
+import io.novasama.substrate_sdk_android.runtime.metadata.module.RuntimeApi
 import java.math.BigInteger
 
 interface WithName {
@@ -14,7 +15,9 @@ fun <T : WithName> List<T>.groupByName() = associateBy(WithName::name).toMap()
 class RuntimeMetadata(
     val metadataVersion: Int,
     val modules: Map<String, Module>,
-    val extrinsic: ExtrinsicMetadata
+    val extrinsic: ExtrinsicMetadata,
+    // Present in v15+ metadata. null otherwise
+    val apis: List<RuntimeApi>?
 )
 
 class ExtrinsicMetadata(

@@ -35,13 +35,12 @@ import io.novasama.substrate_sdk_android.runtime.metadata.v14.StorageMetadataV14
 import io.novasama.substrate_sdk_android.scale.EncodableStruct
 import java.math.BigInteger
 
-@OptIn(ExperimentalUnsignedTypes::class)
-object PostV14RuntimeBuilder : RuntimeBuilder {
+object V14RuntimeBuilder : RuntimeBuilder {
 
     override fun buildMetadata(
         reader: RuntimeMetadataReader,
         typeRegistry: TypeRegistry,
-        knownSignedExtensions: List<SignedExtensionMetadata>,
+        fallbackSignedExtensions: List<SignedExtensionMetadata>,
     ): RuntimeMetadata {
         val metadataStruct = reader.metadata
 
@@ -53,7 +52,8 @@ object PostV14RuntimeBuilder : RuntimeBuilder {
                 typeRegistry
             ),
             modules = buildModules(metadataStruct[schema.pallets], typeRegistry),
-            metadataVersion = reader.metadataVersion
+            metadataVersion = reader.metadataVersion,
+            apis = null
         )
     }
 
@@ -122,7 +122,7 @@ object PostV14RuntimeBuilder : RuntimeBuilder {
         moduleIndex: Int,
     ): Map<String, MetadataFunction> {
 
-        val type = typeRegistry[callsRaw[PalletCallMetadataV14.type].toString()]
+        val type = typeRegistry[callsRaw[PalletCallMetadataV14.type]]
 
         if (type !is DictEnum) return emptyMap()
 
@@ -144,7 +144,7 @@ object PostV14RuntimeBuilder : RuntimeBuilder {
         moduleIndex: Int,
     ): Map<String, Event> {
 
-        val type = typeRegistry[eventsRaw[PalletEventMetadataV14.type].toString()]
+        val type = typeRegistry[eventsRaw[PalletEventMetadataV14.type]]
 
         if (type !is DictEnum) return emptyMap()
 
@@ -180,7 +180,7 @@ object PostV14RuntimeBuilder : RuntimeBuilder {
     ): Map<String, Constant> {
 
         return constantsRaw.map { constantStruct ->
-            val typeIndex = constantStruct[PalletConstantMetadataV14.type].toString()
+            val typeIndex = constantStruct[PalletConstantMetadataV14.type]
 
             Constant(
                 name = constantStruct[PalletConstantMetadataV14.name],
@@ -196,7 +196,7 @@ object PostV14RuntimeBuilder : RuntimeBuilder {
         errorsRaw: EncodableStruct<PalletErrorMetadataV14>,
     ): Map<Int, ErrorMetadata> {
 
-        val type = typeRegistry[errorsRaw[PalletErrorMetadataV14.type].toString()]
+        val type = typeRegistry[errorsRaw[PalletErrorMetadataV14.type]]
 
         if (type !is DictEnum) return emptyMap()
 
@@ -215,8 +215,9 @@ object PostV14RuntimeBuilder : RuntimeBuilder {
     ): StorageEntryType {
         return when (enumValue) {
             is BigInteger -> {
-                StorageEntryType.Plain(typeRegistry[enumValue.toString()])
+                StorageEntryType.Plain(typeRegistry[enumValue])
             }
+
             is EncodableStruct<*> -> {
                 requireOrException(enumValue.schema is MapTypeV14) {
                     cannotConstructStorageEntry(enumValue)
@@ -224,7 +225,7 @@ object PostV14RuntimeBuilder : RuntimeBuilder {
 
                 val hashers = enumValue[MapTypeV14.hashers]
 
-                val type = typeRegistry[enumValue[MapTypeV14.key].toString()]
+                val type = typeRegistry[enumValue[MapTypeV14.key]]
                     ?: cannotConstructStorageEntry(enumValue)
 
                 val keys = if (hashers.size == 1) {
@@ -244,9 +245,10 @@ object PostV14RuntimeBuilder : RuntimeBuilder {
                 StorageEntryType.NMap(
                     keys,
                     hashers,
-                    typeRegistry[enumValue[MapTypeV14.value].toString()]
+                    typeRegistry[enumValue[MapTypeV14.value]]
                 )
             }
+
             else -> cannotConstructStorageEntry(enumValue)
         }
     }
@@ -262,8 +264,8 @@ object PostV14RuntimeBuilder : RuntimeBuilder {
             signedExtensions = struct[schema.signedExtensions].map {
                 SignedExtensionMetadata(
                     id = it[SignedExtensionMetadataV14.identifier],
-                    includedInExtrinsic = typeRegistry[it[SignedExtensionMetadataV14.type].toString()],
-                    includedInSignature = typeRegistry[it[SignedExtensionMetadataV14.additionalSigned].toString()]
+                    includedInExtrinsic = typeRegistry[it[SignedExtensionMetadataV14.type]],
+                    includedInSignature = typeRegistry[it[SignedExtensionMetadataV14.additionalSigned]]
                 )
             }
         )

@@ -6,6 +6,7 @@ import io.novasama.substrate_sdk_android.runtime.definitions.types.Type
 import io.novasama.substrate_sdk_android.runtime.definitions.types.TypeReference
 import io.novasama.substrate_sdk_android.runtime.definitions.types.resolvedOrNull
 import io.novasama.substrate_sdk_android.runtime.definitions.types.skipAliases
+import java.math.BigInteger
 
 interface RequestPreprocessor {
 
@@ -23,6 +24,10 @@ class TypeRegistry(
         val typeRef = getTypeReference(definition)
 
         return typeRef?.value
+    }
+
+    operator fun get(typeIndex: BigInteger): Type<*>? {
+        return get(typeIndex.toString())
     }
 
     inline operator fun <reified R> get(key: String): R? {

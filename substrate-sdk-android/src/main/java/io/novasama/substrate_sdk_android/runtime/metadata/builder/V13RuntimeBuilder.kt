@@ -30,13 +30,12 @@ import io.novasama.substrate_sdk_android.runtime.metadata.module.StorageEntry
 import io.novasama.substrate_sdk_android.runtime.metadata.module.StorageEntryType
 import io.novasama.substrate_sdk_android.scale.EncodableStruct
 
-@OptIn(ExperimentalUnsignedTypes::class)
 internal object V13RuntimeBuilder : RuntimeBuilder {
 
     override fun buildMetadata(
         reader: RuntimeMetadataReader,
         typeRegistry: TypeRegistry,
-        knownSignedExtensions: List<SignedExtensionMetadata>
+        fallbackSignedExtensions: List<SignedExtensionMetadata>
     ): RuntimeMetadata {
         val metadataStruct = reader.metadata
 
@@ -45,10 +44,11 @@ internal object V13RuntimeBuilder : RuntimeBuilder {
         return RuntimeMetadata(
             extrinsic = buildExtrinsic(
                 struct = metadataStruct[RuntimeMetadataSchema.extrinsic],
-                knownSignedExtensions = knownSignedExtensions
+                knownSignedExtensions = fallbackSignedExtensions
             ),
             modules = buildModules(metadataStruct[RuntimeMetadataSchema.modules], typeRegistry),
-            metadataVersion = reader.metadataVersion
+            metadataVersion = reader.metadataVersion,
+            apis = null
         )
     }
 

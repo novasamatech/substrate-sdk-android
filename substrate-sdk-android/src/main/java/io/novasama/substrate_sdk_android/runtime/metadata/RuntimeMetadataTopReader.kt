@@ -4,7 +4,7 @@ import io.emeraldpay.polkaj.scale.ScaleCodecReader
 import io.novasama.substrate_sdk_android.extensions.fromHex
 import io.novasama.substrate_sdk_android.runtime.metadata.v14.PostV14MetadataSchema
 import io.novasama.substrate_sdk_android.runtime.metadata.v14.RuntimeMetadataSchemaV14
-import io.novasama.substrate_sdk_android.runtime.metadata.v14.RuntimeMetadataSchemaV15
+import io.novasama.substrate_sdk_android.runtime.metadata.v15.RuntimeMetadataSchemaV15
 import io.novasama.substrate_sdk_android.scale.EncodableStruct
 import io.novasama.substrate_sdk_android.scale.Schema
 import io.novasama.substrate_sdk_android.scale.uint32
@@ -15,12 +15,12 @@ object Magic : Schema<Magic>() {
     val runtimeVersion by uint8()
 }
 
+@Suppress("UNCHECKED_CAST")
 class RuntimeMetadataReader private constructor(
     val metadataVersion: Int,
     val metadata: EncodableStruct<*>
 ) {
 
-    @Suppress("UNCHECKED_CAST")
     val metadataPostV14: EncodableStruct<PostV14MetadataSchema<*>>
         get() {
             require(metadata.schema is PostV14MetadataSchema<*>) {
@@ -28,6 +28,15 @@ class RuntimeMetadataReader private constructor(
             }
 
             return metadata as EncodableStruct<PostV14MetadataSchema<*>>
+        }
+
+    val metadataV15: EncodableStruct<RuntimeMetadataSchemaV15>
+        get() {
+            require(metadata.schema is RuntimeMetadataSchemaV15) {
+                "Metadata is not v15"
+            }
+
+            return metadata as EncodableStruct<RuntimeMetadataSchemaV15>
         }
 
     companion object {
@@ -57,7 +66,6 @@ class RuntimeMetadataReader private constructor(
             return read(scaleCoderReader)
         }
 
-        @OptIn(ExperimentalUnsignedTypes::class)
         private fun read(reader: ScaleCodecReader): RuntimeMetadataReader {
             val runtimeVersion = Magic.read(reader)[Magic.runtimeVersion].toInt()
 
