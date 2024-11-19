@@ -11,7 +11,7 @@ interface RuntimeBuilder {
     fun buildMetadata(
         reader: RuntimeMetadataReader,
         typeRegistry: TypeRegistry,
-        knownSignedExtensions: List<SignedExtensionMetadata> = DefaultSignedExtensions.ALL,
+        fallbackSignedExtensions: List<SignedExtensionMetadata> = DefaultSignedExtensions.ALL,
     ): RuntimeMetadata
 }
 
@@ -20,11 +20,12 @@ object VersionedRuntimeBuilder : RuntimeBuilder {
     override fun buildMetadata(
         reader: RuntimeMetadataReader,
         typeRegistry: TypeRegistry,
-        knownSignedExtensions: List<SignedExtensionMetadata>,
+        fallbackSignedExtensions: List<SignedExtensionMetadata>,
     ): RuntimeMetadata {
         return when (reader.metadataVersion) {
-            14, 15 -> PostV14RuntimeBuilder.buildMetadata(reader, typeRegistry, knownSignedExtensions)
-            else -> V13RuntimeBuilder.buildMetadata(reader, typeRegistry, knownSignedExtensions)
+            15 -> V15RuntimeBuilder.buildMetadata(reader, typeRegistry, fallbackSignedExtensions)
+            14 -> V14RuntimeBuilder.buildMetadata(reader, typeRegistry, fallbackSignedExtensions)
+            else -> V13RuntimeBuilder.buildMetadata(reader, typeRegistry, fallbackSignedExtensions)
         }
     }
 }

@@ -8,12 +8,18 @@ import io.novasama.substrate_sdk_android.runtime.RuntimeSnapshot
 import io.novasama.substrate_sdk_android.runtime.definitions.types.RuntimeType
 import io.novasama.substrate_sdk_android.runtime.definitions.types.bytes
 import io.novasama.substrate_sdk_android.runtime.definitions.types.errors.EncodeDecodeException
+import io.novasama.substrate_sdk_android.runtime.definitions.types.fromHex
+import io.novasama.substrate_sdk_android.runtime.definitions.types.useScaleWriter
 import io.novasama.substrate_sdk_android.runtime.metadata.module.ErrorMetadata
 import io.novasama.substrate_sdk_android.runtime.metadata.module.Event
 import io.novasama.substrate_sdk_android.runtime.metadata.module.MetadataFunction
 import io.novasama.substrate_sdk_android.runtime.metadata.module.Module
+import io.novasama.substrate_sdk_android.runtime.metadata.module.RuntimeApi
+import io.novasama.substrate_sdk_android.runtime.metadata.module.RuntimeApiMethod
 import io.novasama.substrate_sdk_android.runtime.metadata.module.StorageEntry
 import io.novasama.substrate_sdk_android.runtime.metadata.module.StorageEntryType
+import io.novasama.substrate_sdk_android.wsrpc.request.runtime.RuntimeRequest
+import io.novasama.substrate_sdk_android.wsrpc.request.runtime.state.StateCallRequest
 import java.io.ByteArrayOutputStream
 
 /**
@@ -138,7 +144,7 @@ fun StorageEntry.storageKey(runtime: RuntimeSnapshot, vararg arguments: Any?): S
         val argumentType = argumentsTypes[index]
         val argumentHasher = argumentsHashers[index]
 
-        val keyEncoded = argumentType?.bytes(runtime, key) ?: typeNotResolved(fullName)
+        val keyEncoded = argumentType?.bytes(runtime, key) ?: storageTypeNotResolved(fullName)
 
         keyOutputStream.write(argumentHasher.hashingFunction(keyEncoded))
     }
@@ -154,7 +160,10 @@ fun StorageEntry.storageKey(runtime: RuntimeSnapshot, vararg arguments: Any?): S
  * @throws IllegalStateException if some of types used for encoding cannot be resolved
  * @throws EncodeDecodeException if error happened during encoding
  */
-fun StorageEntry.storageKeys(runtime: RuntimeSnapshot, keysArguments: List<List<Any?>>): List<String> {
+fun StorageEntry.storageKeys(
+    runtime: RuntimeSnapshot,
+    keysArguments: List<List<Any?>>
+): List<String> {
     val argumentsTypes = this.keys
     val argumentsHashers = this.hashers
 
@@ -173,7 +182,7 @@ fun StorageEntry.storageKeys(runtime: RuntimeSnapshot, keysArguments: List<List<
             val argumentType = argumentsTypes[index]
             val argumentHasher = argumentsHashers[index]
 
-            val keyEncoded = argumentType?.bytes(runtime, key) ?: typeNotResolved(fullName)
+            val keyEncoded = argumentType?.bytes(runtime, key) ?: storageTypeNotResolved(fullName)
 
             keyOutputStream.write(argumentHasher.hashingFunction(keyEncoded))
         }
@@ -232,7 +241,68 @@ fun Module.fullNameOf(withName: WithName): String {
 val StorageEntry.fullName
     get() = "$moduleName.$name"
 
-private fun typeNotResolved(entryName: String): Nothing =
+fun RuntimeMetadata.runtimeApi(name: String): RuntimeApi {
+    return runtimeApiOrNull(name) ?: error("Runtime Api $name is not found")
+}
+
+fun RuntimeMetadata.runtimeApiOrNull(name: String): RuntimeApi? {
+    if (apis == null) {
+        error("This version of metadata does not support auto-detection of runtime apis")
+    }
+
+    return apis.find { it.name == name }
+}
+
+fun RuntimeApi.methodOrNull(name: String): RuntimeApiMethod? {
+    return methods.find { it.name == name }
+}
+
+fun RuntimeApi.method(name: String): RuntimeApiMethod {
+    return methodOrNull(name) ?: error("Method $name is not found in runtime api ${this.name}")
+}
+
+fun RuntimeApiMethod.createRequest(
+    runtime: RuntimeSnapshot,
+    inputValues: Map<String, Any?>
+): StateCallRequest {
+    return StateCallRequest(
+        runtimeRpcName = "${apiName}_${name}",
+        encodedArguments = encodeInputs(runtime, inputValues)
+    )
+}
+
+fun RuntimeApiMethod.encodeInputs(
+    runtime: RuntimeSnapshot,
+    inputValues: Map<String, Any?>
+): String {
+    return useScaleWriter {
+        inputs.forEach { methodParam ->
+            val inputValue = inputValues.getValue(methodParam.name)
+
+            val type = methodParam.type ?: runtimeMethodInputNotResolved(name, methodParam.name)
+            type.encodeUnsafe(this, runtime, inputValue)
+        }
+    }.toHexString(withPrefix = true)
+}
+
+fun RuntimeApiMethod.decodeOutput(
+    runtime: RuntimeSnapshot,
+    outputEncoded: String
+): Any? {
+    val outputType = output ?: runtimeMethodOutputNotResolved(name)
+
+    return outputType.fromHex(runtime, outputEncoded)
+}
+
+private fun runtimeMethodInputNotResolved(methodName: String, argumentName: String): Nothing {
+    error("Cannot resolve type for input $argumentName of $methodName method")
+}
+
+private fun runtimeMethodOutputNotResolved(methodName: String): Nothing {
+    error("Cannot resolve type for output of $methodName method")
+}
+
+private fun storageTypeNotResolved(entryName: String): Nothing =
     throw IllegalStateException("Cannot resolve key or value type for storage entry `$entryName`")
 
 private fun wrongEntryType(): Nothing =

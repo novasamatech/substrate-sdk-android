@@ -69,7 +69,8 @@ abstract class BaseTypeTest {
             extrinsic = ExtrinsicMetadata(
                 version = BigInteger.ONE,
                 signedExtensions = emptyList()
-            )
+            ),
+            apis = null
         )
     )
 
