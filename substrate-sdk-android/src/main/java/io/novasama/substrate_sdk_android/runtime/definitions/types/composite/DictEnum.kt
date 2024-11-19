@@ -8,7 +8,6 @@ import io.novasama.substrate_sdk_android.runtime.definitions.types.TypeReference
 import io.novasama.substrate_sdk_android.runtime.definitions.types.errors.EncodeDecodeException
 import io.novasama.substrate_sdk_android.runtime.definitions.types.skipAliasesOrNull
 
-@OptIn(ExperimentalUnsignedTypes::class)
 open class DictEnum(
     name: String,
     val elements: Map<Int, Entry<TypeReference>>

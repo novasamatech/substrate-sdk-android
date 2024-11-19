@@ -2,8 +2,9 @@ package io.novasama.substrate_sdk_android.scale
 
 import io.novasama.substrate_sdk_android.scale.dataType.DataType
 import io.novasama.substrate_sdk_android.scale.dataType.optional
+import io.novasama.substrate_sdk_android.scale.dataType.string
 
-class Field<out T>(val dataType: DataType<out T>, val defaultValue: T? = null)
+class Field<T>(val dataType: DataType<T>, val defaultValue: T? = null)
 
 @Suppress("UNCHECKED_CAST", "unused")
 class EncodableStruct<out S : Schema<out S>>(val schema: S) {
