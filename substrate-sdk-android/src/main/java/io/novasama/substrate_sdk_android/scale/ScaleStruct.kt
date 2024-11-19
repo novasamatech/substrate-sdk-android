@@ -43,13 +43,3 @@ class EncodableStruct<out S : Schema<out S>>(val schema: S) {
 fun <S : Schema<S>> EncodableStruct<S>.toHexString() = schema.toHexString(this)
 
 fun <S : Schema<S>> EncodableStruct<S>.toByteArray() = schema.toByteArray(this)
-
-object SomeSchema : Schema<SomeSchema>() {
-    val someField by vector(string)
-}
-
-fun a() {
-    val struct = SomeSchema.invoke {
-//        it.set(SomeSchema.someField, 1)
-    }
-}
