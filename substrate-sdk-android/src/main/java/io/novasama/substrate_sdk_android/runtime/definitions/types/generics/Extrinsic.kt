@@ -18,7 +18,6 @@ private val SIGNED_MASK = 0b1000_0000.toUByte()
 private const val TYPE_ADDRESS = "Address"
 private const val TYPE_SIGNATURE = "ExtrinsicSignature"
 
-@OptIn(ExperimentalUnsignedTypes::class)
 object Extrinsic : RuntimeType<Extrinsic.EncodingInstance, Extrinsic.DecodedInstance>("ExtrinsicsDecoder") {
 
     class EncodingInstance(

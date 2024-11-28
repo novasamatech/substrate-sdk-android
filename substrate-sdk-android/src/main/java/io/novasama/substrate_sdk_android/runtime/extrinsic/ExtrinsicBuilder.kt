@@ -160,9 +160,9 @@ class ExtrinsicBuilder(
             DefaultSignedExtensions.CHECK_GENESIS to genesisHash,
             DefaultSignedExtensions.CHECK_SPEC_VERSION to runtimeVersion.specVersion.toBigInteger(),
             DefaultSignedExtensions.CHECK_TX_VERSION to
-                runtimeVersion.transactionVersion.toBigInteger(),
+                    runtimeVersion.transactionVersion.toBigInteger(),
             DefaultSignedExtensions.CHECK_METADATA_HASH to
-                checkMetadataHash.toSignedExtensionValue().includedInSignature
+                    checkMetadataHash.toSignedExtensionValue().includedInSignature
         )
 
         val custom = _customSignedExtensions.mapValues { (_, extensionValues) ->
@@ -208,7 +208,7 @@ class ExtrinsicBuilder(
             DefaultSignedExtensions.CHECK_TX_PAYMENT to tip,
             DefaultSignedExtensions.CHECK_NONCE to runtime.encodeNonce(nonce.nonce),
             DefaultSignedExtensions.CHECK_METADATA_HASH to
-                checkMetadataHash.toSignedExtensionValue().includedInExtrinsic
+                    checkMetadataHash.toSignedExtensionValue().includedInExtrinsic
         )
 
         val custom = _customSignedExtensions.mapValues { (_, extensionValues) ->
@@ -233,6 +233,10 @@ class ExtrinsicBuilder(
             signedExtrinsic.signatureWrapper
         )
 
+        override val extrinsic by lazy {
+            createExtrinsic()
+        }
+
         override val extrinsicHex by lazy {
             createExtrinsicHex()
         }
@@ -241,9 +245,10 @@ class ExtrinsicBuilder(
             createSignatureHex()
         }
 
-        private fun createExtrinsicHex(): String {
+        private fun createExtrinsic(): Extrinsic.EncodingInstance {
             val address = buildEncodableAddressInstance(signedExtrinsic.payload.accountId)
-            val extrinsic = Extrinsic.EncodingInstance(
+
+            return Extrinsic.EncodingInstance(
                 signature = Extrinsic.Signature.new(
                     accountIdentifier = address,
                     signature = multiSignature,
@@ -251,7 +256,9 @@ class ExtrinsicBuilder(
                 ),
                 callRepresentation = signedExtrinsic.payload.call
             )
+        }
 
+        private fun createExtrinsicHex(): String {
             return Extrinsic.toHex(runtime, extrinsic)
         }
 
