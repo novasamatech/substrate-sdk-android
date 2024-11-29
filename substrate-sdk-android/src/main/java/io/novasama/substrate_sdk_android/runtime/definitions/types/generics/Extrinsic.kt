@@ -18,21 +18,9 @@ private val SIGNED_MASK = 0b1000_0000.toUByte()
 private const val TYPE_ADDRESS = "Address"
 private const val TYPE_SIGNATURE = "ExtrinsicSignature"
 
-object Extrinsic : RuntimeType<Extrinsic.EncodingInstance, Extrinsic.DecodedInstance>("ExtrinsicsDecoder") {
+object Extrinsic : Type<Extrinsic.Instance>("ExtrinsicsDecoder") {
 
-    class EncodingInstance(
-        val signature: Signature?,
-        val callRepresentation: CallRepresentation
-    ) {
-        sealed class CallRepresentation {
-
-            class Instance(val call: GenericCall.Instance) : CallRepresentation()
-
-            class Bytes(val bytes: ByteArray) : CallRepresentation()
-        }
-    }
-
-    class DecodedInstance(
+    class Instance(
         val signature: Signature?,
         val call: GenericCall.Instance
     )
@@ -55,7 +43,7 @@ object Extrinsic : RuntimeType<Extrinsic.EncodingInstance, Extrinsic.DecodedInst
     override fun decode(
         scaleCodecReader: ScaleCodecReader,
         runtime: RuntimeSnapshot
-    ): DecodedInstance {
+    ): Instance {
         val length = compactInt.read(scaleCodecReader)
 
         val extrinsicVersion = byte.read(scaleCodecReader).toUByte()
@@ -72,20 +60,15 @@ object Extrinsic : RuntimeType<Extrinsic.EncodingInstance, Extrinsic.DecodedInst
 
         val call = GenericCall.decode(scaleCodecReader, runtime)
 
-        return DecodedInstance(signature, call)
+        return Instance(signature, call)
     }
 
     override fun encode(
         scaleCodecWriter: ScaleCodecWriter,
         runtime: RuntimeSnapshot,
-        value: EncodingInstance
+        value: Instance
     ) {
-        val callBytes = when (value.callRepresentation) {
-            is EncodingInstance.CallRepresentation.Instance ->
-                GenericCall.toByteArray(runtime, value.callRepresentation.call)
-
-            is EncodingInstance.CallRepresentation.Bytes -> value.callRepresentation.bytes
-        }
+        val callBytes = GenericCall.toByteArray(runtime, value.call)
 
         encode(scaleCodecWriter, runtime, value.signature, callBytes)
     }
@@ -119,7 +102,7 @@ object Extrinsic : RuntimeType<Extrinsic.EncodingInstance, Extrinsic.DecodedInst
     }
 
     override fun isValidInstance(instance: Any?): Boolean {
-        return instance is EncodingInstance
+        return instance is Instance
     }
 
     private fun encodedVersion(version: UByte, isSigned: Boolean): UByte {

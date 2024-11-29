@@ -18,13 +18,7 @@ fun bytesOf(vararg writers: (ScaleCodecWriter) -> Unit) = useScaleWriter {
 }
 
 fun SignerPayloadExtrinsic.encodeCallDataTo(writer: ScaleCodecWriter) {
-    when (call) {
-        is Extrinsic.EncodingInstance.CallRepresentation.Bytes ->
-            writer.directWrite(call.bytes)
-
-        is Extrinsic.EncodingInstance.CallRepresentation.Instance ->
-            GenericCall.encode(writer, runtime, call.call)
-    }
+    GenericCall.encode(writer, runtime, call)
 }
 
 fun SignerPayloadExtrinsic.encodedCallData() = bytesOf(::encodeCallDataTo)

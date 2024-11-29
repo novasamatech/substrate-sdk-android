@@ -6,7 +6,6 @@ import io.novasama.substrate_sdk_android.extensions.toHexString
 import io.novasama.substrate_sdk_android.runtime.RealRuntimeProvider
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.DictEnum
 import io.novasama.substrate_sdk_android.runtime.definitions.types.fromHex
-import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Extrinsic.EncodingInstance.*
 import io.novasama.substrate_sdk_android.runtime.definitions.types.instances.AddressInstanceConstructor
 import io.novasama.substrate_sdk_android.runtime.definitions.types.instances.SignatureInstanceConstructor
 import io.novasama.substrate_sdk_android.runtime.definitions.types.toHex
@@ -73,7 +72,7 @@ class ExtrinsicTest {
             value = SignatureWrapper.Sr25519(signatureInHex.fromHex())
         )
 
-        val extrinsic = Extrinsic.EncodingInstance(
+        val extrinsic = Extrinsic.Instance(
             signature = Extrinsic.Signature.new(
                 accountIdentifier = AddressInstanceConstructor.constructInstance(
                     typeRegistry = runtime.typeRegistry,
@@ -82,7 +81,7 @@ class ExtrinsicTest {
                 signature = signature,
                 signedExtras = signedExtras
             ),
-            callRepresentation = CallRepresentation.Instance(call)
+            call = call
         )
 
         val encoded = Extrinsic.toHex(runtime, extrinsic)

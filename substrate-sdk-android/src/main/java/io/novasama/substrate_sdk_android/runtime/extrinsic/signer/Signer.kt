@@ -4,7 +4,7 @@ import io.novasama.substrate_sdk_android.encrypt.SignatureWrapper
 import io.novasama.substrate_sdk_android.extensions.fromHex
 import io.novasama.substrate_sdk_android.runtime.AccountId
 import io.novasama.substrate_sdk_android.runtime.RuntimeSnapshot
-import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Extrinsic.EncodingInstance.CallRepresentation
+import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.GenericCall
 import io.novasama.substrate_sdk_android.runtime.extrinsic.Nonce
 
 class SignedExtrinsic(
@@ -28,7 +28,7 @@ class SignerPayloadRaw(
 data class SignerPayloadExtrinsic(
     val runtime: RuntimeSnapshot,
     val accountId: AccountId,
-    val call: CallRepresentation,
+    val call: GenericCall.Instance,
     val signedExtras: SignedExtras,
     val nonce: Nonce,
 ) {
