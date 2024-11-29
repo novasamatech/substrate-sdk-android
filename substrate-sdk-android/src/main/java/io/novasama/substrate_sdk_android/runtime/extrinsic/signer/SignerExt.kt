@@ -5,10 +5,8 @@ import io.novasama.substrate_sdk_android.hash.Hasher.blake2b256
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.DefaultSignedExtensions
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.ExtrasIncludedInExtrinsic
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.ExtrasIncludedInSignature
-import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Extrinsic
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.GenericCall
 import io.novasama.substrate_sdk_android.runtime.definitions.types.useScaleWriter
-import io.novasama.substrate_sdk_android.scale.utils.directWrite
 
 private const val PAYLOAD_HASH_THRESHOLD = 256
 
