@@ -2,6 +2,7 @@ package io.novasama.substrate_sdk_android.runtime.extrinsic.signer
 
 import io.novasama.substrate_sdk_android.runtime.RuntimeSnapshot
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Extrinsic
+import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.toBytesWithoutLength
 import io.novasama.substrate_sdk_android.runtime.definitions.types.toHex
 import io.novasama.substrate_sdk_android.runtime.definitions.types.toHexUntyped
 
@@ -12,6 +13,8 @@ interface SendableExtrinsic {
     val signatureHex: String
 
     val extrinsicHex: String
+
+    val bytesWithoutLength: ByteArray
 }
 
 fun SendableExtrinsic(
@@ -28,6 +31,10 @@ private class RealSendableExtrinsic(
 
     override val extrinsicHex by lazy {
         createExtrinsicHex()
+    }
+
+    override val bytesWithoutLength: ByteArray by lazy {
+        Extrinsic.toBytesWithoutLength(runtime, extrinsic)
     }
 
     override val signatureHex by lazy {
