@@ -5,35 +5,24 @@ package io.novasama.substrate_sdk_android.runtime.definitions.types.generics
 import io.emeraldpay.polkaj.scale.ScaleCodecReader
 import io.emeraldpay.polkaj.scale.ScaleCodecWriter
 import io.novasama.substrate_sdk_android.runtime.RuntimeSnapshot
-import io.novasama.substrate_sdk_android.runtime.definitions.types.RuntimeType
 import io.novasama.substrate_sdk_android.runtime.definitions.types.Type
 import io.novasama.substrate_sdk_android.runtime.definitions.types.bytes
 import io.novasama.substrate_sdk_android.runtime.definitions.types.errors.EncodeDecodeException
 import io.novasama.substrate_sdk_android.runtime.definitions.types.toByteArray
+import io.novasama.substrate_sdk_android.runtime.definitions.types.useScaleWriter
 import io.novasama.substrate_sdk_android.scale.dataType.byte
 import io.novasama.substrate_sdk_android.scale.dataType.compactInt
+import io.novasama.substrate_sdk_android.scale.dataType.toByteArray
+import io.novasama.substrate_sdk_android.scale.utils.directWrite
 
 private val SIGNED_MASK = 0b1000_0000.toUByte()
 
 private const val TYPE_ADDRESS = "Address"
 private const val TYPE_SIGNATURE = "ExtrinsicSignature"
 
-@OptIn(ExperimentalUnsignedTypes::class)
-object Extrinsic : RuntimeType<Extrinsic.EncodingInstance, Extrinsic.DecodedInstance>("ExtrinsicsDecoder") {
+object Extrinsic : Type<Extrinsic.Instance>("ExtrinsicsDecoder") {
 
-    class EncodingInstance(
-        val signature: Signature?,
-        val callRepresentation: CallRepresentation
-    ) {
-        sealed class CallRepresentation {
-
-            class Instance(val call: GenericCall.Instance) : CallRepresentation()
-
-            class Bytes(val bytes: ByteArray) : CallRepresentation()
-        }
-    }
-
-    class DecodedInstance(
+    class Instance(
         val signature: Signature?,
         val call: GenericCall.Instance
     )
@@ -56,7 +45,7 @@ object Extrinsic : RuntimeType<Extrinsic.EncodingInstance, Extrinsic.DecodedInst
     override fun decode(
         scaleCodecReader: ScaleCodecReader,
         runtime: RuntimeSnapshot
-    ): DecodedInstance {
+    ): Instance {
         val length = compactInt.read(scaleCodecReader)
 
         val extrinsicVersion = byte.read(scaleCodecReader).toUByte()
@@ -73,30 +62,34 @@ object Extrinsic : RuntimeType<Extrinsic.EncodingInstance, Extrinsic.DecodedInst
 
         val call = GenericCall.decode(scaleCodecReader, runtime)
 
-        return DecodedInstance(signature, call)
+        return Instance(signature, call)
     }
 
     override fun encode(
         scaleCodecWriter: ScaleCodecWriter,
         runtime: RuntimeSnapshot,
-        value: EncodingInstance
+        value: Instance
     ) {
-        val callBytes = when (value.callRepresentation) {
-            is EncodingInstance.CallRepresentation.Instance ->
-                GenericCall.toByteArray(runtime, value.callRepresentation.call)
+        encode(scaleCodecWriter, runtime, value, encodeLength = true)
+    }
 
-            is EncodingInstance.CallRepresentation.Bytes -> value.callRepresentation.bytes
-        }
-
-        encode(scaleCodecWriter, runtime, value.signature, callBytes)
+    fun encodeWithoutLength(
+        scaleCodecWriter: ScaleCodecWriter,
+        runtime: RuntimeSnapshot,
+        value: Instance
+    ) {
+        encode(scaleCodecWriter, runtime, value, encodeLength = false)
     }
 
     private fun encode(
         scaleCodecWriter: ScaleCodecWriter,
         runtime: RuntimeSnapshot,
-        signature: Signature?,
-        callBytes: ByteArray
+        value: Instance,
+        encodeLength: Boolean,
     ) {
+        val signature = value.signature
+        val callBytes = GenericCall.toByteArray(runtime, value.call)
+
         val isSigned = signature != null
 
         val extrinsicVersion = runtime.metadata.extrinsic.version.toInt().toUByte()
@@ -116,11 +109,15 @@ object Extrinsic : RuntimeType<Extrinsic.EncodingInstance, Extrinsic.DecodedInst
 
         val extrinsicBodyBytes = byteArrayOf(encodedVersion) + signatureWrapperBytes + callBytes
 
-        Bytes.encode(scaleCodecWriter, runtime, extrinsicBodyBytes)
+        if (encodeLength) {
+            Bytes.encode(scaleCodecWriter, runtime, extrinsicBodyBytes)
+        } else {
+            scaleCodecWriter.directWrite(extrinsicBodyBytes)
+        }
     }
 
     override fun isValidInstance(instance: Any?): Boolean {
-        return instance is EncodingInstance
+        return instance is Instance
     }
 
     private fun encodedVersion(version: UByte, isSigned: Boolean): UByte {
@@ -143,4 +140,8 @@ object Extrinsic : RuntimeType<Extrinsic.EncodingInstance, Extrinsic.DecodedInst
     private fun requiredTypeNotFound(name: String): Nothing {
         throw EncodeDecodeException("Cannot resolve $name type, which is required to work with Extrinsic")
     }
+}
+
+fun Extrinsic.toBytesWithoutLength(runtime: RuntimeSnapshot, value: Extrinsic.Instance): ByteArray {
+    return useScaleWriter { encodeWithoutLength(this, runtime, value) }
 }
