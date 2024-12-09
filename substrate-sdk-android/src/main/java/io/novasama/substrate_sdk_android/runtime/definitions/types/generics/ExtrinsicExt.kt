@@ -2,11 +2,24 @@ package io.novasama.substrate_sdk_android.runtime.definitions.types.generics
 
 import io.novasama.substrate_sdk_android.encrypt.EncryptionType
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.DictEnum
+import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.verifySignature.VerifySignature
 import java.util.Locale
 
 class MultiSignature(val encryptionType: EncryptionType, val value: ByteArray)
 
-fun Extrinsic.Signature.tryExtractMultiSignature(): MultiSignature? {
+fun Extrinsic.Instance.signatureInstance(): Any? {
+    return when (type) {
+        Extrinsic.ExtrinsicType.Bare -> null
+
+        is Extrinsic.ExtrinsicType.GeneralTransaction -> type.findSignatureInExplicits()
+
+        is Extrinsic.ExtrinsicType.Signed -> type.signature
+    }
+}
+
+fun Extrinsic.Instance.tryExtractMultiSignature(): MultiSignature? {
+    val signature = signatureInstance() ?: return null
+
     val enumEntry = signature as? DictEnum.Entry<*> ?: return null
     val value = enumEntry.value as? ByteArray ?: return null
 
@@ -16,22 +29,17 @@ fun Extrinsic.Signature.tryExtractMultiSignature(): MultiSignature? {
     return MultiSignature(encryptionType, value)
 }
 
+fun Extrinsic.ExtrinsicType.GeneralTransaction.findSignatureInExplicits(): Any? {
+    val explicit = extensionExplicits[VerifySignature.ID]
+    return VerifySignature.getSignatureFromExplicit(explicit)?.signature
+}
+
 private val EncryptionType.multiSignatureName
     get() = rawName.capitalize(Locale.ROOT)
 
 fun MultiSignature.prepareForEncoding(): Any {
     return DictEnum.Entry(encryptionType.multiSignatureName, value)
 }
-
-fun <A> Extrinsic.Signature.Companion.new(
-    accountIdentifier: A,
-    signature: Any?,
-    signedExtras: ExtrinsicPayloadExtrasInstance
-) = Extrinsic.Signature(
-    accountIdentifier = accountIdentifier,
-    signature = signature,
-    signedExtras = signedExtras
-)
 
 fun multiAddressFromId(addressId: ByteArray): DictEnum.Entry<ByteArray> {
     return DictEnum.Entry(

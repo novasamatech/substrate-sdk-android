@@ -4,14 +4,14 @@ import io.novasama.substrate_sdk_android.runtime.definitions.registry.TypeRegist
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.DefaultSignedExtensions
 import io.novasama.substrate_sdk_android.runtime.metadata.RuntimeMetadata
 import io.novasama.substrate_sdk_android.runtime.metadata.RuntimeMetadataReader
-import io.novasama.substrate_sdk_android.runtime.metadata.SignedExtensionMetadata
+import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionMetadata
 
 interface RuntimeBuilder {
 
     fun buildMetadata(
         reader: RuntimeMetadataReader,
         typeRegistry: TypeRegistry,
-        fallbackSignedExtensions: List<SignedExtensionMetadata> = DefaultSignedExtensions.ALL,
+        fallbackSignedExtensions: List<TransactionExtensionMetadata> = DefaultSignedExtensions.ALL,
     ): RuntimeMetadata
 }
 
@@ -20,7 +20,7 @@ object VersionedRuntimeBuilder : RuntimeBuilder {
     override fun buildMetadata(
         reader: RuntimeMetadataReader,
         typeRegistry: TypeRegistry,
-        fallbackSignedExtensions: List<SignedExtensionMetadata>,
+        fallbackSignedExtensions: List<TransactionExtensionMetadata>,
     ): RuntimeMetadata {
         return when (reader.metadataVersion) {
             15 -> V15RuntimeBuilder.buildMetadata(reader, typeRegistry, fallbackSignedExtensions)

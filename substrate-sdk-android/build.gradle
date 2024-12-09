@@ -52,7 +52,7 @@ android {
         }
     }
     kotlinOptions {
-        freeCompilerArgs = ['-Xinline-classes']
+        freeCompilerArgs = ['-Xcontext-receivers']
     }
 }
 

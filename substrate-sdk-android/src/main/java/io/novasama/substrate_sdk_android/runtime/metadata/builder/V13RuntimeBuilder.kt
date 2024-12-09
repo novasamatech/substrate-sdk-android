@@ -15,7 +15,7 @@ import io.novasama.substrate_sdk_android.runtime.metadata.NMapSchema
 import io.novasama.substrate_sdk_android.runtime.metadata.RuntimeMetadata
 import io.novasama.substrate_sdk_android.runtime.metadata.RuntimeMetadataReader
 import io.novasama.substrate_sdk_android.runtime.metadata.RuntimeMetadataSchema
-import io.novasama.substrate_sdk_android.runtime.metadata.SignedExtensionMetadata
+import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionMetadata
 import io.novasama.substrate_sdk_android.runtime.metadata.StorageEntryMetadataSchema
 import io.novasama.substrate_sdk_android.runtime.metadata.StorageMetadataSchema
 import io.novasama.substrate_sdk_android.runtime.metadata.groupByName
@@ -35,7 +35,7 @@ internal object V13RuntimeBuilder : RuntimeBuilder {
     override fun buildMetadata(
         reader: RuntimeMetadataReader,
         typeRegistry: TypeRegistry,
-        fallbackSignedExtensions: List<SignedExtensionMetadata>
+        fallbackSignedExtensions: List<TransactionExtensionMetadata>
     ): RuntimeMetadata {
         val metadataStruct = reader.metadata
 
@@ -212,7 +212,7 @@ internal object V13RuntimeBuilder : RuntimeBuilder {
 
     private fun buildExtrinsic(
         struct: EncodableStruct<ExtrinsicMetadataSchema>,
-        knownSignedExtensions: List<SignedExtensionMetadata>
+        knownSignedExtensions: List<TransactionExtensionMetadata>
     ): ExtrinsicMetadata {
         val knownSignedExtensionsById = knownSignedExtensions.associateBy { it.id }
 

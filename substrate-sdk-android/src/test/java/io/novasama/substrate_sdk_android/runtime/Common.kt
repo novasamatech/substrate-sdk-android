@@ -27,20 +27,16 @@ object RealRuntimeProvider {
         return RuntimeSnapshot(typeRegistry, metadata)
     }
 
-    fun buildRuntimeV14(networkName: String): RuntimeSnapshot {
-        val gson = Gson()
-
+    fun buildRuntimePostV14(networkName: String): RuntimeSnapshot {
         val metadataRaw = buildRawMetadata(networkName)
 
-        val metadataTypePreset = TypesParserV14.parse(metadataRaw.metadata[RuntimeMetadataSchemaV14.lookup], v14Preset())
+        val postV14Metadata = metadataRaw.metadataPostV14
+        val postV14Schema = postV14Metadata.schema
 
-        val networkTypesReader = JsonReader(getResourceReader("${networkName}.json"))
-        val networkTypesTree = gson.fromJson<TypeDefinitionsTree>(networkTypesReader, TypeDefinitionsTree::class.java)
-
-        val completeTypes = TypeDefinitionParser.parseBaseDefinitions(networkTypesTree, metadataTypePreset)
+        val metadataTypePreset = TypesParserV14.parse(postV14Metadata[postV14Schema.lookup], v14Preset())
 
         val typeRegistry = TypeRegistry(
-            types = completeTypes,
+            types = metadataTypePreset,
             dynamicTypeResolver = DynamicTypeResolver(
                 DynamicTypeResolver.DEFAULT_COMPOUND_EXTENSIONS + GenericsExtension
             )
