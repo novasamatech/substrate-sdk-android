@@ -16,10 +16,8 @@ import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtensi
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.verifySignature.VerifySignature
 import io.novasama.substrate_sdk_android.runtime.metadata.call
 import io.novasama.substrate_sdk_android.runtime.metadata.module
-import io.novasama.substrate_sdk_android.ss58.SS58Encoder.publicKeyToSubstrateAccountId
 import io.novasama.substrate_sdk_android.wsrpc.request.runtime.chain.RuntimeVersion
 import java.math.BigInteger
-
 
 fun ExtrinsicBuilder.call(
     moduleIndex: Int,
@@ -48,7 +46,6 @@ fun ExtrinsicBuilder.call(
 }
 
 private val DEFAULT_TIP = BigInteger.ZERO
-
 
 fun ExtrinsicBuilder(
     runtime: RuntimeSnapshot,

@@ -2,7 +2,6 @@ package io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtens
 
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.DefaultSignedExtensions
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.TransactionExtension
-import java.math.BigInteger
 
 fun CheckTxVersion(txVersion: Int) = TransactionExtension(
     name = DefaultSignedExtensions.CHECK_TX_VERSION,

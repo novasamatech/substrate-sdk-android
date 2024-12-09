@@ -15,9 +15,9 @@ import io.novasama.substrate_sdk_android.runtime.metadata.NMapSchema
 import io.novasama.substrate_sdk_android.runtime.metadata.RuntimeMetadata
 import io.novasama.substrate_sdk_android.runtime.metadata.RuntimeMetadataReader
 import io.novasama.substrate_sdk_android.runtime.metadata.RuntimeMetadataSchema
-import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionMetadata
 import io.novasama.substrate_sdk_android.runtime.metadata.StorageEntryMetadataSchema
 import io.novasama.substrate_sdk_android.runtime.metadata.StorageMetadataSchema
+import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionMetadata
 import io.novasama.substrate_sdk_android.runtime.metadata.groupByName
 import io.novasama.substrate_sdk_android.runtime.metadata.module.Constant
 import io.novasama.substrate_sdk_android.runtime.metadata.module.ErrorMetadata

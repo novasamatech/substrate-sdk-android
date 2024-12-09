@@ -6,4 +6,3 @@ sealed class CheckMetadataHashMode {
 
     class Enabled(val hash: ByteArray) : CheckMetadataHashMode()
 }
-

@@ -5,7 +5,7 @@ import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtensi
 import java.math.BigInteger
 
 fun ChargeTransactionPayment(
-   tip: BigInteger
+    tip: BigInteger
 ) = TransactionExtension(
     name = DefaultSignedExtensions.CHECK_TX_PAYMENT,
     implicit = null,

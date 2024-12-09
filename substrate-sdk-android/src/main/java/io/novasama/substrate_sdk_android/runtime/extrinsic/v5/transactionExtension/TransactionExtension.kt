@@ -14,9 +14,8 @@ interface TransactionExtension {
         inheritedImplication: InheritedImplication,
         extrinsicVersion: ExtrinsicVersion,
         runtimeSnapshot: RuntimeSnapshot,
-    ) : Any?
+    ): Any?
 }
-
 
 fun TransactionExtension(
     name: String,

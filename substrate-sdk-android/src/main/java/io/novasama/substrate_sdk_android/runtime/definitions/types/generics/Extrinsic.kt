@@ -6,11 +6,8 @@ import io.emeraldpay.polkaj.scale.ScaleCodecReader
 import io.emeraldpay.polkaj.scale.ScaleCodecWriter
 import io.novasama.substrate_sdk_android.runtime.RuntimeSnapshot
 import io.novasama.substrate_sdk_android.runtime.definitions.types.Type
-import io.novasama.substrate_sdk_android.runtime.definitions.types.bytes
 import io.novasama.substrate_sdk_android.runtime.definitions.types.errors.EncodeDecodeException
-import io.novasama.substrate_sdk_android.runtime.definitions.types.toByteArray
 import io.novasama.substrate_sdk_android.runtime.definitions.types.useScaleWriter
-import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionId
 import io.novasama.substrate_sdk_android.scale.dataType.byte
 import io.novasama.substrate_sdk_android.scale.dataType.compactInt
 import io.novasama.substrate_sdk_android.scale.utils.directWrite
@@ -161,7 +158,6 @@ object Extrinsic : Type<Extrinsic.Instance>("ExtrinsicsDecoder") {
             is ExtrinsicType.Signed -> encodeSigned(writer, runtime, type)
         }
     }
-
 
     private fun encodeSigned(
         writer: ScaleCodecWriter,

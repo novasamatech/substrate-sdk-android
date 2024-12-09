@@ -1,31 +1,31 @@
-//package io.novasama.substrate_sdk_android.runtime.extrinsic
+// package io.novasama.substrate_sdk_android.runtime.extrinsic
 //
-//import io.novasama.substrate_sdk_android.encrypt.SignatureWrapper
-//import io.novasama.substrate_sdk_android.runtime.AccountId
-//import io.novasama.substrate_sdk_android.runtime.RuntimeSnapshot
-//import io.novasama.substrate_sdk_android.runtime.definitions.types.RuntimeType
-//import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.DefaultSignedExtensions
-//import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Era
-//import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Extrinsic
-//import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.ExtrinsicPayloadExtrasInstance
-//import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.GenericCall
-//import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.new
-//import io.novasama.substrate_sdk_android.runtime.definitions.types.instances.AddressInstanceConstructor
-//import io.novasama.substrate_sdk_android.runtime.definitions.types.instances.SignatureInstanceConstructor
-//import io.novasama.substrate_sdk_android.runtime.extrinsic.signer.SendableExtrinsic
-//import io.novasama.substrate_sdk_android.runtime.extrinsic.signer.SignedExtrinsic
-//import io.novasama.substrate_sdk_android.runtime.extrinsic.signer.Signer
-//import io.novasama.substrate_sdk_android.runtime.extrinsic.signer.SignerPayloadExtrinsic
-//import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionId
-//import io.novasama.substrate_sdk_android.runtime.metadata.SignedExtensionValue
-//import io.novasama.substrate_sdk_android.runtime.metadata.call
-//import io.novasama.substrate_sdk_android.runtime.metadata.module
-//import io.novasama.substrate_sdk_android.wsrpc.request.runtime.chain.RuntimeVersion
-//import java.math.BigInteger
+// import io.novasama.substrate_sdk_android.encrypt.SignatureWrapper
+// import io.novasama.substrate_sdk_android.runtime.AccountId
+// import io.novasama.substrate_sdk_android.runtime.RuntimeSnapshot
+// import io.novasama.substrate_sdk_android.runtime.definitions.types.RuntimeType
+// import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.DefaultSignedExtensions
+// import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Era
+// import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Extrinsic
+// import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.ExtrinsicPayloadExtrasInstance
+// import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.GenericCall
+// import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.new
+// import io.novasama.substrate_sdk_android.runtime.definitions.types.instances.AddressInstanceConstructor
+// import io.novasama.substrate_sdk_android.runtime.definitions.types.instances.SignatureInstanceConstructor
+// import io.novasama.substrate_sdk_android.runtime.extrinsic.signer.SendableExtrinsic
+// import io.novasama.substrate_sdk_android.runtime.extrinsic.signer.SignedExtrinsic
+// import io.novasama.substrate_sdk_android.runtime.extrinsic.signer.Signer
+// import io.novasama.substrate_sdk_android.runtime.extrinsic.signer.SignerPayloadExtrinsic
+// import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionId
+// import io.novasama.substrate_sdk_android.runtime.metadata.SignedExtensionValue
+// import io.novasama.substrate_sdk_android.runtime.metadata.call
+// import io.novasama.substrate_sdk_android.runtime.metadata.module
+// import io.novasama.substrate_sdk_android.wsrpc.request.runtime.chain.RuntimeVersion
+// import java.math.BigInteger
 //
-//private val DEFAULT_TIP = BigInteger.ZERO
+// private val DEFAULT_TIP = BigInteger.ZERO
 //
-//class ExtrinsicBuilder(
+// class ExtrinsicBuilder(
 //    val runtime: RuntimeSnapshot,
 //    private val nonce: Nonce,
 //    private val runtimeVersion: RuntimeVersion,
@@ -39,7 +39,7 @@
 //    customSignedExtensions: Map<TransactionExtensionId, SignedExtensionValue> = emptyMap(),
 //    private val addressInstanceConstructor: RuntimeType.InstanceConstructor<AccountId> = AddressInstanceConstructor,
 //    private val signatureConstructor: RuntimeType.InstanceConstructor<SignatureWrapper> = SignatureInstanceConstructor
-//) {
+// ) {
 //
 //    private val mutableCalls = mutableListOf<GenericCall.Instance>()
 //
@@ -222,4 +222,4 @@
 //
 //        return default + custom
 //    }
-//}
+// }
