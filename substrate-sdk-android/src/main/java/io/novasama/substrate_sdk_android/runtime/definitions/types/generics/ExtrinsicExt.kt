@@ -1,6 +1,7 @@
 package io.novasama.substrate_sdk_android.runtime.definitions.types.generics
 
 import io.novasama.substrate_sdk_android.encrypt.EncryptionType
+import io.novasama.substrate_sdk_android.runtime.AccountId
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.DictEnum
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.verifySignature.VerifySignature
 import java.util.Locale
@@ -17,6 +18,31 @@ fun Extrinsic.Instance.signatureInstance(): Any? {
     }
 }
 
+fun Extrinsic.Instance.signerIdentifier(): Any? {
+    return when (val type = type) {
+        Extrinsic.ExtrinsicType.Bare -> null
+
+        is Extrinsic.ExtrinsicType.GeneralTransaction -> type.findSignerIdentifierInExplicits()
+
+        is Extrinsic.ExtrinsicType.Signed -> type.accountIdentifier
+    }
+}
+
+fun Extrinsic.Instance.explicits(): ExtrinsicPayloadExtrasInstance? {
+    return when(val type = type) {
+        Extrinsic.ExtrinsicType.Bare -> null
+
+        is Extrinsic.ExtrinsicType.GeneralTransaction -> type.extensionExplicits
+
+        is Extrinsic.ExtrinsicType.Signed -> type.signedExtras
+    }
+}
+
+private fun Extrinsic.ExtrinsicType.GeneralTransaction.findSignerIdentifierInExplicits(): Any? {
+    val explicit = extensionExplicits[VerifySignature.ID]
+    return VerifySignature.getSignatureFromExplicit(explicit)?.account
+}
+
 fun Extrinsic.Instance.tryExtractMultiSignature(): MultiSignature? {
     val signature = signatureInstance() ?: return null
 
@@ -29,7 +55,7 @@ fun Extrinsic.Instance.tryExtractMultiSignature(): MultiSignature? {
     return MultiSignature(encryptionType, value)
 }
 
-fun Extrinsic.ExtrinsicType.GeneralTransaction.findSignatureInExplicits(): Any? {
+private fun Extrinsic.ExtrinsicType.GeneralTransaction.findSignatureInExplicits(): Any? {
     val explicit = extensionExplicits[VerifySignature.ID]
     return VerifySignature.getSignatureFromExplicit(explicit)?.signature
 }

@@ -18,3 +18,8 @@ class SucceedingExtensionValues(
     val implicit: Any?,
     val explicit: Any?
 )
+
+inline fun <reified T> List<SucceedingExtensionValues>.findExtensionOrThrow(): T {
+    val extensionValues = first { it.transactionExtension is T }
+    return extensionValues.transactionExtension as T
+}

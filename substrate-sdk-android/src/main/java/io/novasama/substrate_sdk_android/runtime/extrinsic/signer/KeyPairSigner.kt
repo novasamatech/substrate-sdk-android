@@ -37,7 +37,6 @@ class KeyPairSigner(
         return SignedRaw(payload, signatureWrapper)
     }
 
-    context(TransactionExtension)
     override suspend fun signInheritedImplication(
         inheritedImplication: InheritedImplication,
         signingPayload: ByteArray,

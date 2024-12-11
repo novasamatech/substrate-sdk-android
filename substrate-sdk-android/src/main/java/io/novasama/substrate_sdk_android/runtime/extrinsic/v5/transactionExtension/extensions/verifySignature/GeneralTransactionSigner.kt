@@ -8,7 +8,6 @@ import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtensi
 
 interface GeneralTransactionSigner {
 
-    context(VerifySignature)
     suspend fun signInheritedImplication(
         inheritedImplication: InheritedImplication,
         signingPayload: ByteArray,

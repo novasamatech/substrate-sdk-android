@@ -52,8 +52,8 @@ fun ExtrinsicBuilder(
     nonce: Nonce,
     runtimeVersion: RuntimeVersion,
     genesisHash: ByteArray,
-    accountId: AccountId,
-    signer: GeneralTransactionSigner,
+    accountId: AccountId?,
+    signer: GeneralTransactionSigner?,
     blockHash: ByteArray = genesisHash,
     era: Era = Era.Immortal,
     tip: BigInteger = DEFAULT_TIP,
@@ -62,7 +62,9 @@ fun ExtrinsicBuilder(
     batchMode: BatchMode = BatchMode.BATCH,
 ): ExtrinsicBuilder {
     return ExtrinsicBuilder(runtime, extrinsicVersion, batchMode).apply {
-        setTransactionExtension(VerifySignature.enabled(signer, accountId))
+        if (accountId != null && signer != null) {
+            setTransactionExtension(VerifySignature.enabled(signer, accountId))
+        }
         setTransactionExtension(CheckNonce(nonce))
         setTransactionExtension(CheckMortality(era, blockHash))
         setTransactionExtension(CheckGenesis(genesisHash))

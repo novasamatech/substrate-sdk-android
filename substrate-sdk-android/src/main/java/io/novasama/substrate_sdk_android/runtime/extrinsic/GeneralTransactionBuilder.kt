@@ -209,8 +209,7 @@ class ExtrinsicBuilder(
         }
     }
 
-    context(ScaleCodecWriter)
-    private fun encodeExtensionsVersion() {
+    private fun ScaleCodecWriter.encodeExtensionsVersion() {
         when (extrinsicVersion) {
             ExtrinsicVersion.V4 -> {
                 // extension version is not present in extrinsic v4
@@ -222,9 +221,8 @@ class ExtrinsicBuilder(
         }
     }
 
-    context(ScaleCodecWriter)
-    private fun encodeCall(call: GenericCall.Instance) {
-        GenericCall.encode(this@ScaleCodecWriter, runtime, call)
+    private fun ScaleCodecWriter.encodeCall(call: GenericCall.Instance) {
+        GenericCall.encode(this, runtime, call)
     }
 
     private fun allExtensionsInRuntime(extrinsicVersion: ExtrinsicVersion): List<TransactionExtensionMetadata> {
@@ -254,8 +252,7 @@ class ExtrinsicBuilder(
         )
     }
 
-    context(ScaleCodecWriter)
-    private fun encodeExtensions(succeedingExtensions: List<SucceedingExtensionValues>) {
+    private fun ScaleCodecWriter.encodeExtensions(succeedingExtensions: List<SucceedingExtensionValues>) {
         // Encode explicits
         succeedingExtensions.onEach { extensionValues ->
             encodeExtensionValue(
@@ -275,8 +272,7 @@ class ExtrinsicBuilder(
         }
     }
 
-    context(ScaleCodecWriter)
-    private fun encodeExtensionValue(
+    private fun ScaleCodecWriter.encodeExtensionValue(
         extension: TransactionExtension,
         extensionValue: Any?,
         type: RuntimeType<*, *>?,
@@ -290,7 +286,7 @@ class ExtrinsicBuilder(
         }
 
         try {
-            type.encodeUnsafe(this@ScaleCodecWriter, runtime, extensionValue)
+            type.encodeUnsafe(this, runtime, extensionValue)
         } catch (e: EncodeDecodeException) {
             throw Exception("Failed to encode extension ${extension.name}", e)
         }
