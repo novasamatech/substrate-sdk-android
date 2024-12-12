@@ -18,7 +18,7 @@ class VerifySignature(
 
     companion object {
 
-        const val ID = "VerifySignature"
+        const val ID = "VerifyMultiSignature"
 
         fun disabledExplicit(): Any {
             return DictEnum.Entry("Disabled", null)
