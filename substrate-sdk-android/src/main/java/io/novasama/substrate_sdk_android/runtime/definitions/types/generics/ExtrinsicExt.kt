@@ -1,7 +1,6 @@
 package io.novasama.substrate_sdk_android.runtime.definitions.types.generics
 
 import io.novasama.substrate_sdk_android.encrypt.EncryptionType
-import io.novasama.substrate_sdk_android.runtime.AccountId
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.DictEnum
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.verifySignature.VerifySignature
 import java.util.Locale
@@ -29,7 +28,7 @@ fun Extrinsic.Instance.signerIdentifier(): Any? {
 }
 
 fun Extrinsic.Instance.explicits(): ExtrinsicPayloadExtrasInstance? {
-    return when(val type = type) {
+    return when (val type = type) {
         Extrinsic.ExtrinsicType.Bare -> null
 
         is Extrinsic.ExtrinsicType.GeneralTransaction -> type.extensionExplicits
