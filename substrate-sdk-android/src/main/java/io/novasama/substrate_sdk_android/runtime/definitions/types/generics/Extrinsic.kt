@@ -8,6 +8,7 @@ import io.novasama.substrate_sdk_android.runtime.RuntimeSnapshot
 import io.novasama.substrate_sdk_android.runtime.definitions.types.Type
 import io.novasama.substrate_sdk_android.runtime.definitions.types.errors.EncodeDecodeException
 import io.novasama.substrate_sdk_android.runtime.definitions.types.useScaleWriter
+import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.TransactionExtension
 import io.novasama.substrate_sdk_android.scale.dataType.byte
 import io.novasama.substrate_sdk_android.scale.dataType.compactInt
 import io.novasama.substrate_sdk_android.scale.utils.directWrite
@@ -27,6 +28,23 @@ private const val EXTRINSIC_FORMAT_VERSION: Byte = 5
 private const val TYPE_ADDRESS = "Address"
 private const val TYPE_SIGNATURE = "ExtrinsicSignature"
 
+/**
+ * A type that encodes Substrate extrinsics. It supports extrinsics of version 4 and 5
+ *
+ * For v4 the layout is:
+ *     Signed: version_byte | address | signature | transaction_extensions | call
+ *     Unsigned: version_byte | call
+ *
+ * For v5 the layout is:
+ *    Bare: version_byte | call
+ *    General: version_byte | extensions_version | transaction_extensions_for(extensions_version) | call
+ *
+ * TODO Note that for v5 General transactions encoded extensions depend on used extensions_version, providing versioning
+ * However, this is not implemented **yet** and we currently encode a fixed set of extensions present in extrinsic metadata
+ * We will be able to support versioning once Metadata V16 (or v15 custom fields) become available
+ *
+ * For more deatails about transaction extensions @see [TransactionExtension] docs
+ */
 object Extrinsic : Type<Extrinsic.Instance>("ExtrinsicsDecoder") {
 
     class Instance(
