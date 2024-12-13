@@ -48,7 +48,9 @@ afterEvaluate {
 
                 // Adds javadocs and sources as separate jars.
 //                artifact androidJavadocsJar
-                artifact androidSourcesJar
+                artifact(androidSourcesJar) {
+                    classifier 'sources'
+                }
 
                 // You can customize attributes of the publication here or in module's build.gradle file.
                 //groupId = 'com.example'
@@ -94,6 +96,8 @@ afterEvaluate {
                     password = ossrhPassword
                 }
             }
+
+            mavenLocal()
         }
     }
 }

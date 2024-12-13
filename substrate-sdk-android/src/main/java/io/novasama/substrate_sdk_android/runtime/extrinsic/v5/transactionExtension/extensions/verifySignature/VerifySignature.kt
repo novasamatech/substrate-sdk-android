@@ -37,7 +37,7 @@ class VerifySignature(
 
             return when (asEnum.name) {
                 "Disabled" -> null
-                "Enabled" -> {
+                "Signed" -> {
                     val structValue = asEnum.value as Struct.Instance
 
                     SignatureInstance(
@@ -83,7 +83,7 @@ class VerifySignature(
         runtimeSnapshot: RuntimeSnapshot,
     ): Any {
         return DictEnum.Entry(
-            name = "Enabled",
+            name = "Signed",
             value = Struct.Instance(
                 mapOf(
                     "signature" to SignatureInstanceConstructor.constructInstance(
