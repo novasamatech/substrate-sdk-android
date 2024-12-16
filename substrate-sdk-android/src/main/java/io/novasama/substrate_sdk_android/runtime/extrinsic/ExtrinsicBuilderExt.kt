@@ -4,6 +4,7 @@ import io.novasama.substrate_sdk_android.runtime.AccountId
 import io.novasama.substrate_sdk_android.runtime.RuntimeSnapshot
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Era
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.GenericCall
+import io.novasama.substrate_sdk_android.runtime.extrinsic.builder.ExtrinsicBuilder
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.ChargeTransactionPayment
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.CheckGenesis
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.CheckMortality
@@ -14,6 +15,7 @@ import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtensi
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.checkMetadataHash.CheckMetadataHashMode
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.verifySignature.GeneralTransactionSigner
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.verifySignature.VerifySignature
+import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.verifySignature.VerifySignatureMode
 import io.novasama.substrate_sdk_android.runtime.metadata.call
 import io.novasama.substrate_sdk_android.runtime.metadata.module
 import io.novasama.substrate_sdk_android.wsrpc.request.runtime.chain.RuntimeVersion
@@ -58,13 +60,15 @@ fun ExtrinsicBuilder(
     era: Era = Era.Immortal,
     tip: BigInteger = DEFAULT_TIP,
     checkMetadataHash: CheckMetadataHashMode = CheckMetadataHashMode.Disabled,
-    extrinsicVersion: ExtrinsicVersion = ExtrinsicVersion.V4,
+    extrinsicVersion: ExtrinsicVersion = ExtrinsicVersion.V4(VerifySignatureMode.from(signer, accountId)),
     batchMode: BatchMode = BatchMode.BATCH,
 ): ExtrinsicBuilder {
     return ExtrinsicBuilder(runtime, extrinsicVersion, batchMode).apply {
-        if (accountId != null && signer != null) {
-            setTransactionExtension(VerifySignature.enabled(signer, accountId))
+        if (extrinsicVersion is ExtrinsicVersion.V5) {
+            val mode = VerifySignatureMode.from(signer, accountId)
+            setTransactionExtension(VerifySignature(mode))
         }
+
         setTransactionExtension(CheckNonce(nonce))
         setTransactionExtension(CheckMortality(era, blockHash))
         setTransactionExtension(CheckGenesis(genesisHash))

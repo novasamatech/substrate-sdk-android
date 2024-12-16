@@ -6,6 +6,8 @@ import io.novasama.substrate_sdk_android.runtime.AccountId
 import io.novasama.substrate_sdk_android.runtime.RuntimeSnapshot
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.DictEnum
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
+import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Extrinsic
+import io.novasama.substrate_sdk_android.runtime.definitions.types.instances.AddressInstanceConstructor
 import io.novasama.substrate_sdk_android.runtime.definitions.types.instances.SignatureInstanceConstructor
 import io.novasama.substrate_sdk_android.runtime.extrinsic.ExtrinsicVersion
 import io.novasama.substrate_sdk_android.runtime.extrinsic.signer.PAYLOAD_HASH_THRESHOLD
@@ -42,7 +44,7 @@ class VerifySignature(
 
                     SignatureInstance(
                         signature = structValue["signature"],
-                        account = structValue["account"]!!
+                        accountId = structValue["account"]!!
                     )
                 }
 
@@ -77,6 +79,15 @@ class VerifySignature(
         }
     }
 
+    internal suspend fun v4Signature(
+        inheritedImplication: InheritedImplication,
+        extrinsicVersion: ExtrinsicVersion,
+        runtimeSnapshot: RuntimeSnapshot,
+    ): SignatureInstance? {
+        val explicit = explicit(inheritedImplication, extrinsicVersion, runtimeSnapshot)
+        return getSignatureFromExplicit(explicit)
+    }
+
     private fun enabled(
         signatureWrapper: SignatureWrapper,
         accountId: AccountId,
@@ -100,7 +111,7 @@ class VerifySignature(
         val encoded = encoded()
 
         return when (extrinsicVersion) {
-            ExtrinsicVersion.V4 -> if (encoded.size > PAYLOAD_HASH_THRESHOLD) {
+            is ExtrinsicVersion.V4 -> if (encoded.size > PAYLOAD_HASH_THRESHOLD) {
                 encoded.blake2b256()
             } else {
                 encoded

@@ -8,6 +8,7 @@ import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtensi
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.CheckNonce
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.FixedValueTransactionExtension
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.verifySignature.VerifySignature
+import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionId
 
 /**
  * Interfaces that describes an arbitrary transaction extension.
@@ -64,3 +65,15 @@ fun TransactionExtension(
 }
 
 fun AbsentExtension(name: String) = TransactionExtension(name, null, null)
+
+fun List<SucceedingExtensionValues>.mutableExplicitsMap(): MutableMap<TransactionExtensionId, Any?> {
+    return associateByTo(
+        destination = mutableMapOf(),
+        keySelector = { it.transactionExtension.name },
+        valueTransform = { it.explicit }
+    )
+}
+
+fun List<SucceedingExtensionValues>.explicitsMap(): Map<TransactionExtensionId, Any?> {
+    return mutableExplicitsMap()
+}

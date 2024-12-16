@@ -1,6 +1,7 @@
 package io.novasama.substrate_sdk_android.runtime.definitions.types.generics
 
 import io.novasama.substrate_sdk_android.encrypt.EncryptionType
+import io.novasama.substrate_sdk_android.runtime.AccountId
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.DictEnum
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.verifySignature.VerifySignature
 import java.util.Locale
@@ -17,13 +18,13 @@ fun Extrinsic.Instance.signatureInstance(): Any? {
     }
 }
 
-fun Extrinsic.Instance.signerIdentifier(): Any? {
+fun Extrinsic.Instance.signer(): AccountId? {
     return when (val type = type) {
         Extrinsic.ExtrinsicType.Bare -> null
 
-        is Extrinsic.ExtrinsicType.GeneralTransaction -> type.findSignerIdentifierInExplicits()
+        is Extrinsic.ExtrinsicType.GeneralTransaction -> type.findSignerInExplicits()
 
-        is Extrinsic.ExtrinsicType.Signed -> type.accountIdentifier
+        is Extrinsic.ExtrinsicType.Signed -> extractAccountId(type.accountIdentifier)
     }
 }
 
@@ -37,9 +38,9 @@ fun Extrinsic.Instance.explicits(): ExtrinsicPayloadExtrasInstance? {
     }
 }
 
-private fun Extrinsic.ExtrinsicType.GeneralTransaction.findSignerIdentifierInExplicits(): Any? {
+private fun Extrinsic.ExtrinsicType.GeneralTransaction.findSignerInExplicits(): AccountId? {
     val explicit = extensionExplicits[VerifySignature.ID]
-    return VerifySignature.getSignatureFromExplicit(explicit)?.account
+    return VerifySignature.getSignatureFromExplicit(explicit)?.accountId
 }
 
 fun Extrinsic.Instance.tryExtractMultiSignature(): MultiSignature? {
@@ -58,6 +59,20 @@ private fun Extrinsic.ExtrinsicType.GeneralTransaction.findSignatureInExplicits(
     val explicit = extensionExplicits[VerifySignature.ID]
     return VerifySignature.getSignatureFromExplicit(explicit)?.signature
 }
+
+fun extractAccountId(dynamicInstance: Any?): AccountId =
+    when (dynamicInstance) {
+        // MultiAddress
+        is DictEnum.Entry<*> ->  {
+            require(dynamicInstance.name == "Id")
+
+            dynamicInstance.value as AccountId
+        }
+        // GenericAccountId or EthereumAddress
+        is ByteArray -> dynamicInstance
+
+        else -> error("Cannot extract account id")
+    }
 
 private val EncryptionType.multiSignatureName
     get() = rawName.capitalize(Locale.ROOT)

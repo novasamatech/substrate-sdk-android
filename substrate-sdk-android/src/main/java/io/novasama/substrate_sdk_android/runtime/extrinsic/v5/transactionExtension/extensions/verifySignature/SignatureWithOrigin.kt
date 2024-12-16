@@ -4,5 +4,5 @@ import io.novasama.substrate_sdk_android.runtime.AccountId
 
 internal class SignatureInstance(
     val signature: Any?,
-    val account: AccountId
+    val accountId: AccountId
 )

@@ -4,15 +4,16 @@ import io.novasama.substrate_sdk_android.encrypt.EncryptionType
 import io.novasama.substrate_sdk_android.encrypt.MultiChainEncryption
 import io.novasama.substrate_sdk_android.encrypt.keypair.BaseKeypair
 import io.novasama.substrate_sdk_android.extensions.fromHex
-import io.novasama.substrate_sdk_android.extensions.toHexString
 import io.novasama.substrate_sdk_android.integration.transfer
 import io.novasama.substrate_sdk_android.runtime.RealRuntimeProvider
 import io.novasama.substrate_sdk_android.runtime.RuntimeSnapshot
 import io.novasama.substrate_sdk_android.runtime.definitions.types.fromHex
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Era
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Extrinsic
+import io.novasama.substrate_sdk_android.runtime.extrinsic.builder.ExtrinsicBuilder
 import io.novasama.substrate_sdk_android.runtime.extrinsic.signer.KeyPairSigner
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.ChargeAssetTxPayment
+import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.verifySignature.VerifySignatureMode
 import io.novasama.substrate_sdk_android.runtime.metadata.MetadataTestCommon
 import io.novasama.substrate_sdk_android.ss58.SS58Encoder.publicKeyToSubstrateAccountId
 import io.novasama.substrate_sdk_android.ss58.SS58Encoder.toAccountId
@@ -194,7 +195,8 @@ class ExtrinsicBuilderTest {
     fun `should build v5 general transaction`() = runBlockingTest {
         val runtime = RealRuntimeProvider.buildRuntimePostV14("westend_v15")
 
-        val expectedTx = "0xc04500b503880000040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402"
+        val expectedTx =
+            "0xc04500b503880000040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402"
 
         val extrinsicBuilder = createExtrinsicBuilder(
             usedRuntime = runtime,
@@ -211,7 +213,11 @@ class ExtrinsicBuilderTest {
     private fun createExtrinsicBuilder(
         usedRuntime: RuntimeSnapshot = runtime,
         batchMode: BatchMode = BatchMode.BATCH,
-        extrinsicVersion: ExtrinsicVersion = ExtrinsicVersion.V4
+        extrinsicVersion: ExtrinsicVersion = ExtrinsicVersion.V4(
+            VerifySignatureMode.from(
+                keypairSigner(), KEYPAIR.publicKey.publicKeyToSubstrateAccountId()
+            )
+        )
     ) = ExtrinsicBuilder(
         runtime = usedRuntime,
         signer = keypairSigner(),
