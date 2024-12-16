@@ -6,8 +6,6 @@ import io.novasama.substrate_sdk_android.runtime.AccountId
 import io.novasama.substrate_sdk_android.runtime.RuntimeSnapshot
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.DictEnum
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
-import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Extrinsic
-import io.novasama.substrate_sdk_android.runtime.definitions.types.instances.AddressInstanceConstructor
 import io.novasama.substrate_sdk_android.runtime.definitions.types.instances.SignatureInstanceConstructor
 import io.novasama.substrate_sdk_android.runtime.extrinsic.ExtrinsicVersion
 import io.novasama.substrate_sdk_android.runtime.extrinsic.signer.PAYLOAD_HASH_THRESHOLD

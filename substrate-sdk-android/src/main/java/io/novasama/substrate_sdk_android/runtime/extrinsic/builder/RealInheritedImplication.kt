@@ -20,7 +20,6 @@ internal abstract class BaseInheritedImplication(
     val runtime: RuntimeSnapshot
 ) : InheritedImplication {
 
-
     protected abstract fun ScaleCodecWriter.encodeImplication()
 
     final override fun encoded(): ByteArray {

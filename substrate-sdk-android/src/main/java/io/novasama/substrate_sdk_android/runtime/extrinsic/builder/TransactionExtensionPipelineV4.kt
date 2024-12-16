@@ -19,7 +19,7 @@ import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionMe
 class TransactionExtensionPipelineV4(
     private val runtime: RuntimeSnapshot,
     private val extrinsicVersion: ExtrinsicVersion.V4
-): TransactionBuildingPipeline {
+) : TransactionBuildingPipeline {
 
     override suspend fun constructExtrinsicType(
         generalTransactionParams: GeneralTransactionParams

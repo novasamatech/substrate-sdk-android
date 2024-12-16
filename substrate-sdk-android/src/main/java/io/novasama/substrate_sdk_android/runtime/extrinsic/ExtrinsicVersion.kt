@@ -8,7 +8,7 @@ sealed class ExtrinsicVersion {
 
     class V4(
         val verifySignatureMode: VerifySignatureMode,
-    ): ExtrinsicVersion()
+    ) : ExtrinsicVersion()
 
     class V5(
         val extensionVersion: Byte = EXTENSIONS_VERSION_DEFAULT,

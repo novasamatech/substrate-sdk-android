@@ -63,7 +63,7 @@ private fun Extrinsic.ExtrinsicType.GeneralTransaction.findSignatureInExplicits(
 fun extractAccountId(dynamicInstance: Any?): AccountId =
     when (dynamicInstance) {
         // MultiAddress
-        is DictEnum.Entry<*> ->  {
+        is DictEnum.Entry<*> -> {
             require(dynamicInstance.name == "Id")
 
             dynamicInstance.value as AccountId
