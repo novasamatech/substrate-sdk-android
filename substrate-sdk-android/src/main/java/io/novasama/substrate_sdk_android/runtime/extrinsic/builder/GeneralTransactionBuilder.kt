@@ -16,6 +16,7 @@ class ExtrinsicBuilder(
     val runtime: RuntimeSnapshot,
     private val extrinsicVersion: ExtrinsicVersion,
     private val batchMode: BatchMode,
+    private val extensionNesting: TransactionExtensionNesting = FlatTransactionExtensionNesting()
 ) {
 
     private val transactionExtensions = mutableMapOf<TransactionExtensionId, TransactionExtension>()
@@ -67,7 +68,7 @@ class ExtrinsicBuilder(
     private fun createTransactionBuildingPipeline(): TransactionBuildingPipeline {
         return when (extrinsicVersion) {
             is ExtrinsicVersion.V4 -> TransactionExtensionPipelineV4(runtime, extrinsicVersion)
-            is ExtrinsicVersion.V5 -> TransactionBuildingPipelineV5(runtime, extrinsicVersion)
+            is ExtrinsicVersion.V5 -> TransactionBuildingPipelineV5(runtime, extrinsicVersion, extensionNesting)
         }
     }
 

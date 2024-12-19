@@ -14,24 +14,30 @@ import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionMe
 
 class TransactionBuildingPipelineV5(
     private val runtime: RuntimeSnapshot,
-    private val extrinsicVersion: ExtrinsicVersion.V5
+    private val extrinsicVersion: ExtrinsicVersion.V5,
+    private val nesting: TransactionExtensionNesting,
 ) : TransactionBuildingPipeline {
 
     override suspend fun constructExtrinsicType(
         generalTransactionParams: GeneralTransactionParams
     ): Extrinsic.ExtrinsicType {
-        val initial = InheritedImplicationV5(
-            call = generalTransactionParams.call,
-            succeedingExtensions = emptyList()
-        )
-
         val allRuntimeExtensions = runtime.metadata.extrinsic.signedExtensions
 
-        val finalImplication = allRuntimeExtensions.foldRight(initial) { extensionMetadata, acc ->
+        val lastExtension = allRuntimeExtensions.last().id
+        val initial = InheritedImplicationV5(
+            call = generalTransactionParams.call,
+            succeedingExtensions = emptyList(),
+            currentNestedLevel = nesting.nestedLevelOf(lastExtension)
+        )
+
+        val finalImplication = allRuntimeExtensions.foldRightIndexed(initial) { idx, extensionMetadata, acc ->
             val extension = generalTransactionParams.extensions.getOrAbsent(extensionMetadata.id)
             val explicit = extension.explicit(acc, extrinsicVersion, runtime)
 
-            acc.add(extension, extensionMetadata, explicit)
+            val nextExtension = allRuntimeExtensions.getOrNull(idx - 1)?.id
+            val nextNestingLevel = nextExtension?.let(nesting::nestedLevelOf) ?: 0
+
+            acc.add(extension, extensionMetadata, explicit, nextNestingLevel)
         }
 
         return Extrinsic.ExtrinsicType.GeneralTransaction(
@@ -42,23 +48,26 @@ class TransactionBuildingPipelineV5(
 
     private inner class InheritedImplicationV5(
         override val call: GenericCall.Instance,
-        override val succeedingExtensions: List<SucceedingExtensionValues>
-    ) : BaseInheritedImplication(call, succeedingExtensions, runtime) {
+        override val succeedingExtensions: List<SucceedingExtensionValues>,
+        currentNestedLevel: Int
+    ) : BaseInheritedImplication(call, succeedingExtensions, runtime, currentNestedLevel) {
 
         override fun ScaleCodecWriter.encodeImplication() {
             writeByte(extrinsicVersion.extensionVersion)
-            encodeCall(call)
-            encodeExtensions(succeedingExtensions)
+            encodeCall()
+            encodeExtensions()
         }
 
         suspend fun add(
             extension: TransactionExtension,
             extensionMetadata: TransactionExtensionMetadata,
-            explicit: Any?
+            explicit: Any?,
+            nextNestingLevel: Int,
         ): InheritedImplicationV5 {
             return InheritedImplicationV5(
                 call = call,
-                succeedingExtensions = addExtensionValue(extension, extensionMetadata, explicit)
+                succeedingExtensions = addExtensionValue(extension, extensionMetadata, explicit),
+                currentNestedLevel = nextNestingLevel
             )
         }
     }

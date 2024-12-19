@@ -18,7 +18,7 @@ import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionMe
 
 class TransactionExtensionPipelineV4(
     private val runtime: RuntimeSnapshot,
-    private val extrinsicVersion: ExtrinsicVersion.V4
+    private val extrinsicVersion: ExtrinsicVersion.V4,
 ) : TransactionBuildingPipeline {
 
     override suspend fun constructExtrinsicType(
@@ -26,26 +26,32 @@ class TransactionExtensionPipelineV4(
     ): Extrinsic.ExtrinsicType {
         val initial = InheritedImplicationV4(
             call = generalTransactionParams.call,
-            succeedingExtensions = emptyList()
+            succeedingExtensions = emptyList(),
+            currentNestedLevel = 0
         )
 
         val allRuntimeExtensions = runtime.metadata.extrinsic.signedExtensions
 
         val finalImplication = allRuntimeExtensions.foldRight(initial) { extensionMetadata, acc ->
-            val extension = generalTransactionParams.extensions.getDisablingSignature(extensionMetadata.id)
+            val extension =
+                generalTransactionParams.extensions.getDisablingSignature(extensionMetadata.id)
             val explicit = extension.explicit(acc, extrinsicVersion, runtime)
 
             acc.add(extension, extensionMetadata, explicit)
         }
 
         val manualVerifySignature = VerifySignature(extrinsicVersion.verifySignatureMode)
-        val v4Signature = manualVerifySignature.v4Signature(finalImplication, extrinsicVersion, runtime)
+        val v4Signature =
+            manualVerifySignature.v4Signature(finalImplication, extrinsicVersion, runtime)
 
         return if (v4Signature == null) {
             Extrinsic.ExtrinsicType.Bare
         } else {
             Extrinsic.ExtrinsicType.Signed(
-                accountIdentifier = AddressInstanceConstructor.constructInstance(runtime.typeRegistry, v4Signature.accountId),
+                accountIdentifier = AddressInstanceConstructor.constructInstance(
+                    runtime.typeRegistry,
+                    v4Signature.accountId
+                ),
                 signature = v4Signature.signature,
                 signedExtras = finalImplication.succeedingExtensions.explicitsMap()
             )
@@ -62,22 +68,24 @@ class TransactionExtensionPipelineV4(
 
     private inner class InheritedImplicationV4(
         override val call: GenericCall.Instance,
-        override val succeedingExtensions: List<SucceedingExtensionValues>
-    ) : BaseInheritedImplication(call, succeedingExtensions, runtime) {
+        override val succeedingExtensions: List<SucceedingExtensionValues>,
+        currentNestedLevel: Int,
+    ) : BaseInheritedImplication(call, succeedingExtensions, runtime, currentNestedLevel) {
 
         override fun ScaleCodecWriter.encodeImplication() {
-            encodeCall(call)
-            encodeExtensions(succeedingExtensions)
+            encodeCall()
+            encodeExtensions()
         }
 
         suspend fun add(
             extension: TransactionExtension,
             extensionMetadata: TransactionExtensionMetadata,
-            explicit: Any?
+            explicit: Any?,
         ): InheritedImplicationV4 {
             return InheritedImplicationV4(
                 call = call,
-                succeedingExtensions = addExtensionValue(extension, extensionMetadata, explicit)
+                succeedingExtensions = addExtensionValue(extension, extensionMetadata, explicit),
+                currentNestedLevel = currentNestingLevel
             )
         }
     }

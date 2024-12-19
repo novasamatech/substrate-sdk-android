@@ -5,6 +5,8 @@ import io.novasama.substrate_sdk_android.runtime.RuntimeSnapshot
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Era
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.GenericCall
 import io.novasama.substrate_sdk_android.runtime.extrinsic.builder.ExtrinsicBuilder
+import io.novasama.substrate_sdk_android.runtime.extrinsic.builder.FlatTransactionExtensionNesting
+import io.novasama.substrate_sdk_android.runtime.extrinsic.builder.TransactionExtensionNesting
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.ChargeTransactionPayment
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.CheckGenesis
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.CheckMortality
@@ -62,8 +64,9 @@ fun ExtrinsicBuilder(
     checkMetadataHash: CheckMetadataHashMode = CheckMetadataHashMode.Disabled,
     extrinsicVersion: ExtrinsicVersion = ExtrinsicVersion.V4(VerifySignatureMode.from(signer, accountId)),
     batchMode: BatchMode = BatchMode.BATCH,
+    extensionNesting: TransactionExtensionNesting = FlatTransactionExtensionNesting(),
 ): ExtrinsicBuilder {
-    return ExtrinsicBuilder(runtime, extrinsicVersion, batchMode).apply {
+    return ExtrinsicBuilder(runtime, extrinsicVersion, batchMode, extensionNesting).apply {
         if (extrinsicVersion is ExtrinsicVersion.V5) {
             val mode = VerifySignatureMode.from(signer, accountId)
             setTransactionExtension(VerifySignature(mode))

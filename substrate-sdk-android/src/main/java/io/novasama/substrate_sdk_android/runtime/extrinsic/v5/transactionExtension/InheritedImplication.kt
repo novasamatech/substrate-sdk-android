@@ -52,7 +52,8 @@ class SucceedingExtensionValues(
     val transactionExtension: TransactionExtension,
     val extensionMetadata: TransactionExtensionMetadata,
     val implicit: Any?,
-    val explicit: Any?
+    val explicit: Any?,
+    val nestingLevel: Int
 )
 
 inline fun <reified T> List<SucceedingExtensionValues>.findExtensionOrThrow(): T {

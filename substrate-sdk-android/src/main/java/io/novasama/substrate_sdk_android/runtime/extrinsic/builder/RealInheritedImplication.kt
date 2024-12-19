@@ -10,14 +10,19 @@ import io.novasama.substrate_sdk_android.runtime.definitions.types.useScaleWrite
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.InheritedImplication
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.SucceedingExtensionValues
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.TransactionExtension
+import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.TransactionExtensionValue
+import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionId
 import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionMetadata
+import org.bouncycastle.asn1.x509.Extensions
 
 internal abstract class BaseInheritedImplication(
     override val call: GenericCall.Instance,
 
     override val succeedingExtensions: List<SucceedingExtensionValues>,
 
-    val runtime: RuntimeSnapshot
+    val runtime: RuntimeSnapshot,
+
+    protected val currentNestingLevel: Int,
 ) : InheritedImplication {
 
     protected abstract fun ScaleCodecWriter.encodeImplication()
@@ -37,7 +42,8 @@ internal abstract class BaseInheritedImplication(
             transactionExtension = extension,
             extensionMetadata = extensionMetadata,
             implicit = extension.implicit(),
-            explicit = explicit
+            explicit = explicit,
+            nestingLevel = currentNestingLevel
         )
 
         val newSucceedingExtensionValues = buildList {
@@ -48,13 +54,20 @@ internal abstract class BaseInheritedImplication(
         return newSucceedingExtensionValues
     }
 
-    protected fun ScaleCodecWriter.encodeCall(call: GenericCall.Instance) {
+    protected fun ScaleCodecWriter.encodeCall() {
         GenericCall.encode(this, runtime, call)
     }
 
-    protected fun ScaleCodecWriter.encodeExtensions(succeedingExtensions: List<SucceedingExtensionValues>) {
+    protected fun ScaleCodecWriter.encodeExtensions() {
+        val (fromPreviousLevels, fromCurrentLevel) = partitionByNestingBoundary()
+
+        encodeExtensions(fromPreviousLevels)
+        encodeExtensions(fromCurrentLevel)
+    }
+
+    private fun ScaleCodecWriter.encodeExtensions(extensions: List<SucceedingExtensionValues>) {
         // Encode explicits
-        succeedingExtensions.onEach { extensionValues ->
+        extensions.onEach { extensionValues ->
             encodeExtensionValue(
                 extensionValues.transactionExtension,
                 extensionValues.explicit,
@@ -63,13 +76,30 @@ internal abstract class BaseInheritedImplication(
         }
 
         // Encode implicits
-        succeedingExtensions.onEach { extensionValues ->
+        extensions.onEach { extensionValues ->
             encodeExtensionValue(
                 extensionValues.transactionExtension,
                 extensionValues.implicit,
                 extensionValues.extensionMetadata.includedInSignature
             )
         }
+    }
+
+    private fun partitionByNestingBoundary(): Pair<List<SucceedingExtensionValues>, List<SucceedingExtensionValues>> {
+        val firstExtensionWithLowerNestedLevel = succeedingExtensions.indexOfFirst { it.nestingLevel < currentNestingLevel }
+
+        val inheritedFromPreviousLevel: List<SucceedingExtensionValues>
+        val inheritedFromCurrentLevel: List<SucceedingExtensionValues>
+
+        if (firstExtensionWithLowerNestedLevel == -1) {
+            inheritedFromPreviousLevel = emptyList()
+            inheritedFromCurrentLevel = succeedingExtensions
+        } else {
+            inheritedFromPreviousLevel = succeedingExtensions.subList(firstExtensionWithLowerNestedLevel, succeedingExtensions.size)
+            inheritedFromCurrentLevel = succeedingExtensions.subList(0, firstExtensionWithLowerNestedLevel)
+        }
+
+        return inheritedFromPreviousLevel to inheritedFromCurrentLevel
     }
 
     private fun ScaleCodecWriter.encodeExtensionValue(
