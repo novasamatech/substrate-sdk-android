@@ -7,6 +7,8 @@ import io.novasama.substrate_sdk_android.wsrpc.request.DeliveryType
 import io.novasama.substrate_sdk_android.wsrpc.request.runtime.RuntimeRequest
 import io.novasama.substrate_sdk_android.wsrpc.request.runtime.UnsubscribeMethodResolver
 import io.novasama.substrate_sdk_android.wsrpc.request.runtime.storage.MultiplexerCallback
+import io.novasama.substrate_sdk_android.wsrpc.request.runtime.storage.StorageSubscriptionMultiplexer
+import io.novasama.substrate_sdk_android.wsrpc.request.runtime.storage.StorageSubscriptionMultiplexer.BatchChange
 import io.novasama.substrate_sdk_android.wsrpc.request.runtime.storage.StorageSubscriptionMultiplexer.Builder
 import io.novasama.substrate_sdk_android.wsrpc.request.runtime.storage.StorageSubscriptionMultiplexer.Change
 import io.novasama.substrate_sdk_android.wsrpc.response.RpcResponse
@@ -98,7 +100,7 @@ fun SocketService.networkStateFlow(): Flow<State> = callbackFlow {
 }
 
 fun Builder.subscribe(key: String): Flow<Change> {
-    val callback = FlowCallback()
+    val callback = FlowCallback<Change>()
 
     subscribe(key, callback)
 
@@ -106,11 +108,20 @@ fun Builder.subscribe(key: String): Flow<Change> {
         .map { it.getOrThrow() }
 }
 
-private class FlowCallback : MultiplexerCallback {
+fun Builder.subscribe(keys: List<String>): Flow<BatchChange> {
+    val callback = FlowCallback<BatchChange>()
 
-    val collector = MutableSharedFlow<Result<Change>>(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    subscribe(keys, callback)
 
-    override fun onNext(response: Change) {
+    return callback.collector
+        .map { it.getOrThrow() }
+}
+
+private class FlowCallback<T> : SocketService.ResponseListener<T> {
+
+    val collector = MutableSharedFlow<Result<T>>(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+
+    override fun onNext(response: T) {
         collector.tryEmit(Result.success(response))
     }
 
