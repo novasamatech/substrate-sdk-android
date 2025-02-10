@@ -11,7 +11,7 @@ import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Null
 import io.novasama.substrate_sdk_android.runtime.metadata.ExtrinsicMetadata
 import io.novasama.substrate_sdk_android.runtime.metadata.RuntimeMetadata
 import io.novasama.substrate_sdk_android.runtime.metadata.RuntimeMetadataReader
-import io.novasama.substrate_sdk_android.runtime.metadata.SignedExtensionMetadata
+import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionMetadata
 import io.novasama.substrate_sdk_android.runtime.metadata.groupByName
 import io.novasama.substrate_sdk_android.runtime.metadata.module.Constant
 import io.novasama.substrate_sdk_android.runtime.metadata.module.ErrorMetadata
@@ -40,7 +40,7 @@ object V14RuntimeBuilder : RuntimeBuilder {
     override fun buildMetadata(
         reader: RuntimeMetadataReader,
         typeRegistry: TypeRegistry,
-        fallbackSignedExtensions: List<SignedExtensionMetadata>,
+        fallbackSignedExtensions: List<TransactionExtensionMetadata>,
     ): RuntimeMetadata {
         val metadataStruct = reader.metadata
 
@@ -262,7 +262,7 @@ object V14RuntimeBuilder : RuntimeBuilder {
         return ExtrinsicMetadata(
             version = struct[schema.version].toInt().toBigInteger(),
             signedExtensions = struct[schema.signedExtensions].map {
-                SignedExtensionMetadata(
+                TransactionExtensionMetadata(
                     id = it[SignedExtensionMetadataV14.identifier],
                     includedInExtrinsic = typeRegistry[it[SignedExtensionMetadataV14.type]],
                     includedInSignature = typeRegistry[it[SignedExtensionMetadataV14.additionalSigned]]

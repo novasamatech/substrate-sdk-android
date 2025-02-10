@@ -44,7 +44,7 @@ class MetadataTest {
 
     @Test
     fun `should decode metadata with NMap`() {
-        val metadata = RealRuntimeProvider.buildRuntimeV14("statemine").metadata
+        val metadata = RealRuntimeProvider.buildRuntimePostV14("statemine").metadata
 
         assertInstance<StorageEntryType.NMap>(metadata.module("Assets").storage("Approvals").type)
     }

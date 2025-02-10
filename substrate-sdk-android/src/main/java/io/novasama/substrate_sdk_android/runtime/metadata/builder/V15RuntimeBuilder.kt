@@ -3,7 +3,7 @@ package io.novasama.substrate_sdk_android.runtime.metadata.builder
 import io.novasama.substrate_sdk_android.runtime.definitions.registry.TypeRegistry
 import io.novasama.substrate_sdk_android.runtime.metadata.RuntimeMetadata
 import io.novasama.substrate_sdk_android.runtime.metadata.RuntimeMetadataReader
-import io.novasama.substrate_sdk_android.runtime.metadata.SignedExtensionMetadata
+import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionMetadata
 import io.novasama.substrate_sdk_android.runtime.metadata.module.RuntimeApi
 import io.novasama.substrate_sdk_android.runtime.metadata.module.RuntimeApiMethod
 import io.novasama.substrate_sdk_android.runtime.metadata.module.RuntimeApiMethodParam
@@ -23,7 +23,7 @@ object V15RuntimeBuilder : RuntimeBuilder {
     override fun buildMetadata(
         reader: RuntimeMetadataReader,
         typeRegistry: TypeRegistry,
-        fallbackSignedExtensions: List<SignedExtensionMetadata>
+        fallbackSignedExtensions: List<TransactionExtensionMetadata>
     ): RuntimeMetadata {
         val v14 = V14RuntimeBuilder.buildMetadata(reader, typeRegistry, fallbackSignedExtensions)
 

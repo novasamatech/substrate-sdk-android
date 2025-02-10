@@ -46,12 +46,13 @@ private class RealSendableExtrinsic(
     }
 
     private fun createSignatureHex(): String {
-        requireNotNull(extrinsic.signature) {
+        val type = extrinsic.type
+        require(type is Extrinsic.ExtrinsicType.Signed) {
             "Extrinsic is unsigned"
         }
 
         val signatureType = Extrinsic.signatureType(runtime)
 
-        return signatureType.toHexUntyped(runtime, extrinsic.signature.signature)
+        return signatureType.toHexUntyped(runtime, type.signature)
     }
 }

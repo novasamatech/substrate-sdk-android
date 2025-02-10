@@ -6,9 +6,9 @@ import io.novasama.substrate_sdk_android.runtime.definitions.types.primitives.Co
 import io.novasama.substrate_sdk_android.runtime.definitions.types.primitives.FixedByteArray
 import io.novasama.substrate_sdk_android.runtime.definitions.types.primitives.u32
 import io.novasama.substrate_sdk_android.runtime.definitions.types.primitives.u8
-import io.novasama.substrate_sdk_android.runtime.metadata.SignedExtensionMetadata
-import io.novasama.substrate_sdk_android.runtime.metadata.SignedExtensionMetadata.Companion.onlyInExtrinsic
-import io.novasama.substrate_sdk_android.runtime.metadata.SignedExtensionMetadata.Companion.onlyInSignature
+import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionMetadata
+import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionMetadata.Companion.onlyInExtrinsic
+import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionMetadata.Companion.onlyInSignature
 
 object DefaultSignedExtensions {
 
@@ -21,7 +21,7 @@ object DefaultSignedExtensions {
     const val CHECK_METADATA_HASH = "CheckMetadataHash"
 
     val ALL = listOf(
-        SignedExtensionMetadata(
+        TransactionExtensionMetadata(
             id = CHECK_MORTALITY,
             includedInExtrinsic = EraType,
             includedInSignature = H256
@@ -35,7 +35,7 @@ object DefaultSignedExtensions {
         // This one should not be included in any pre-v14 runtime
         // which is the use-case for this hard-coded list
         // But we support it anyway just in case
-        SignedExtensionMetadata(
+        TransactionExtensionMetadata(
             id = CHECK_METADATA_HASH,
             includedInExtrinsic = u8,
             includedInSignature = Option(

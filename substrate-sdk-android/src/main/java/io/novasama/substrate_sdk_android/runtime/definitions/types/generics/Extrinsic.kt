@@ -6,33 +6,66 @@ import io.emeraldpay.polkaj.scale.ScaleCodecReader
 import io.emeraldpay.polkaj.scale.ScaleCodecWriter
 import io.novasama.substrate_sdk_android.runtime.RuntimeSnapshot
 import io.novasama.substrate_sdk_android.runtime.definitions.types.Type
-import io.novasama.substrate_sdk_android.runtime.definitions.types.bytes
 import io.novasama.substrate_sdk_android.runtime.definitions.types.errors.EncodeDecodeException
-import io.novasama.substrate_sdk_android.runtime.definitions.types.toByteArray
 import io.novasama.substrate_sdk_android.runtime.definitions.types.useScaleWriter
+import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.TransactionExtension
 import io.novasama.substrate_sdk_android.scale.dataType.byte
 import io.novasama.substrate_sdk_android.scale.dataType.compactInt
-import io.novasama.substrate_sdk_android.scale.dataType.toByteArray
 import io.novasama.substrate_sdk_android.scale.utils.directWrite
+import kotlin.experimental.and
+import kotlin.experimental.or
 
-private val SIGNED_MASK = 0b1000_0000.toUByte()
+private const val VERSION_MASK: Byte = 0b0011_1111
+private const val TYPE_MASK: Byte = 0b1100_0000.toByte()
+
+private const val TYPE_BARE: Byte = 0b00000000
+private const val TYPE_SIGNED: Byte = 0b10000000.toByte()
+private const val TYPE_GENERAL: Byte = 0b01000000
+
+private const val LEGACY_EXTRINSIC_FORMAT_VERSION: Byte = 4
+private const val EXTRINSIC_FORMAT_VERSION: Byte = 5
 
 private const val TYPE_ADDRESS = "Address"
 private const val TYPE_SIGNATURE = "ExtrinsicSignature"
 
+/**
+ * A type that encodes Substrate extrinsics. It supports extrinsics of version 4 and 5
+ *
+ * For v4 the layout is:
+ *     Signed: version_byte | address | signature | transaction_extensions | call
+ *     Unsigned: version_byte | call
+ *
+ * For v5 the layout is:
+ *    Bare: version_byte | call
+ *    General: version_byte | extensions_version | transaction_extensions_for(extensions_version) | call
+ *
+ * TODO Note that for v5 General transactions encoded extensions depend on used extensions_version, providing versioning
+ * However, this is not implemented **yet** and we currently encode a fixed set of extensions present in extrinsic metadata
+ * We will be able to support versioning once Metadata V16 (or v15 custom fields) become available
+ *
+ * For more deatails about transaction extensions @see [TransactionExtension] docs
+ */
 object Extrinsic : Type<Extrinsic.Instance>("ExtrinsicsDecoder") {
 
     class Instance(
-        val signature: Signature?,
+        val type: ExtrinsicType,
         val call: GenericCall.Instance
     )
 
-    class Signature(
-        val accountIdentifier: Any?,
-        val signature: Any?,
-        val signedExtras: ExtrinsicPayloadExtrasInstance
-    ) {
-        companion object // for creator extensions
+    sealed class ExtrinsicType {
+
+        object Bare : ExtrinsicType()
+
+        class Signed(
+            val accountIdentifier: Any?,
+            val signature: Any?,
+            val signedExtras: ExtrinsicPayloadExtrasInstance
+        ) : ExtrinsicType()
+
+        class GeneralTransaction(
+            val extensionsVersion: Byte,
+            val extensionExplicits: ExtrinsicPayloadExtrasInstance
+        ) : ExtrinsicType()
     }
 
     fun signatureType(runtime: RuntimeSnapshot): Type<*> {
@@ -48,21 +81,28 @@ object Extrinsic : Type<Extrinsic.Instance>("ExtrinsicsDecoder") {
     ): Instance {
         val length = compactInt.read(scaleCodecReader)
 
-        val extrinsicVersion = byte.read(scaleCodecReader).toUByte()
+        val extrinsicVersionByte = byte.read(scaleCodecReader)
 
-        val signature = if (isSigned(extrinsicVersion)) {
-            Signature(
-                accountIdentifier = addressType(runtime).decode(scaleCodecReader, runtime),
-                signature = signatureType(runtime).decode(scaleCodecReader, runtime),
-                signedExtras = ExtrasIncludedInExtrinsic.decode(scaleCodecReader, runtime)
-            )
-        } else {
-            null
+        val extrinsicVersion = extrinsicVersionByte and VERSION_MASK
+        val extrinsicType = extrinsicVersionByte and TYPE_MASK
+
+        val type = when {
+            extrinsicType == TYPE_BARE && versionSupportsBare(extrinsicVersion) -> ExtrinsicType.Bare
+
+            extrinsicType == TYPE_SIGNED && extrinsicVersion == LEGACY_EXTRINSIC_FORMAT_VERSION -> {
+                decodeSignedType(runtime, scaleCodecReader)
+            }
+
+            extrinsicType == TYPE_GENERAL && extrinsicVersion == EXTRINSIC_FORMAT_VERSION -> {
+                decodeGeneralType(runtime, scaleCodecReader)
+            }
+
+            else -> error("Unknown extrinsic version: $extrinsicVersionByte")
         }
 
         val call = GenericCall.decode(scaleCodecReader, runtime)
 
-        return Instance(signature, call)
+        return Instance(type, call)
     }
 
     override fun encode(
@@ -70,7 +110,33 @@ object Extrinsic : Type<Extrinsic.Instance>("ExtrinsicsDecoder") {
         runtime: RuntimeSnapshot,
         value: Instance
     ) {
-        encode(scaleCodecWriter, runtime, value, encodeLength = true)
+        val noLengthBytes = encodeNoLength(runtime, value)
+        Bytes.encode(scaleCodecWriter, runtime, noLengthBytes)
+    }
+
+    private fun versionSupportsBare(version: Byte): Boolean {
+        return version == EXTRINSIC_FORMAT_VERSION || version == LEGACY_EXTRINSIC_FORMAT_VERSION
+    }
+
+    private fun decodeSignedType(
+        runtime: RuntimeSnapshot,
+        scaleCodecReader: ScaleCodecReader,
+    ): ExtrinsicType.Signed {
+        return ExtrinsicType.Signed(
+            accountIdentifier = addressType(runtime).decode(scaleCodecReader, runtime),
+            signature = signatureType(runtime).decode(scaleCodecReader, runtime),
+            signedExtras = ExtrasIncludedInExtrinsic.decode(scaleCodecReader, runtime)
+        )
+    }
+
+    private fun decodeGeneralType(
+        runtime: RuntimeSnapshot,
+        scaleCodecReader: ScaleCodecReader
+    ): ExtrinsicType.GeneralTransaction {
+        val extensionsVersion = scaleCodecReader.readByte()
+        val explicits = ExtrasIncludedInExtrinsic.decode(scaleCodecReader, runtime)
+
+        return ExtrinsicType.GeneralTransaction(extensionsVersion, explicits)
     }
 
     fun encodeWithoutLength(
@@ -78,58 +144,71 @@ object Extrinsic : Type<Extrinsic.Instance>("ExtrinsicsDecoder") {
         runtime: RuntimeSnapshot,
         value: Instance
     ) {
-        encode(scaleCodecWriter, runtime, value, encodeLength = false)
+        val noLengthBytes = encodeNoLength(runtime, value)
+        scaleCodecWriter.directWrite(noLengthBytes)
     }
 
-    private fun encode(
-        scaleCodecWriter: ScaleCodecWriter,
+    private fun encodeNoLength(
         runtime: RuntimeSnapshot,
         value: Instance,
-        encodeLength: Boolean,
+    ): ByteArray {
+        return useScaleWriter {
+            val writer = this@useScaleWriter
+
+            encodeTransactionType(writer, runtime, value.type)
+            GenericCall.encode(writer, runtime, value.call)
+        }
+    }
+
+    private fun encodeTransactionType(
+        writer: ScaleCodecWriter,
+        runtime: RuntimeSnapshot,
+        type: ExtrinsicType
     ) {
-        val signature = value.signature
-        val callBytes = GenericCall.toByteArray(runtime, value.call)
+        writer.writeByte(type.versionByte(runtime))
 
-        val isSigned = signature != null
+        when (type) {
+            // Nothing to encode
+            ExtrinsicType.Bare -> Unit
 
-        val extrinsicVersion = runtime.metadata.extrinsic.version.toInt().toUByte()
-        val encodedVersion = encodedVersion(extrinsicVersion, isSigned).toByte()
+            is ExtrinsicType.GeneralTransaction -> encodeGeneral(writer, runtime, type)
 
-        val signatureWrapperBytes = if (isSigned) {
-            requireNotNull(signature)
-
-            val addressBytes = addressType(runtime).bytes(runtime, signature.accountIdentifier)
-            val signatureBytes = signatureType(runtime).bytes(runtime, signature.signature)
-            val signedExtrasBytes = ExtrasIncludedInExtrinsic.bytes(runtime, signature.signedExtras)
-
-            addressBytes + signatureBytes + signedExtrasBytes
-        } else {
-            byteArrayOf()
+            is ExtrinsicType.Signed -> encodeSigned(writer, runtime, type)
         }
+    }
 
-        val extrinsicBodyBytes = byteArrayOf(encodedVersion) + signatureWrapperBytes + callBytes
+    private fun encodeSigned(
+        writer: ScaleCodecWriter,
+        runtime: RuntimeSnapshot,
+        signedType: ExtrinsicType.Signed,
+    ) {
+        addressType(runtime).encodeUnsafe(writer, runtime, signedType.accountIdentifier)
+        signatureType(runtime).encodeUnsafe(writer, runtime, signedType.signature)
+        ExtrasIncludedInExtrinsic.encodeUnsafe(writer, runtime, signedType.signedExtras)
+    }
 
-        if (encodeLength) {
-            Bytes.encode(scaleCodecWriter, runtime, extrinsicBodyBytes)
-        } else {
-            scaleCodecWriter.directWrite(extrinsicBodyBytes)
-        }
+    private fun encodeGeneral(
+        writer: ScaleCodecWriter,
+        runtime: RuntimeSnapshot,
+        generalType: ExtrinsicType.GeneralTransaction,
+    ) {
+        writer.writeByte(generalType.extensionsVersion)
+
+        ExtrasIncludedInExtrinsic.encodeUnsafe(writer, runtime, generalType.extensionExplicits)
     }
 
     override fun isValidInstance(instance: Any?): Boolean {
         return instance is Instance
     }
 
-    private fun encodedVersion(version: UByte, isSigned: Boolean): UByte {
-        return if (isSigned) {
-            version or SIGNED_MASK
-        } else {
-            version
-        }
-    }
+    private fun ExtrinsicType.versionByte(runtime: RuntimeSnapshot): Byte {
+        return when (this) {
+            ExtrinsicType.Bare -> runtime.metadata.extrinsic.version.toByte() or TYPE_BARE
 
-    private fun isSigned(extrinsicVersion: UByte): Boolean {
-        return extrinsicVersion and SIGNED_MASK != 0.toUByte()
+            is ExtrinsicType.GeneralTransaction -> EXTRINSIC_FORMAT_VERSION or TYPE_GENERAL
+
+            is ExtrinsicType.Signed -> LEGACY_EXTRINSIC_FORMAT_VERSION or TYPE_SIGNED
+        }
     }
 
     private fun addressType(runtime: RuntimeSnapshot): Type<*> {

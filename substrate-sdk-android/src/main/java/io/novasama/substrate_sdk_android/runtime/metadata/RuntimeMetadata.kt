@@ -22,18 +22,18 @@ class RuntimeMetadata(
 
 class ExtrinsicMetadata(
     val version: BigInteger,
-    val signedExtensions: List<SignedExtensionMetadata>
+    val signedExtensions: List<TransactionExtensionMetadata>
 )
 
-typealias SignedExtensionId = String
+typealias TransactionExtensionId = String
 
 class SignedExtensionValue(
     val includedInExtrinsic: Any? = null,
     val includedInSignature: Any? = null,
 )
 
-class SignedExtensionMetadata(
-    val id: SignedExtensionId,
+class TransactionExtensionMetadata(
+    val id: TransactionExtensionId,
 
     /**
      * Additional information that is included both into extrinsic and signature payload
@@ -55,19 +55,19 @@ class SignedExtensionMetadata(
 
     companion object {
 
-        fun onlyInExtrinsic(id: String, includedInExtrinsic: RuntimeType<*, *>): SignedExtensionMetadata {
-            return SignedExtensionMetadata(id, includedInExtrinsic, Null)
+        fun onlyInExtrinsic(id: String, includedInExtrinsic: RuntimeType<*, *>): TransactionExtensionMetadata {
+            return TransactionExtensionMetadata(id, includedInExtrinsic, Null)
         }
 
         fun onlyInSignature(
             id: String,
             includedInSignature: RuntimeType<*, *>
-        ): SignedExtensionMetadata {
-            return SignedExtensionMetadata(id, Null, includedInSignature)
+        ): TransactionExtensionMetadata {
+            return TransactionExtensionMetadata(id, Null, includedInSignature)
         }
     }
 }
 
-fun ExtrinsicMetadata.findSignedExtension(id: SignedExtensionId): SignedExtensionMetadata? {
+fun ExtrinsicMetadata.findSignedExtension(id: TransactionExtensionId): TransactionExtensionMetadata? {
     return signedExtensions.find { it.id == id }
 }

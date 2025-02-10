@@ -7,13 +7,14 @@ import io.novasama.substrate_sdk_android.extensions.fromHex
 import io.novasama.substrate_sdk_android.integration.transfer
 import io.novasama.substrate_sdk_android.runtime.RealRuntimeProvider
 import io.novasama.substrate_sdk_android.runtime.RuntimeSnapshot
-import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
 import io.novasama.substrate_sdk_android.runtime.definitions.types.fromHex
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Era
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Extrinsic
+import io.novasama.substrate_sdk_android.runtime.extrinsic.builder.ExtrinsicBuilder
 import io.novasama.substrate_sdk_android.runtime.extrinsic.signer.KeyPairSigner
+import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.ChargeAssetTxPayment
+import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.verifySignature.VerifySignatureMode
 import io.novasama.substrate_sdk_android.runtime.metadata.MetadataTestCommon
-import io.novasama.substrate_sdk_android.runtime.metadata.SignedExtensionValue
 import io.novasama.substrate_sdk_android.ss58.SS58Encoder.publicKeyToSubstrateAccountId
 import io.novasama.substrate_sdk_android.ss58.SS58Encoder.toAccountId
 import io.novasama.substrate_sdk_android.wsrpc.request.runtime.chain.RuntimeVersion
@@ -104,7 +105,7 @@ class ExtrinsicBuilderTest {
 
     @Test
     fun `should build batch_all extrinsic`() = runBlockingTest {
-        val extrinsicBuilder = createExtrinsicBuilder()
+        val extrinsicBuilder = createExtrinsicBuilder(batchMode = BatchMode.BATCH_ALL)
 
         repeat(2) {
             extrinsicBuilder.transfer(
@@ -113,7 +114,7 @@ class ExtrinsicBuilderTest {
             )
         }
 
-        val extrinsic = extrinsicBuilder.buildExtrinsic(batchMode = BatchMode.BATCH_ALL)
+        val extrinsic = extrinsicBuilder.buildExtrinsic()
         val decoded = Extrinsic.fromHex(runtime, extrinsic.extrinsicHex)
 
         assertEquals(decoded.call.function.name, "batch_all")
@@ -121,7 +122,7 @@ class ExtrinsicBuilderTest {
 
     @Test
     fun `should build big extrinsic`() = runBlockingTest {
-        val extrinsicBuilder = createExtrinsicBuilder()
+        val extrinsicBuilder = createExtrinsicBuilder(batchMode = BatchMode.BATCH_ALL)
 
         repeat(20) {
             extrinsicBuilder.transfer(
@@ -130,14 +131,14 @@ class ExtrinsicBuilderTest {
             )
         }
 
-        val extrinsic = extrinsicBuilder.buildExtrinsic(batchMode = BatchMode.BATCH_ALL)
+        val extrinsic = extrinsicBuilder.buildExtrinsic()
 
         assertEquals(BIG_TRANSACTION, extrinsic.extrinsicHex)
     }
 
     @Test
-    fun `should build single transfer extrinsic statemine`() = runBlockingTest {
-        val runtime = RealRuntimeProvider.buildRuntimeV14("statemine")
+    fun `should register custom signed extensions`() = runBlockingTest {
+        val runtime = RealRuntimeProvider.buildRuntimePostV14("statemine")
 
         val extrinsicInHex =
             "0x45028400fdc41550fb5186d71cae699c31731b3e1baa10680c7bd6b3831a6d222cf4d1680045ba1f9d291fff7dddf36f7ec060405d5e87ac8fab8832cfcc66858e6975141748ce89c41bda6c3a84204d3c6f929b928702168ca38bbed69b172044b599a10ab5038800000a0000bcc5ecf679ebd776866a04c212a4ec5dc45cefab57d7aa858c389844e212693f0700e40b5402"
@@ -150,16 +151,6 @@ class ExtrinsicBuilderTest {
             signer = keypairSigner(),
             accountId = KEYPAIR.publicKey.publicKeyToSubstrateAccountId(),
             era = Era.Mortal(64, 59),
-            customSignedExtensions = mapOf(
-                "ChargeAssetTxPayment" to SignedExtensionValue(
-                    Struct.Instance(
-                        mapOf(
-                            "tip" to BigInteger.ZERO,
-                            "assetId" to null
-                        )
-                    )
-                )
-            ),
             blockHash = "0xdd7532c5c01242696001e57cded1bc1326379059300287552a9c344e5bea1070".fromHex()
         )
 
@@ -168,45 +159,8 @@ class ExtrinsicBuilderTest {
             amount = BigInteger("10000000000")
         )
 
-        val extrinsic = builder.buildExtrinsic()
-        
-        assertEquals(extrinsicInHex, extrinsic.extrinsicHex)
-    }
-
-    @Test
-    fun `should register signed extensions after creation`() = runBlockingTest {
-        val runtime = RealRuntimeProvider.buildRuntimeV14("statemine")
-
-        val extrinsicInHex =
-            "0x45028400fdc41550fb5186d71cae699c31731b3e1baa10680c7bd6b3831a6d222cf4d1680045ba1f9d291fff7dddf36f7ec060405d5e87ac8fab8832cfcc66858e6975141748ce89c41bda6c3a84204d3c6f929b928702168ca38bbed69b172044b599a10ab5038800000a0000bcc5ecf679ebd776866a04c212a4ec5dc45cefab57d7aa858c389844e212693f0700e40b5402"
-
-        val builder = ExtrinsicBuilder(
-            runtime = runtime,
-            nonce = Nonce.singleTx(34.toBigInteger()),
-            runtimeVersion = RuntimeVersion(601, 4),
-            genesisHash = "48239ef607d7928874027a43a67689209727dfb3d3dc5e5b03a39bdc2eda771a".fromHex(),
-            signer = keypairSigner(),
-            accountId = KEYPAIR.publicKey.publicKeyToSubstrateAccountId(),
-            era = Era.Mortal(64, 59),
-            customSignedExtensions = emptyMap(),
-            blockHash = "0xdd7532c5c01242696001e57cded1bc1326379059300287552a9c344e5bea1070".fromHex()
-        )
-
-        builder.transfer(
-            recipientAccountId = "GqqKJJZ1MtiWiC6CzNg3g8bawriq6HZioHW1NEpxdf6Q6P5".toAccountId(),
-            amount = BigInteger("10000000000")
-        )
-
-        val chargeAssetTxPaymentValue = Struct.Instance(
-            mapOf(
-                "tip" to BigInteger.ZERO,
-                "assetId" to null
-            )
-        )
-
-        builder.signedExtension(
-            id = "ChargeAssetTxPayment",
-            value = SignedExtensionValue(includedInExtrinsic = chargeAssetTxPaymentValue)
+        builder.setTransactionExtension(
+            ChargeAssetTxPayment(tip = BigInteger.ZERO, assetId = null)
         )
 
         val extrinsic = builder.buildExtrinsic()
@@ -237,7 +191,34 @@ class ExtrinsicBuilderTest {
         extrinsicBuilder.buildExtrinsic()
     }
 
-    private fun createExtrinsicBuilder(usedRuntime: RuntimeSnapshot = runtime) = ExtrinsicBuilder(
+    @Test
+    fun `should build v5 general transaction`() = runBlockingTest {
+        val runtime = RealRuntimeProvider.buildRuntimePostV14("westend_v15")
+
+        val expectedTx =
+            "0xc04500b503880000040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402"
+
+        val extrinsicBuilder = createExtrinsicBuilder(
+            usedRuntime = runtime,
+            extrinsicVersion = ExtrinsicVersion.V5()
+        )
+
+        val extrinsic = extrinsicBuilder.testSingleTransfer()
+            .buildExtrinsic()
+            .extrinsicHex
+
+        assertEquals(expectedTx, extrinsic)
+    }
+
+    private fun createExtrinsicBuilder(
+        usedRuntime: RuntimeSnapshot = runtime,
+        batchMode: BatchMode = BatchMode.BATCH,
+        extrinsicVersion: ExtrinsicVersion = ExtrinsicVersion.V4(
+            VerifySignatureMode.from(
+                keypairSigner(), KEYPAIR.publicKey.publicKeyToSubstrateAccountId()
+            )
+        )
+    ) = ExtrinsicBuilder(
         runtime = usedRuntime,
         signer = keypairSigner(),
         nonce = Nonce.singleTx(34.toBigInteger()),
@@ -245,7 +226,9 @@ class ExtrinsicBuilderTest {
         genesisHash = "e143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e".fromHex(),
         accountId = KEYPAIR.publicKey.publicKeyToSubstrateAccountId(),
         era = Era.Mortal(64, 59),
-        blockHash = "0x1b876104c68b4a8924c098d61d2ad798761bb6fff55cca2885939ffc27ef5ecb".fromHex()
+        blockHash = "0x1b876104c68b4a8924c098d61d2ad798761bb6fff55cca2885939ffc27ef5ecb".fromHex(),
+        batchMode = batchMode,
+        extrinsicVersion = extrinsicVersion
     )
 
     private fun keypairSigner() = KeyPairSigner(

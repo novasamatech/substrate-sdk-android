@@ -28,7 +28,7 @@ class ExtrinsicTest {
     fun `should decode transfer extrinsic`() {
         val decoded = Extrinsic.fromHex(runtime, inHex)
 
-        val multiSignature = decoded.signature!!.tryExtractMultiSignature()!!
+        val multiSignature = decoded.tryExtractMultiSignature()!!
 
         assertEquals(signatureInHex, multiSignature.value.toHexString())
     }
@@ -73,7 +73,7 @@ class ExtrinsicTest {
         )
 
         val extrinsic = Extrinsic.Instance(
-            signature = Extrinsic.Signature.new(
+            type = Extrinsic.ExtrinsicType.Signed(
                 accountIdentifier = AddressInstanceConstructor.constructInstance(
                     typeRegistry = runtime.typeRegistry,
                     value = "340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c63".fromHex()

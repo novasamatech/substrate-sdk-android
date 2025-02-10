@@ -7,34 +7,44 @@ import io.novasama.substrate_sdk_android.runtime.definitions.types.RuntimeType
 import io.novasama.substrate_sdk_android.runtime.definitions.types.Type
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.isEmptyStruct
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.isEmptyTuple
-import io.novasama.substrate_sdk_android.runtime.metadata.SignedExtensionId
-import io.novasama.substrate_sdk_android.runtime.metadata.SignedExtensionMetadata
+import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionId
+import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionMetadata
 
 /**
- * @see [SignedExtensionMetadata.includedInExtrinsic]
+ * @see [TransactionExtensionMetadata.includedInExtrinsic]
  */
 object ExtrasIncludedInExtrinsic : ExtrinsicPayloadExtras("ExtrinsicPayloadExtras.ExtrasIncludedInExtrinsic") {
 
-    override fun getTypeFrom(signedExtension: SignedExtensionMetadata): Type<*>? {
+    override fun getTypeFrom(signedExtension: TransactionExtensionMetadata): Type<*>? {
         return signedExtension.includedInExtrinsic
     }
 }
 
 /**
- * @see [SignedExtensionMetadata.includedInSignature]
+ * @see [TransactionExtensionMetadata.includedInSignature]
  */
 object ExtrasIncludedInSignature :
     ExtrinsicPayloadExtras("ExtrinsicPayloadExtras.ExtrasIncludedInSignature") {
-    override fun getTypeFrom(signedExtension: SignedExtensionMetadata): Type<*>? {
+    override fun getTypeFrom(signedExtension: TransactionExtensionMetadata): Type<*>? {
         return signedExtension.includedInSignature
     }
 }
 
-typealias ExtrinsicPayloadExtrasInstance = Map<SignedExtensionId, Any?>
+typealias ExtrinsicPayloadExtrasInstance = Map<TransactionExtensionId, Any?>
 
 abstract class ExtrinsicPayloadExtras(name: String) : Type<ExtrinsicPayloadExtrasInstance>(name) {
 
-    protected abstract fun getTypeFrom(signedExtension: SignedExtensionMetadata): Type<*>?
+    companion object {
+
+        fun shouldSkipEncoding(type: RuntimeType<*, *>): Boolean {
+            // this is for better backward-compatibility -
+            // clients might pass null instead of empty struct / empty tuple that are specified in
+            // RuntimeMetadata.signedExtensions v14
+            return type.isNullType() || type.isEmptyStruct() || type.isEmptyTuple()
+        }
+    }
+
+    protected abstract fun getTypeFrom(signedExtension: TransactionExtensionMetadata): Type<*>?
 
     override fun decode(
         scaleCodecReader: ScaleCodecReader,
@@ -71,12 +81,5 @@ abstract class ExtrinsicPayloadExtras(name: String) : Type<ExtrinsicPayloadExtra
 
     override fun isValidInstance(instance: Any?): Boolean {
         return instance is Map<*, *> && instance.keys.all { it is String }
-    }
-
-    private fun shouldSkipEncoding(type: RuntimeType<*, *>): Boolean {
-        // this is for better backward-compatibility -
-        // clients might pass null instead of empty struct / empty tuple that are specified in
-        // RuntimeMetadata.signedExtensions v14
-        return type.isNullType() || type.isEmptyStruct() || type.isEmptyTuple()
     }
 }

@@ -41,8 +41,8 @@ class RuntimeMetadataReader private constructor(
 
     companion object {
 
-        fun read(metadaScale: String): RuntimeMetadataReader {
-            return read(metadaScale.fromHex())
+        fun read(metadataScale: String): RuntimeMetadataReader {
+            return read(metadataScale.fromHex())
         }
 
         /**

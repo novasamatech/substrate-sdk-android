@@ -8,7 +8,7 @@ import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Extr
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.GenericCall
 import io.novasama.substrate_sdk_android.runtime.definitions.types.useScaleWriter
 
-private const val PAYLOAD_HASH_THRESHOLD = 256
+const val PAYLOAD_HASH_THRESHOLD = 256
 
 fun bytesOf(writer: (ScaleCodecWriter) -> Unit) = useScaleWriter(writer)
 fun bytesOf(vararg writers: (ScaleCodecWriter) -> Unit) = useScaleWriter {
