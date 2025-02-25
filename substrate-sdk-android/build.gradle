@@ -7,8 +7,8 @@ apply from: '../maven-publish-helper.gradle'
 
 publishing {
     publications {
-        release(MavenPublication) {
-            groupId 'io.github.nova-wallet'
+        maven(MavenPublication) {
+            artifactId 'core'
         }
     }
 }
