@@ -49,7 +49,7 @@ abstract class BaseEncoder: ScaleEncoder {
     override fun encodeDouble(value: Double) = unsupportedEncoding("Double")
 
     override fun encodeEnum(enumDescriptor: SerialDescriptor, index: Int) {
-        TODO("Enum encoding")
+        encodeIdentity(enumDescriptor.getElementName(index))
     }
 
     override fun encodeFloat(value: Float) = unsupportedEncoding("Float")
