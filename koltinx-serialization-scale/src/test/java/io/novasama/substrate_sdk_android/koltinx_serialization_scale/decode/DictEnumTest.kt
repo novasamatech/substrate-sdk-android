@@ -3,6 +3,7 @@ package io.novasama.substrate_sdk_android.koltinx_serialization_scale.decode
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations.SerializedFallback
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.DictEnum
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.junit.Test
 
@@ -21,6 +22,10 @@ sealed class Sealed {
 
     @Serializable
     data class SingleList(val elements: List<Boolean>) : Sealed()
+
+    @Serializable
+    @SerialName("ChangedName")
+    object Renamed: Sealed()
 
     @Serializable
     object Unknown : Sealed()
@@ -72,5 +77,11 @@ class EnumTest : DecodeTest() {
     fun `should decode fallback variant object`() = runDecodeTest(
         expected = Sealed.Unknown as Sealed,
         raw = DictEnum.Entry("SomethingElse", true)
+    )
+
+    @Test
+    fun `serial name works`() = runDecodeTest(
+        expected = Sealed.Renamed as Sealed,
+        raw = DictEnum.Entry("ChangedName", null)
     )
 }

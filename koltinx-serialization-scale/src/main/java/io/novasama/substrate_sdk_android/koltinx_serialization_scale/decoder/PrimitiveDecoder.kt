@@ -111,10 +111,16 @@ open class PrimitiveDecoder(
         }
 
         val enumEntry = value as DictEnum.Entry<*>
+
+        val stubDecoder = StubCompositeDecoder()
+
         val variantClassName = createClassName(serializer.descriptor, enumEntry.name)
 
         val actualSerializer =
-            serializer.findPolymorphicSerializerOrNull(StubCompositeDecoder(), variantClassName)
+            serializer.findPolymorphicSerializerOrNull(stubDecoder, variantClassName)
+                // @SerialName annotation completely changes the key, not just the class suffix.
+                // So we also check for enum entry name directly to handle SerialName changes
+                ?: serializer.findPolymorphicSerializerOrNull(stubDecoder, enumEntry.name)
                 ?: serializer.findFallbackFromAnnotations()
                 ?: error("Subtype $variantClassName not registered")
 

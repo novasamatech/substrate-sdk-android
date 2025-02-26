@@ -14,6 +14,8 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.plus
 import kotlinx.serialization.serializer
 import java.math.BigInteger
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 
 interface DynamicStructureFormat : SerialFormat {
 
@@ -22,30 +24,36 @@ interface DynamicStructureFormat : SerialFormat {
     fun <T> decode(deserializer: DeserializationStrategy<T>, dynamicStructure: Any?): T
 }
 
-inline fun <reified T> DynamicStructureFormat.encode(value: T): Any? =
-    encode(serializersModule.modifiedSerializer(), value)
-
-inline fun <reified T> DynamicStructureFormat.decode(dynamicStructure: Any?): T =
-    decode(serializersModule.modifiedSerializer(), dynamicStructure)
-
-@Suppress("UNCHECKED_CAST")
-inline fun <reified T> SerializersModule.modifiedSerializer(): KSerializer<T> {
-    return when {
-        // We need to overwrite built-in serializer for ByteArray
-        T::class == ByteArray::class -> ByteArraySerializer as KSerializer<T>
-        else -> serializer()
-    }
+inline fun <reified T> DynamicStructureFormat.encode(value: T): Any? {
+    return encode(typeOf<T>(), value)
 }
 
-private val defaultSerializers = SerializersModule {
-    contextual(BigInteger::class, BigIntegerSerializer)
-    contextual(ByteArray::class, ByteArraySerializer)
+fun <T> DynamicStructureFormat.encode(type: KType, value: T): Any? {
+    return encode(serializersModule.modifiedSerializer(type), value)
+}
+
+inline fun <reified T> DynamicStructureFormat.decode(dynamicStructure: Any?): T {
+    return decode(typeOf<T>(), dynamicStructure)
+}
+
+fun <T> DynamicStructureFormat.decode(type: KType, dynamicStructure: Any?): T {
+    return decode(serializersModule.modifiedSerializer(type), dynamicStructure)
+}
+
+@Suppress("UNCHECKED_CAST")
+private fun <T> SerializersModule.modifiedSerializer(kType: KType): KSerializer<T> {
+    return when {
+        // We need to overwrite built-in serializer for ByteArray
+        kType == typeOf<ByteArray>()  -> ByteArraySerializer as KSerializer<T>
+        else -> serializer(kType) as KSerializer<T>
+    }
 }
 
 @OptIn(ExperimentalSerializationApi::class)
 open class Scale(
     serializersModules: SerializersModule
 ) : DynamicStructureFormat {
+
     override val serializersModule: SerializersModule = defaultSerializers + serializersModules
 
     companion object Default : Scale(EmptySerializersModule)
@@ -60,4 +68,10 @@ open class Scale(
         val decoder = PrimitiveDecoder(serializersModule, dynamicStructure)
         return decoder.decodeSerializableValue(deserializer)
     }
+}
+
+
+private val defaultSerializers = SerializersModule {
+    contextual(BigInteger::class, BigIntegerSerializer)
+    contextual(ByteArray::class, ByteArraySerializer)
 }

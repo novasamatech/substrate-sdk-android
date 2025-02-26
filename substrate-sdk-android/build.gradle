@@ -7,7 +7,7 @@ apply from: '../maven-publish-helper.gradle'
 
 publishing {
     publications {
-        maven(MavenPublication) {
+        release(MavenPublication) {
             artifactId 'core'
         }
     }

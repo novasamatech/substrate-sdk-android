@@ -1,14 +1,16 @@
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.encode
 
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.junit.Test
 
 
 class CollectionEnumTest : EncodeTest() {
 
+    @Serializable
     enum class TestEnum {
-        A, B, C
+        A, B, @SerialName("c") C
     }
 
     @Test
@@ -28,4 +30,10 @@ class CollectionEnumTest : EncodeTest() {
             expected = Struct.Instance(mapOf("a" to "A"))
         )
     }
+
+    @Test
+    fun `SerialName works`() = runEncodeTest(
+        value = TestEnum.C,
+        expected = "c"
+    )
 }

@@ -2,6 +2,7 @@ package io.novasama.substrate_sdk_android.koltinx_serialization_scale.encode
 
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.DictEnum
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.junit.Test
 
@@ -19,6 +20,10 @@ sealed class Sealed {
 
     @Serializable
     class SingleList(val elements: List<Boolean>) : Sealed()
+
+    @Serializable
+    @SerialName("ChangedName")
+    object Renamed: Sealed()
 }
 
 class EnumTests : EncodeTest() {
@@ -62,4 +67,10 @@ class EnumTests : EncodeTest() {
             )
         )
     }
+
+    @Test
+    fun `serial name works`() = runEncodeTest(
+        value = Sealed.Renamed as Sealed,
+        expected = DictEnum.Entry("ChangedName", null)
+    )
 }
