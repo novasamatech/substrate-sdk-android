@@ -2,6 +2,7 @@
 
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.decoder
 
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations.findSerializedFallback
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.DictEnum
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
 import kotlinx.serialization.DeserializationStrategy
@@ -11,6 +12,7 @@ import kotlinx.serialization.SealedClassSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.StructureKind
 import kotlinx.serialization.encoding.CompositeDecoder
+import kotlinx.serialization.encoding.CompositeDecoder.Companion.UNKNOWN_NAME
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.modules.SerializersModule
 import java.math.BigInteger
@@ -47,7 +49,13 @@ open class PrimitiveDecoder(
     override fun decodeDouble(): Double = unsupportedDecoding("Char")
 
     override fun decodeEnum(enumDescriptor: SerialDescriptor): Int {
-        return enumDescriptor.getElementIndex(decodeString())
+        val name = decodeString()
+        val index = enumDescriptor.getElementIndex(name)
+
+        if (index != UNKNOWN_NAME) return index
+
+        val fallback = enumDescriptor.findSerializedFallback() ?: return index
+        return enumDescriptor.getElementIndex(fallback)
     }
 
     override fun decodeFloat(): Float = unsupportedDecoding("Float")
@@ -80,10 +88,10 @@ open class PrimitiveDecoder(
     }
 
     override fun decodeString(): String {
-        return when(val raw = decodeIdentity()) {
+        return when (val raw = decodeIdentity()) {
             is ByteArray -> raw.decodeToString()
             is String -> raw
-            else -> error("Unsupported value when attepmting to decode String: ${raw}")
+            else -> error("Unsupported value when attepmting to decode String: $raw")
         }
     }
 
@@ -103,18 +111,32 @@ open class PrimitiveDecoder(
         }
 
         val enumEntry = value as DictEnum.Entry<*>
-        val variantClassName = serializer.descriptor.serialName + ".${enumEntry.name}"
+        val variantClassName = createClassName(serializer.descriptor, enumEntry.name)
 
-        val actualSerializer =  serializer.findPolymorphicSerializerOrNull(StubCompositeDecoder(), variantClassName)
-            ?: error("Subtype $variantClassName not registered")
+        val actualSerializer =
+            serializer.findPolymorphicSerializerOrNull(StubCompositeDecoder(), variantClassName)
+                ?: serializer.findFallbackFromAnnotations()
+                ?: error("Subtype $variantClassName not registered")
 
         val enumDecoder = EnumDecoder(serializersModule, enumEntry.value)
         return actualSerializer.deserialize(enumDecoder) as T
     }
 
+    private fun <T : Any> SealedClassSerializer<T>.findFallbackFromAnnotations(): DeserializationStrategy<out T>? {
+        val fallback = descriptor.findSerializedFallback() ?: return null
+        val fallbackClassName = createClassName(descriptor, fallback)
+
+        return findPolymorphicSerializerOrNull(StubCompositeDecoder(), fallbackClassName)
+            ?: error("Subtype $fallbackClassName specified as fallback via @FallbackAnnotation is not registered")
+    }
+
+    private fun createClassName(descriptor: SerialDescriptor, subclassName: String): String {
+        return descriptor.serialName + ".$subclassName"
+    }
+
     // This is needed because `findPolymorphicSerializerOrNull` only accepts `CompositeDecoder`
     // whereas actually only using `serializersModule` under the hood
-    private inner class StubCompositeDecoder: BaseCompositeDecoder() {
+    private inner class StubCompositeDecoder : BaseCompositeDecoder() {
 
         override val serializersModule: SerializersModule
             get() = this@PrimitiveDecoder.serializersModule
@@ -124,7 +146,7 @@ open class PrimitiveDecoder(
         }
 
         override fun decodeElementIndex(descriptor: SerialDescriptor): Int {
-           error("STUB")
+            error("STUB")
         }
     }
 }

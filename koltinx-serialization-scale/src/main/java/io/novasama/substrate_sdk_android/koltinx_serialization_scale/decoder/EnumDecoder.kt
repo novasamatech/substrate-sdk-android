@@ -3,11 +3,9 @@
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.decoder
 
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.shouldUseTransientStructInEnum
-import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.DictEnum
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.CompositeDecoder
-import kotlinx.serialization.encoding.CompositeDecoder.Companion.DECODE_DONE
 import kotlinx.serialization.internal.AbstractPolymorphicSerializer
 import kotlinx.serialization.modules.SerializersModule
 
@@ -20,10 +18,10 @@ import kotlinx.serialization.modules.SerializersModule
  *
  * So it first encodes variant name and then the variant value
  */
-//class EnumDecoder(
+// class EnumDecoder(
 //    override val serializersModule: SerializersModule,
 //    private val enumEntry: DictEnum.Entry<*>
-//) : BaseCompositeDecoder() {
+// ) : BaseCompositeDecoder() {
 //
 //    companion object {
 //
@@ -67,7 +65,7 @@ import kotlinx.serialization.modules.SerializersModule
 //            return super.beginStructure(descriptor)
 //        }
 //    }
-//}
+// }
 
 class EnumDecoder(
     serializersModule: SerializersModule,

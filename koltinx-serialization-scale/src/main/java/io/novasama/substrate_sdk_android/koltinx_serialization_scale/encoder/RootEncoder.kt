@@ -18,4 +18,3 @@ class RootEncoder(override val serializersModule: SerializersModule) : BaseEncod
         current = value
     }
 }
-

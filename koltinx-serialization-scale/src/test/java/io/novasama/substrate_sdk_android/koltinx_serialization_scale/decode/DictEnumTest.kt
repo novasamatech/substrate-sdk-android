@@ -7,10 +7,10 @@ import kotlinx.serialization.Serializable
 import org.junit.Test
 
 @Serializable
+@SerializedFallback("Unknown")
 sealed class Sealed {
 
     @Serializable
-    @SerializedFallback
     object A : Sealed()
 
     @Serializable
@@ -21,6 +21,9 @@ sealed class Sealed {
 
     @Serializable
     data class SingleList(val elements: List<Boolean>) : Sealed()
+
+    @Serializable
+    object Unknown : Sealed()
 }
 
 class EnumTest : DecodeTest() {
@@ -64,4 +67,10 @@ class EnumTest : DecodeTest() {
             )
         )
     }
+
+    @Test
+    fun `should decode fallback variant object`() = runDecodeTest(
+        expected = Sealed.Unknown as Sealed,
+        raw = DictEnum.Entry("SomethingElse", true)
+    )
 }

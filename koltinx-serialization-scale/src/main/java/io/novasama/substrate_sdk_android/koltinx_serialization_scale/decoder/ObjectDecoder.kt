@@ -11,6 +11,6 @@ class ObjectDecoder(override val serializersModule: SerializersModule) : BaseCom
     }
 
     override fun decodeElementIndex(descriptor: SerialDescriptor): Int {
-       return DECODE_DONE
+        return DECODE_DONE
     }
 }

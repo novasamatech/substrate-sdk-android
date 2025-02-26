@@ -1,5 +1,6 @@
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.decode
 
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations.SerializedFallback
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
 import kotlinx.serialization.Serializable
 import org.junit.Test
@@ -7,6 +8,8 @@ import org.junit.Test
 
 class CollectionEnumTest : DecodeTest() {
 
+    @SerializedFallback("A")
+    @Serializable
     enum class TestEnum {
         A, B, C
     }
@@ -28,4 +31,10 @@ class CollectionEnumTest : DecodeTest() {
             raw = Struct.Instance(mapOf("a" to "A"))
         )
     }
+
+    @Test
+    fun `should decode collection enum with fallback`() = runDecodeTest(
+        raw = "D",
+        expected = TestEnum.A
+    )
 }

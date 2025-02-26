@@ -37,7 +37,7 @@ class StructDecoder(
 class TransientStructDecoder(
     override val serializersModule: SerializersModule,
     private val singleField: Any?
-): BaseCompositeDecoder() {
+) : BaseCompositeDecoder() {
 
     private var shouldDecode: Boolean = true
 

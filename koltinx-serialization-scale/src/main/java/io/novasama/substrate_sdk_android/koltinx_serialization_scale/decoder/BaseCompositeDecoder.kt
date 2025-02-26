@@ -7,7 +7,7 @@ import kotlinx.serialization.encoding.CompositeDecoder
 import kotlinx.serialization.encoding.Decoder
 import java.math.BigInteger
 
-abstract class  BaseCompositeDecoder : CompositeDecoder {
+abstract class BaseCompositeDecoder : CompositeDecoder {
 
     abstract fun decodeIdentity(descriptor: SerialDescriptor, index: Int): Any?
 
@@ -67,7 +67,6 @@ abstract class  BaseCompositeDecoder : CompositeDecoder {
         val rawValue = decodeIdentity(descriptor, index)
         return decodeSerializableValue(rawValue, deserializer)
     }
-
 
     override fun decodeShortElement(descriptor: SerialDescriptor, index: Int): Short {
         return decodeNumber(descriptor, index).toShort()

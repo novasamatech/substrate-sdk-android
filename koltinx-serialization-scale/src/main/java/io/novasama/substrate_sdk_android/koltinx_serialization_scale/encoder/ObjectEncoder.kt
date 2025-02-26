@@ -6,7 +6,7 @@ import kotlinx.serialization.modules.SerializersModule
 class ObjectEncoder(
     override val serializersModule: SerializersModule,
     nodeConsumer: (Any?) -> Unit
-): BaseCompositeEncoder(nodeConsumer) {
+) : BaseCompositeEncoder(nodeConsumer) {
 
     override fun encodeIdentity(descriptor: SerialDescriptor, index: Int, value: Any?) {
         error("encodeIdentity should not be called when encoding an object")

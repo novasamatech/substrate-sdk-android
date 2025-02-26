@@ -12,7 +12,7 @@ class ListEncoder(
     private var current = ArrayList<Any?>(expectedSize)
 
     override fun encodeIdentity(descriptor: SerialDescriptor, index: Int, value: Any?) {
-       current.add(index, value)
+        current.add(index, value)
     }
 
     override fun getEncodedValue(): List<Any?> {

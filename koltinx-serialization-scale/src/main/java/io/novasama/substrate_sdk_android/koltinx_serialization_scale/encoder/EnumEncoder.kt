@@ -1,7 +1,5 @@
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.encoder
 
-import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.NotSet
-import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.requireValueSet
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.shouldUseTransientStructInEnum
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.DictEnum
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -18,10 +16,10 @@ import kotlinx.serialization.modules.SerializersModule
  *
  * So it first encodes variant name and then the variant value
  */
-//class EnumEncoder(
+// class EnumEncoder(
 //    override val serializersModule: SerializersModule,
 //    nodeConsumer: (Any?) -> Unit,
-//) : BaseCompositeEncoder(nodeConsumer) {
+// ) : BaseCompositeEncoder(nodeConsumer) {
 //
 //    private var _variantName: String? = null
 //    private val variantName: String
@@ -62,7 +60,7 @@ import kotlinx.serialization.modules.SerializersModule
 //    private fun qualifiedClassNameToVariantName(qualified: String): String {
 //        return qualified.split(".").last()
 //    }
-//}
+// }
 
 class EnumEncoder(
     override val serializersModule: SerializersModule,

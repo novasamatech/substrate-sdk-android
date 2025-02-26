@@ -4,19 +4,14 @@ package io.novasama.substrate_sdk_android.koltinx_serialization_scale.encoder
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.InternalSerializationApi
-import kotlinx.serialization.Polymorphic
-import kotlinx.serialization.SealedClassSerializer
 import kotlinx.serialization.SerializationStrategy
-import kotlinx.serialization.descriptors.PolymorphicKind
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.StructureKind
 import kotlinx.serialization.encoding.CompositeEncoder
 import kotlinx.serialization.encoding.Encoder
-import kotlinx.serialization.findPolymorphicSerializer
-import kotlinx.serialization.internal.AbstractPolymorphicSerializer
 import java.math.BigInteger
 
-abstract class BaseEncoder: ScaleEncoder {
+abstract class BaseEncoder : ScaleEncoder {
 
     protected abstract fun encodeIdentity(value: Any?)
 

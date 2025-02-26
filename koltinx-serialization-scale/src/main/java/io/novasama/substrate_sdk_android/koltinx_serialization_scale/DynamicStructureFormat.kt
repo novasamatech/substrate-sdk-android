@@ -25,7 +25,6 @@ interface DynamicStructureFormat : SerialFormat {
 inline fun <reified T> DynamicStructureFormat.encode(value: T): Any? =
     encode(serializersModule.modifiedSerializer(), value)
 
-
 inline fun <reified T> DynamicStructureFormat.decode(dynamicStructure: Any?): T =
     decode(serializersModule.modifiedSerializer(), dynamicStructure)
 
@@ -37,7 +36,6 @@ inline fun <reified T> SerializersModule.modifiedSerializer(): KSerializer<T> {
         else -> serializer()
     }
 }
-
 
 private val defaultSerializers = SerializersModule {
     contextual(BigInteger::class, BigIntegerSerializer)
