@@ -3,13 +3,20 @@
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.encoder
 
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.Polymorphic
+import kotlinx.serialization.SealedClassSerializer
+import kotlinx.serialization.SerializationStrategy
+import kotlinx.serialization.descriptors.PolymorphicKind
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.StructureKind
 import kotlinx.serialization.encoding.CompositeEncoder
 import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.findPolymorphicSerializer
+import kotlinx.serialization.internal.AbstractPolymorphicSerializer
 import java.math.BigInteger
 
-abstract class BaseEncoder : ScaleEncoder {
+abstract class BaseEncoder: ScaleEncoder {
 
     protected abstract fun encodeIdentity(value: Any?)
 
@@ -23,6 +30,8 @@ abstract class BaseEncoder : ScaleEncoder {
     override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
         return when (val kind = descriptor.kind) {
             StructureKind.CLASS -> StructEncoder(serializersModule, nodeConsumer = ::encodeIdentity)
+            StructureKind.OBJECT -> ObjectEncoder(serializersModule, nodeConsumer = ::encodeIdentity)
+            PolymorphicKind.SEALED -> EnumEncoder(serializersModule, nodeConsumer = ::encodeIdentity)
             else -> error("Unsupported descriptor kind: $kind")
         }
     }
@@ -64,4 +73,29 @@ abstract class BaseEncoder : ScaleEncoder {
     private fun unsupportedEncoding(type: String): Nothing {
         error("Encoding $type is not supported")
     }
+
+//    @OptIn(InternalSerializationApi::class)
+//    @Suppress("UNCHECKED_CAST")
+//    internal fun <T> encodePolymorphic(
+//        serializer: SerializationStrategy<T>,
+//        value: T,
+//    ) {
+//        if (serializer !is AbstractPolymorphicSerializer<*>) {
+//            serializer.serialize(this, value)
+//            return
+//        }
+//
+//        val casted = serializer as AbstractPolymorphicSerializer<Any>
+//        val actualSerializer = casted.findPolymorphicSerializer(this, value as Any)
+//
+//        val encoder = if (serializer is SealedClassSerializer<*>) {
+//            // serialize Sealed Classes as Enums
+//            val variantName = qualifiedClassNameToSimple(actualSerializer.descriptor.serialName)
+//            EnumEncoder(serializersModule, nodeConsumer = ::encodeIdentity, variantName)
+//        } else {
+//            this
+//        }
+//
+//        actualSerializer.serialize(encoder, value)
+//    }
 }
