@@ -62,5 +62,4 @@ class EnumTests : EncodeTest() {
             )
         )
     }
-
 }

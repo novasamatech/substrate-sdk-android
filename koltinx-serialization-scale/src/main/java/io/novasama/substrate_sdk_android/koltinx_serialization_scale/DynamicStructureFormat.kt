@@ -1,5 +1,6 @@
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale
 
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.decoder.PrimitiveDecoder
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.encoder.SingleValueEncoder
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.serializers.BigIntegerSerializer
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.serializers.ByteArraySerializer
@@ -22,20 +23,21 @@ interface DynamicStructureFormat : SerialFormat {
 }
 
 inline fun <reified T> DynamicStructureFormat.encode(value: T): Any? =
-    encode(serializersModule.modifiedSerializer(value), value)
+    encode(serializersModule.modifiedSerializer(), value)
 
+
+inline fun <reified T> DynamicStructureFormat.decode(dynamicStructure: Any?): T =
+    decode(serializersModule.modifiedSerializer(), dynamicStructure)
 
 @Suppress("UNCHECKED_CAST")
-inline fun <reified T> SerializersModule.modifiedSerializer(value: T): KSerializer<T> {
+inline fun <reified T> SerializersModule.modifiedSerializer(): KSerializer<T> {
     return when {
         // We need to overwrite built-in serializer for ByteArray
-        value is ByteArray -> ByteArraySerializer as KSerializer<T>
+        T::class == ByteArray::class -> ByteArraySerializer as KSerializer<T>
         else -> serializer()
     }
 }
 
-inline fun <reified T> DynamicStructureFormat.decode(dynamicStructure: Any?): T =
-    decode(serializersModule.serializer(), dynamicStructure)
 
 private val defaultSerializers = SerializersModule {
     contextual(BigInteger::class, BigIntegerSerializer)
@@ -57,9 +59,7 @@ open class Scale(
     }
 
     override fun <T> decode(deserializer: DeserializationStrategy<T>, dynamicStructure: Any?): T {
-        return dynamicStructure as T
-//        val decoder = SingleValueDecoder(serializersModule, dynamicStructure)
-//
-//        return decoder.decodeSerializableValue(deserializer)
+        val decoder = PrimitiveDecoder(serializersModule, dynamicStructure)
+        return decoder.decodeSerializableValue(deserializer)
     }
 }

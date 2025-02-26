@@ -42,8 +42,6 @@ abstract class BaseEncoder: ScaleEncoder {
 
     override fun encodeBoolean(value: Boolean) = encodeIdentity(value)
 
-    override fun encodeByte(value: Byte) = encodeIdentity(value)
-
     override fun encodeChar(value: Char) = unsupportedEncoding("Char")
 
     override fun encodeDouble(value: Double) = unsupportedEncoding("Double")
@@ -62,6 +60,8 @@ abstract class BaseEncoder: ScaleEncoder {
     override fun encodeInt(value: Int) = encodeNumber(value.toBigInteger())
 
     override fun encodeLong(value: Long) = encodeNumber(value.toBigInteger())
+
+    override fun encodeByte(value: Byte) = encodeIdentity(value.toInt().toBigInteger())
 
     @ExperimentalSerializationApi
     override fun encodeNull() = encodeIdentity(null)

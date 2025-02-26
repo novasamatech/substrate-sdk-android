@@ -2,9 +2,9 @@ package io.novasama.substrate_sdk_android.koltinx_serialization_scale.encoder
 
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.NotSet
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.requireValueSet
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.shouldUseTransientStructInEnum
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.DictEnum
 import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.descriptors.StructureKind
 import kotlinx.serialization.encoding.CompositeEncoder
 import kotlinx.serialization.internal.AbstractPolymorphicSerializer
 import kotlinx.serialization.modules.SerializersModule
@@ -51,15 +51,11 @@ class EnumEncoder(
         SingleValueEncoder(serializersModule) {
 
         override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
-            if (descriptor.shouldUseTransientStructEncoding()) {
+            if (descriptor.shouldUseTransientStructInEnum()) {
                 return TransientStructEncoder(serializersModule, nodeConsumer = ::encodeIdentity)
             }
 
             return super.beginStructure(descriptor)
-        }
-
-        private fun SerialDescriptor.shouldUseTransientStructEncoding(): Boolean {
-            return kind is StructureKind.CLASS && elementsCount == 1
         }
     }
 

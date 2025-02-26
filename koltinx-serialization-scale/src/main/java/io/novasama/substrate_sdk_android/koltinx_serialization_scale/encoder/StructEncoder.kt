@@ -26,6 +26,7 @@ class StructEncoder(
 
 /**
  * Encodes struct with a single value without wrapping it into [Struct.Instance]
+ * Used in Enums
  */
 class TransientStructEncoder(
     override val serializersModule: SerializersModule,

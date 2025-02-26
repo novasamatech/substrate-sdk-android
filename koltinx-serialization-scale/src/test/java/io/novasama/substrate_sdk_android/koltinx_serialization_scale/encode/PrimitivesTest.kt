@@ -8,10 +8,15 @@ import org.junit.Test
 class PrimitivesTest : EncodeTest() {
 
     @Test
-    fun `should encode number`() = runEncodeTest(
-        value = 123.toBigInteger(),
-        expected = 123.toBigInteger()
-    )
+    fun `should encode number`() {
+        val expected = 123.toBigInteger()
+
+        runEncodeTest(value = 123, expected)
+        runEncodeTest(value = 123.toByte(), expected)
+        runEncodeTest(value = 123.toShort(), expected)
+        runEncodeTest(value = 123.toLong(), expected)
+        runEncodeTest(value = 123.toBigInteger(), expected)
+    }
 
     @Test
     fun `should encode string`() {
