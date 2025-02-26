@@ -13,11 +13,16 @@ abstract class BaseEncoder : ScaleEncoder {
 
     protected abstract fun encodeIdentity(value: Any?)
 
-    override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
-        val nodeConsumer = { node: Any? -> encodeIdentity(node) }
+    override fun beginCollection(
+        descriptor: SerialDescriptor,
+        collectionSize: Int
+    ): CompositeEncoder {
+        return ListEncoder(serializersModule, collectionSize, nodeConsumer = ::encodeIdentity)
+    }
 
+    override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
         return when (val kind = descriptor.kind) {
-            StructureKind.CLASS -> StructEncoder(serializersModule, nodeConsumer)
+            StructureKind.CLASS -> StructEncoder(serializersModule, nodeConsumer = ::encodeIdentity)
             else -> error("Unsupported descriptor kind: $kind")
         }
     }
