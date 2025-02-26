@@ -44,7 +44,7 @@ fun <T> DynamicStructureFormat.decode(type: KType, dynamicStructure: Any?): T {
 private fun <T> SerializersModule.modifiedSerializer(kType: KType): KSerializer<T> {
     return when {
         // We need to overwrite built-in serializer for ByteArray
-        kType == typeOf<ByteArray>()  -> ByteArraySerializer as KSerializer<T>
+        kType == typeOf<ByteArray>() -> ByteArraySerializer as KSerializer<T>
         else -> serializer(kType) as KSerializer<T>
     }
 }
@@ -69,7 +69,6 @@ open class Scale(
         return decoder.decodeSerializableValue(deserializer)
     }
 }
-
 
 private val defaultSerializers = SerializersModule {
     contextual(BigInteger::class, BigIntegerSerializer)
