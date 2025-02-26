@@ -73,29 +73,4 @@ abstract class BaseEncoder: ScaleEncoder {
     private fun unsupportedEncoding(type: String): Nothing {
         error("Encoding $type is not supported")
     }
-
-//    @OptIn(InternalSerializationApi::class)
-//    @Suppress("UNCHECKED_CAST")
-//    internal fun <T> encodePolymorphic(
-//        serializer: SerializationStrategy<T>,
-//        value: T,
-//    ) {
-//        if (serializer !is AbstractPolymorphicSerializer<*>) {
-//            serializer.serialize(this, value)
-//            return
-//        }
-//
-//        val casted = serializer as AbstractPolymorphicSerializer<Any>
-//        val actualSerializer = casted.findPolymorphicSerializer(this, value as Any)
-//
-//        val encoder = if (serializer is SealedClassSerializer<*>) {
-//            // serialize Sealed Classes as Enums
-//            val variantName = qualifiedClassNameToSimple(actualSerializer.descriptor.serialName)
-//            EnumEncoder(serializersModule, nodeConsumer = ::encodeIdentity, variantName)
-//        } else {
-//            this
-//        }
-//
-//        actualSerializer.serialize(encoder, value)
-//    }
 }
