@@ -1,7 +1,7 @@
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale
 
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.decoder.PrimitiveDecoder
-import io.novasama.substrate_sdk_android.koltinx_serialization_scale.encoder.SingleValueEncoder
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.encoder.RootEncoder
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.serializers.BigIntegerSerializer
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.serializers.ByteArraySerializer
 import kotlinx.serialization.DeserializationStrategy
@@ -53,7 +53,7 @@ open class Scale(
     companion object Default : Scale(EmptySerializersModule)
 
     override fun <T> encode(serializer: SerializationStrategy<T>, value: T): Any? {
-        val encoder = SingleValueEncoder(serializersModule)
+        val encoder = RootEncoder(serializersModule)
         encoder.encodeSerializableValue(serializer, value)
         return encoder.getCurrent()
     }

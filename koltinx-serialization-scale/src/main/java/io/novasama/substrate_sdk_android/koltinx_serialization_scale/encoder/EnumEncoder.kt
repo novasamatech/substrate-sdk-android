@@ -18,48 +18,67 @@ import kotlinx.serialization.modules.SerializersModule
  *
  * So it first encodes variant name and then the variant value
  */
+//class EnumEncoder(
+//    override val serializersModule: SerializersModule,
+//    nodeConsumer: (Any?) -> Unit,
+//) : BaseCompositeEncoder(nodeConsumer) {
+//
+//    private var _variantName: String? = null
+//    private val variantName: String
+//        get() = requireNotNull(_variantName) {
+//            "Variant name was not encoded"
+//        }
+//
+//    private var variantValue: Any? = NotSet
+//
+//    override fun encodeIdentity(descriptor: SerialDescriptor, index: Int, value: Any?) {
+//        variantValue = value
+//    }
+//
+//    override fun encodeStringElement(descriptor: SerialDescriptor, index: Int, value: String) {
+//        _variantName = qualifiedClassNameToVariantName(value)
+//    }
+//
+//    override fun getEncodedValue(): Any {
+//        return DictEnum.Entry(variantName, requireValueSet(variantValue))
+//    }
+//
+//    override fun createSerializableElementEncoder(): SingleValueEncoder {
+//        return EnumInnerTransientStructEncoder(serializersModule)
+//    }
+//
+//    private class EnumInnerTransientStructEncoder(serializersModule: SerializersModule) :
+//        SingleValueEncoder(serializersModule) {
+//
+//        override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
+//            if (descriptor.shouldUseTransientStructInEnum()) {
+//                return TransientStructEncoder(serializersModule, nodeConsumer = ::encodeIdentity)
+//            }
+//
+//            return super.beginStructure(descriptor)
+//        }
+//    }
+//
+//    private fun qualifiedClassNameToVariantName(qualified: String): String {
+//        return qualified.split(".").last()
+//    }
+//}
+
 class EnumEncoder(
     override val serializersModule: SerializersModule,
-    nodeConsumer: (Any?) -> Unit,
-) : BaseCompositeEncoder(nodeConsumer) {
+    private val variantName: String,
+    private val nodeConsumer: (DictEnum.Entry<*>) -> Unit,
+) : BaseEncoder() {
 
-    private var _variantName: String? = null
-    private val variantName: String
-        get() = requireNotNull(_variantName) {
-            "Variant name was not encoded"
+    override fun encodeIdentity(value: Any?) {
+        nodeConsumer(DictEnum.Entry(variantName, value))
+    }
+
+    override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
+        if (descriptor.shouldUseTransientStructInEnum()) {
+            return TransientStructEncoder(serializersModule, nodeConsumer = ::encodeIdentity)
         }
 
-    private var variantValue: Any? = NotSet
-
-    override fun encodeIdentity(descriptor: SerialDescriptor, index: Int, value: Any?) {
-        variantValue = value
-    }
-
-    override fun encodeStringElement(descriptor: SerialDescriptor, index: Int, value: String) {
-        _variantName = qualifiedClassNameToVariantName(value)
-    }
-
-    override fun getEncodedValue(): Any {
-        return DictEnum.Entry(variantName, requireValueSet(variantValue))
-    }
-
-    override fun createSerializableElementEncoder(): SingleValueEncoder {
-        return EnumInnerTransientStructEncoder(serializersModule)
-    }
-
-    private class EnumInnerTransientStructEncoder(serializersModule: SerializersModule) :
-        SingleValueEncoder(serializersModule) {
-
-        override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
-            if (descriptor.shouldUseTransientStructInEnum()) {
-                return TransientStructEncoder(serializersModule, nodeConsumer = ::encodeIdentity)
-            }
-
-            return super.beginStructure(descriptor)
-        }
-    }
-
-    private fun qualifiedClassNameToVariantName(qualified: String): String {
-        return qualified.split(".").last()
+        return super.beginStructure(descriptor)
     }
 }

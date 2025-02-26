@@ -5,7 +5,7 @@ import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.requi
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.requireValueSet
 import kotlinx.serialization.modules.SerializersModule
 
-open class SingleValueEncoder(override val serializersModule: SerializersModule) : BaseEncoder() {
+class RootEncoder(override val serializersModule: SerializersModule) : BaseEncoder() {
 
     private var current: Any? = NotSet
 
@@ -13,8 +13,9 @@ open class SingleValueEncoder(override val serializersModule: SerializersModule)
         return requireValueSet(current)
     }
 
-    final override fun encodeIdentity(value: Any?) {
+    override fun encodeIdentity(value: Any?) {
         requireValueNotSet(current)
         current = value
     }
 }
+

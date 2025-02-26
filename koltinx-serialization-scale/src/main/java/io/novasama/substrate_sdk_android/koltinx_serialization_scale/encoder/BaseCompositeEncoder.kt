@@ -72,9 +72,9 @@ abstract class BaseCompositeEncoder(
         serializer: SerializationStrategy<T>,
         value: T
     ) {
-        val encoder = createSerializableElementEncoder()
-        serializer.serialize(encoder, value)
-        encodeIdentity(descriptor, index, encoder.getCurrent())
+        val nodeConsumer = { inner: Any? -> encodeIdentity(descriptor, index, inner) }
+        val encoder = ConsumeCallbackEncoder(serializersModule, nodeConsumer)
+        encoder.encodePolymorphic(serializer, value, nodeConsumer)
     }
 
     override fun encodeStringElement(descriptor: SerialDescriptor, index: Int, value: String) {
@@ -83,10 +83,6 @@ abstract class BaseCompositeEncoder(
 
     override fun endStructure(descriptor: SerialDescriptor) {
         nodeConsumer(getEncodedValue())
-    }
-
-    protected open fun createSerializableElementEncoder(): SingleValueEncoder {
-        return SingleValueEncoder(serializersModule)
     }
 
     private fun unsupportedEncoding(type: String): Nothing {

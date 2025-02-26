@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalSerializationApi::class)
+@file:OptIn(ExperimentalSerializationApi::class, InternalSerializationApi::class)
 
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.encoder
 
@@ -31,7 +31,6 @@ abstract class BaseEncoder: ScaleEncoder {
         return when (val kind = descriptor.kind) {
             StructureKind.CLASS -> StructEncoder(serializersModule, nodeConsumer = ::encodeIdentity)
             StructureKind.OBJECT -> ObjectEncoder(serializersModule, nodeConsumer = ::encodeIdentity)
-            PolymorphicKind.SEALED -> EnumEncoder(serializersModule, nodeConsumer = ::encodeIdentity)
             else -> error("Unsupported descriptor kind: $kind")
         }
     }
@@ -72,5 +71,9 @@ abstract class BaseEncoder: ScaleEncoder {
 
     private fun unsupportedEncoding(type: String): Nothing {
         error("Encoding $type is not supported")
+    }
+
+    override fun <T> encodeSerializableValue(serializer: SerializationStrategy<T>, value: T) {
+        encodePolymorphic(serializer, value, nodeConsumer = ::encodeIdentity)
     }
 }
