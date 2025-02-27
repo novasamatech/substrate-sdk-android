@@ -14,8 +14,7 @@ class Struct(
     val mapping: LinkedHashMap<String, TypeReference>
 ) : Type<Struct.Instance>(name) {
 
-    @JvmInline
-    value class Instance(val mapping: Map<String, Any?>) {
+    data class Instance(val mapping: Map<String, Any?>) {
         inline operator fun <reified R> get(key: String): R? = mapping[key] as? R
 
         operator fun contains(key: String): Boolean = key in mapping

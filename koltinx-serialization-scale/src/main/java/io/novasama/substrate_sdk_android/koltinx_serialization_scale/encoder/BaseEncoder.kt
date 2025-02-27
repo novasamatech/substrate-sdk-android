@@ -74,7 +74,7 @@ abstract class BaseEncoder : ScaleEncoder {
         encodePolymorphic(serializer, value, nodeConsumer = ::encodeIdentity)
     }
 
-    private fun SerialDescriptor.createStructEncoder() : CompositeEncoder {
+    private fun SerialDescriptor.createStructEncoder(): CompositeEncoder {
         return if (isAnnotatedWith<TransientStruct>()) {
             require(elementsCount == 1) {
                 "Cannot use @TransientStruct annotation on a class with more than 1 field"
