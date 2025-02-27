@@ -2,6 +2,7 @@ package io.novasama.substrate_sdk_android.koltinx_serialization_scale.encode
 
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.serializers.BigIntegerSerializable
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.junit.Test
 import java.math.BigInteger
@@ -80,6 +81,30 @@ class StructTest : EncodeTest() {
                     "d" to 321.toBigInteger()
                 )
             )
+        )
+    }
+
+    @Test
+    fun `SerialName works`() {
+
+        @Serializable
+        data class A(@SerialName("b") val a: Boolean)
+
+        runEncodeTest(
+            expected = Struct.Instance(mapOf("b" to true)),
+            value = A(a = true)
+        )
+    }
+
+    @Test
+    fun `should encode camel case as snake case`() {
+
+        @Serializable
+        data class A(@SerialName("b") val a: Boolean)
+
+        runEncodeTest(
+            expected = Struct.Instance(mapOf("b" to true)),
+            value = A(a = true)
         )
     }
 }

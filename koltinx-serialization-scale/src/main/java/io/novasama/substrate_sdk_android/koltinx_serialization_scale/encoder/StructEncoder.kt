@@ -1,9 +1,13 @@
+@file:OptIn(ExperimentalSerializationApi::class)
+
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.encoder
 
+import io.novasama.substrate_sdk_android.extensions.camelCaseToSnakeCase
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.NotSet
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.requireValueNotSet
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.requireValueSet
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.modules.SerializersModule
 
@@ -15,7 +19,7 @@ class StructEncoder(
     private var current = mutableMapOf<String, Any?>()
 
     override fun encodeIdentity(descriptor: SerialDescriptor, index: Int, value: Any?) {
-        val tag = descriptor.getElementName(index)
+        val tag = descriptor.getElementName(index).camelCaseToSnakeCase()
         current[tag] = value
     }
 

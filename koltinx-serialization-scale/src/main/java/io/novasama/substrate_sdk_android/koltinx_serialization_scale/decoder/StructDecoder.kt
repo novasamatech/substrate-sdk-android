@@ -2,6 +2,7 @@
 
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.decoder
 
+import io.novasama.substrate_sdk_android.extensions.camelCaseToSnakeCase
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -16,7 +17,7 @@ class StructDecoder(
     private var currentIndex = 0
 
     override fun decodeIdentity(descriptor: SerialDescriptor, index: Int): Any? {
-        val key = descriptor.getElementName(index)
+        val key = descriptor.getElementName(index).camelCaseToSnakeCase()
         return value[key]
     }
 

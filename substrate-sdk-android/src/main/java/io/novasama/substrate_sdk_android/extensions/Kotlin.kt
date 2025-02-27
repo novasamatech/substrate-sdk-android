@@ -106,7 +106,7 @@ fun ByteArray.split(divider: ByteArray): List<ByteArray> {
     return results
 }
 
-internal fun String.snakeCaseToCamelCase(): String {
+fun String.snakeCaseToCamelCase(): String {
     return split("_").mapIndexed { index, segment ->
         if (index > 0) { // do not capitalize first segment
             segment.capitalize(Locale.ROOT)
@@ -114,6 +114,21 @@ internal fun String.snakeCaseToCamelCase(): String {
             segment
         }
     }.joinToString(separator = "")
+}
+
+fun String.camelCaseToSnakeCase(): String {
+    val origin = this
+
+    return buildString {
+        origin.forEach {
+            if (it.isUpperCase()) {
+                append('_')
+                append(it.lowercase())
+            } else {
+                append(it)
+            }
+        }
+    }
 }
 
 @ExperimentalUnsignedTypes
