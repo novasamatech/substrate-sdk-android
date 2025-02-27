@@ -3,6 +3,7 @@
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.encoder
 
 import io.novasama.substrate_sdk_android.extensions.camelCaseToSnakeCase
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations.TransientStruct
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.NotSet
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.requireValueNotSet
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.requireValueSet
@@ -30,7 +31,7 @@ class StructEncoder(
 
 /**
  * Encodes struct with a single value without wrapping it into [Struct.Instance]
- * Used in Enums
+ * Used in for single-field associated values of enums or when [TransientStruct] is used
  */
 class TransientStructEncoder(
     override val serializersModule: SerializersModule,

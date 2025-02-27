@@ -2,7 +2,11 @@
 
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.decoder
 
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations.TransientStruct
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations.findSerializedFallback
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.encoder.StructEncoder
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.encoder.TransientStructEncoder
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.isAnnotatedWith
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.DictEnum
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
 import kotlinx.serialization.DeserializationStrategy
@@ -13,6 +17,7 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.StructureKind
 import kotlinx.serialization.encoding.CompositeDecoder
 import kotlinx.serialization.encoding.CompositeDecoder.Companion.UNKNOWN_NAME
+import kotlinx.serialization.encoding.CompositeEncoder
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.modules.SerializersModule
 import java.math.BigInteger
@@ -33,7 +38,7 @@ open class PrimitiveDecoder(
 
     override fun beginStructure(descriptor: SerialDescriptor): CompositeDecoder {
         return when (val kind = descriptor.kind) {
-            StructureKind.CLASS -> StructDecoder(serializersModule, value as Struct.Instance)
+            StructureKind.CLASS -> descriptor.createStructDecoder(value)
             StructureKind.LIST -> ListDecoder(serializersModule, value as List<*>)
             StructureKind.OBJECT -> ObjectDecoder(serializersModule)
             else -> error("Unsupported descriptor kind: $kind")
@@ -138,6 +143,18 @@ open class PrimitiveDecoder(
 
     private fun createClassName(descriptor: SerialDescriptor, subclassName: String): String {
         return descriptor.serialName + ".$subclassName"
+    }
+
+    private fun SerialDescriptor.createStructDecoder(value: Any?) : CompositeDecoder {
+        return if (isAnnotatedWith<TransientStruct>()) {
+            require(elementsCount == 1) {
+                "Cannot use @TransientStruct annotation on a class with more than 1 field"
+            }
+
+            TransientStructDecoder(serializersModule, value)
+        } else {
+            StructDecoder(serializersModule, value as Struct.Instance)
+        }
     }
 
     // This is needed because `findPolymorphicSerializerOrNull` only accepts `CompositeDecoder`

@@ -3,6 +3,7 @@
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.decoder
 
 import io.novasama.substrate_sdk_android.extensions.camelCaseToSnakeCase
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.encoder.TransientStructEncoder
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -31,9 +32,7 @@ class StructDecoder(
 }
 
 /**
- * Decode a transient struct - a single field "struct" that is not wrapped
- * with Struct.Instance but rather represented by the value directly
- * Used in Enums
+ * @see TransientStructEncoder
  */
 class TransientStructDecoder(
     override val serializersModule: SerializersModule,

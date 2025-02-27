@@ -1,5 +1,6 @@
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.encode
 
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations.TransientStruct
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.serializers.BigIntegerSerializable
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
 import kotlinx.serialization.SerialName
@@ -104,6 +105,19 @@ class StructTest : EncodeTest() {
 
         runEncodeTest(
             expected = Struct.Instance(mapOf("b" to true)),
+            value = A(a = true)
+        )
+    }
+
+    @Test
+    fun `should encode transient struct`() {
+
+        @Serializable
+        @TransientStruct
+        data class A(val a: Boolean)
+
+        runEncodeTest(
+            expected = true,
             value = A(a = true)
         )
     }

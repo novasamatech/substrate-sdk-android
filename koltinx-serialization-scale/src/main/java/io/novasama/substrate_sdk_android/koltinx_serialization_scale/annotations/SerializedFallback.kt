@@ -2,6 +2,7 @@
 
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations
 
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.findAnnotation
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialInfo
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -39,8 +40,5 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 annotation class SerializedFallback(val fallback: String)
 
 fun SerialDescriptor.findSerializedFallback(): String? {
-    val fallbackAnnotation = annotations.find { it is SerializedFallback }
-        as? SerializedFallback ?: return null
-
-    return fallbackAnnotation.fallback
+    return findAnnotation<SerializedFallback>()?.fallback
 }
