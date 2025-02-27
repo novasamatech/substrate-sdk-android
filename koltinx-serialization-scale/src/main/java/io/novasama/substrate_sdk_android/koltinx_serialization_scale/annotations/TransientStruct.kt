@@ -4,12 +4,16 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialInfo
 
 /**
- * Instructs serialization process to skip wrapping annotated value in Struct.Instance
- * Only applicable to single-field classes
+ * Instructs serialization process to skip wrapping annotated value in Struct.Instance.
+ *
+ * Only applicable to single-field classes.
+ *
  * This annotation is useful to switch to value-class like behavior in case class cannot be annotated
- * as value class directly (e.g. it overrides hash-code)
- * Annotating class with more than 1 field with this field will cause an exception to be thrown
- * Example
+ * as value class directly (e.g. it overrides hash-code).
+ *
+ * Annotating class with more than 1 field with this field will cause an exception to be thrown.
+ *
+ * Example:
  * ```
  * @TransientStruct
  * data class Transient(val field: Boolean)
