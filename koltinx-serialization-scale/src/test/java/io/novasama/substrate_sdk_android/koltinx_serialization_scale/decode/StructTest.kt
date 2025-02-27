@@ -104,4 +104,16 @@ class StructTest : DecodeTest() {
             raw = true
         )
     }
+
+    @Test
+    fun `should decode partially defined struct`() {
+
+        @Serializable
+        data class A(val a: Boolean)
+
+        runDecodeTest(
+            expected = A(a = true),
+            raw = Struct.Instance(mapOf("a" to true, "b" to false))
+        )
+    }
 }
