@@ -1,0 +1,20 @@
+package io.novasama.substrate_sdk_android.koltinx_serialization_scale.encoder
+
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.NotSet
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.requireValueNotSet
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.requireValueSet
+import kotlinx.serialization.modules.SerializersModule
+
+class RootEncoder(override val serializersModule: SerializersModule) : BaseEncoder() {
+
+    private var current: Any? = NotSet
+
+    fun getCurrent(): Any? {
+        return requireValueSet(current)
+    }
+
+    override fun encodeIdentity(value: Any?) {
+        requireValueNotSet(current)
+        current = value
+    }
+}
