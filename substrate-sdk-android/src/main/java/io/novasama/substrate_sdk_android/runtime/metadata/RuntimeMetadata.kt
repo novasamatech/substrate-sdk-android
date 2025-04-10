@@ -27,11 +27,6 @@ class ExtrinsicMetadata(
 
 typealias TransactionExtensionId = String
 
-class SignedExtensionValue(
-    val includedInExtrinsic: Any? = null,
-    val includedInSignature: Any? = null,
-)
-
 class TransactionExtensionMetadata(
     val id: TransactionExtensionId,
 
