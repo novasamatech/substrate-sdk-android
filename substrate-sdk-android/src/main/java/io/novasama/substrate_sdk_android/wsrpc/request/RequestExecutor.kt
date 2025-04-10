@@ -8,6 +8,7 @@ typealias SendAction = () -> Unit
 
 class RequestExecutor(private val executor: ExecutorService = Executors.newSingleThreadExecutor()) {
     private val futures = mutableListOf<Future<*>>()
+    private val lock = Any()
 
     fun execute(action: SendAction) {
         var future: Future<*>? = null
@@ -15,15 +16,21 @@ class RequestExecutor(private val executor: ExecutorService = Executors.newSingl
         future = executor.submit {
             action()
 
-            futures.remove(future)
+            synchronized(lock) {
+                futures.remove(future)
+            }
         }
 
-        futures += future
+        synchronized(lock) {
+            futures += future
+        }
     }
 
     fun reset() {
-        futures.forEach { it.cancel(true) }
+        synchronized(lock) {
+            futures.forEach { it.cancel(true) }
 
-        futures.clear()
+            futures.clear()
+        }
     }
 }
