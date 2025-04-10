@@ -7,11 +7,6 @@ import io.novasama.substrate_sdk_android.runtime.RuntimeSnapshot
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.GenericCall
 import io.novasama.substrate_sdk_android.runtime.extrinsic.Nonce
 
-class SignedExtrinsic(
-    val payload: SignerPayloadExtrinsic,
-    val signatureWrapper: SignatureWrapper
-)
-
 class SignedRaw(
     val payload: SignerPayloadRaw,
     val signatureWrapper: SignatureWrapper
@@ -52,8 +47,6 @@ fun SignerPayloadRaw.Companion.fromHex(
 ) = SignerPayloadRaw(hexMessage.fromHex(), accountId, skipMessageHashing)
 
 interface Signer {
-
-    suspend fun signExtrinsic(payloadExtrinsic: SignerPayloadExtrinsic): SignedExtrinsic
 
     suspend fun signRaw(payload: SignerPayloadRaw): SignedRaw
 }

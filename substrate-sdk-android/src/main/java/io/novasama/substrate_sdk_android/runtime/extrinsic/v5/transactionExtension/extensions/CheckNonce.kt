@@ -11,9 +11,7 @@ import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtensi
 import io.novasama.substrate_sdk_android.runtime.metadata.findSignedExtension
 import java.math.BigInteger
 
-class CheckNonce(
-    val nonce: Nonce,
-) : TransactionExtension {
+class CheckNonce(val nonce: Nonce) : TransactionExtension {
 
     override val name: String = DefaultSignedExtensions.CHECK_NONCE
 
@@ -26,10 +24,10 @@ class CheckNonce(
         extrinsicVersion: ExtrinsicVersion,
         runtimeSnapshot: RuntimeSnapshot
     ): Any? {
-        return runtimeSnapshot.encodeNonce(nonce.nonce)
+        return runtimeSnapshot.encodeNonce(nonce)
     }
 
-    private fun RuntimeSnapshot.encodeNonce(nonce: BigInteger): Any {
+    private fun RuntimeSnapshot.encodeNonce(nonce: Nonce): Any {
         val nonceExtension = metadata.extrinsic
             .findSignedExtension(DefaultSignedExtensions.CHECK_NONCE) ?: return nonce
 

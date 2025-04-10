@@ -62,15 +62,13 @@ fun ExtrinsicBuilder(
     era: Era = Era.Immortal,
     tip: BigInteger = DEFAULT_TIP,
     checkMetadataHash: CheckMetadataHashMode = CheckMetadataHashMode.Disabled,
-    extrinsicVersion: ExtrinsicVersion = ExtrinsicVersion.V4(VerifySignatureMode.from(signer, accountId)),
+    extrinsicVersion: ExtrinsicVersion = ExtrinsicVersion.V4,
     batchMode: BatchMode = BatchMode.BATCH,
     extensionNesting: TransactionExtensionNesting = FlatTransactionExtensionNesting(),
 ): ExtrinsicBuilder {
     return ExtrinsicBuilder(runtime, extrinsicVersion, batchMode, extensionNesting).apply {
-        if (extrinsicVersion is ExtrinsicVersion.V5) {
-            val mode = VerifySignatureMode.from(signer, accountId)
-            setTransactionExtension(VerifySignature(mode))
-        }
+        val mode = VerifySignatureMode.from(signer, accountId)
+        setTransactionExtension(VerifySignature(mode))
 
         setTransactionExtension(CheckNonce(nonce))
         setTransactionExtension(CheckMortality(era, blockHash))

@@ -45,7 +45,7 @@ import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionId
  */
 interface TransactionExtension {
 
-    val name: String
+    val name: TransactionExtensionId
 
     suspend fun implicit(): Any?
 

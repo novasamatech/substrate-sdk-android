@@ -31,18 +31,17 @@ class TransactionExtensionPipelineV4(
         )
 
         val allRuntimeExtensions = runtime.metadata.extrinsic.signedExtensions
+        val runtimeExtensionsWithoutSignature = allRuntimeExtensions.filter { it.id != VerifySignature.ID }
 
-        val finalImplication = allRuntimeExtensions.foldRight(initial) { extensionMetadata, acc ->
-            val extension =
-                generalTransactionParams.extensions.getDisablingSignature(extensionMetadata.id)
+        val implicationWithoutSignature = runtimeExtensionsWithoutSignature.foldRight(initial) { extensionMetadata, acc ->
+            val extension = generalTransactionParams.extensions.getOrAbsent(extensionMetadata.id)
             val explicit = extension.explicit(acc, extrinsicVersion, runtime)
 
             acc.add(extension, extensionMetadata, explicit)
         }
 
-        val manualVerifySignature = VerifySignature(extrinsicVersion.verifySignatureMode)
-        val v4Signature =
-            manualVerifySignature.v4Signature(finalImplication, extrinsicVersion, runtime)
+        val signatureExtension = generalTransactionParams.extensions[VerifySignature.ID] as? VerifySignature
+        val v4Signature = signatureExtension?.v4Signature(implicationWithoutSignature, extrinsicVersion, runtime)
 
         return if (v4Signature == null) {
             Extrinsic.ExtrinsicType.Bare
@@ -53,16 +52,8 @@ class TransactionExtensionPipelineV4(
                     v4Signature.accountId
                 ),
                 signature = v4Signature.signature,
-                signedExtras = finalImplication.succeedingExtensions.explicitsMap()
+                signedExtras = implicationWithoutSignature.succeedingExtensions.explicitsMap()
             )
-        }
-    }
-
-    private fun Map<TransactionExtensionId, TransactionExtension>.getDisablingSignature(id: TransactionExtensionId): TransactionExtension {
-        return if (id == VerifySignature.ID) {
-            VerifySignature(VerifySignatureMode.Disabled)
-        } else {
-            getOrAbsent(id)
         }
     }
 
