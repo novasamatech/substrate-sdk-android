@@ -17,7 +17,7 @@ internal abstract class BaseInheritedImplication(
 
     override val succeedingExtensions: List<SucceedingExtensionValues>,
 
-    val runtime: RuntimeSnapshot,
+    override val runtime: RuntimeSnapshot,
 
     protected val currentNestingLevel: Int,
 ) : InheritedImplication {
@@ -27,6 +27,30 @@ internal abstract class BaseInheritedImplication(
     final override fun encoded(): ByteArray {
         return useScaleWriter {
             encodeImplication()
+        }
+    }
+
+    override fun encodedCall(): ByteArray {
+        return useScaleWriter {
+            encodeCall()
+        }
+    }
+
+    override fun encodedExtensions(): ByteArray {
+        return useScaleWriter {
+            encodeExtensions()
+        }
+    }
+
+    override fun encodedExplicits(): ByteArray {
+        return useScaleWriter {
+            encodeExplicits(succeedingExtensions)
+        }
+    }
+
+    override fun encodedImplicits(): ByteArray {
+        return useScaleWriter {
+            encodeImplicits(succeedingExtensions)
         }
     }
 
@@ -63,7 +87,11 @@ internal abstract class BaseInheritedImplication(
     }
 
     private fun ScaleCodecWriter.encodeExtensions(extensions: List<SucceedingExtensionValues>) {
-        // Encode explicits
+        encodeExplicits(extensions)
+        encodeImplicits(extensions)
+    }
+
+    private fun ScaleCodecWriter.encodeExplicits(extensions: List<SucceedingExtensionValues>) {
         extensions.onEach { extensionValues ->
             encodeExtensionValue(
                 extensionValues.transactionExtension,
@@ -71,8 +99,9 @@ internal abstract class BaseInheritedImplication(
                 extensionValues.extensionMetadata.includedInExtrinsic
             )
         }
+    }
 
-        // Encode implicits
+    private fun ScaleCodecWriter.encodeImplicits(extensions: List<SucceedingExtensionValues>) {
         extensions.onEach { extensionValues ->
             encodeExtensionValue(
                 extensionValues.transactionExtension,
@@ -83,7 +112,8 @@ internal abstract class BaseInheritedImplication(
     }
 
     private fun partitionByNestingBoundary(): Pair<List<SucceedingExtensionValues>, List<SucceedingExtensionValues>> {
-        val firstExtensionWithLowerNestedLevel = succeedingExtensions.indexOfFirst { it.nestingLevel < currentNestingLevel }
+        val firstExtensionWithLowerNestedLevel =
+            succeedingExtensions.indexOfFirst { it.nestingLevel < currentNestingLevel }
 
         val inheritedFromPreviousLevel: List<SucceedingExtensionValues>
         val inheritedFromCurrentLevel: List<SucceedingExtensionValues>
@@ -92,8 +122,12 @@ internal abstract class BaseInheritedImplication(
             inheritedFromPreviousLevel = emptyList()
             inheritedFromCurrentLevel = succeedingExtensions
         } else {
-            inheritedFromPreviousLevel = succeedingExtensions.subList(firstExtensionWithLowerNestedLevel, succeedingExtensions.size)
-            inheritedFromCurrentLevel = succeedingExtensions.subList(0, firstExtensionWithLowerNestedLevel)
+            inheritedFromPreviousLevel = succeedingExtensions.subList(
+                firstExtensionWithLowerNestedLevel,
+                succeedingExtensions.size
+            )
+            inheritedFromCurrentLevel =
+                succeedingExtensions.subList(0, firstExtensionWithLowerNestedLevel)
         }
 
         return inheritedFromPreviousLevel to inheritedFromCurrentLevel

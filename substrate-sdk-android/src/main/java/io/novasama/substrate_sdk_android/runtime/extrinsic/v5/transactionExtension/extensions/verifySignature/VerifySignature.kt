@@ -1,14 +1,12 @@
 package io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.verifySignature
 
 import io.novasama.substrate_sdk_android.encrypt.SignatureWrapper
-import io.novasama.substrate_sdk_android.hash.Hasher.blake2b256
 import io.novasama.substrate_sdk_android.runtime.AccountId
 import io.novasama.substrate_sdk_android.runtime.RuntimeSnapshot
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.DictEnum
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
 import io.novasama.substrate_sdk_android.runtime.definitions.types.instances.SignatureInstanceConstructor
-import io.novasama.substrate_sdk_android.runtime.extrinsic.ExtrinsicVersion
-import io.novasama.substrate_sdk_android.runtime.extrinsic.signer.PAYLOAD_HASH_THRESHOLD
+import io.novasama.substrate_sdk_android.runtime.extrinsic.builder.ExtrinsicBuilder
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.InheritedImplication
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.TransactionExtension
 
@@ -30,6 +28,13 @@ class VerifySignature(
 
         fun disabled(): VerifySignature {
             return VerifySignature(VerifySignatureMode.Disabled)
+        }
+
+        fun ExtrinsicBuilder.setVerifySignature(
+            signer: GeneralTransactionSigner,
+            accountId: AccountId
+        ) {
+            setTransactionExtension(enabled(signer, accountId))
         }
 
         internal fun getSignatureFromExplicit(explicit: Any?): SignatureInstance? {
@@ -59,7 +64,6 @@ class VerifySignature(
 
     override suspend fun explicit(
         inheritedImplication: InheritedImplication,
-        extrinsicVersion: ExtrinsicVersion,
         runtimeSnapshot: RuntimeSnapshot,
     ): Any {
         return when (mode) {
@@ -68,7 +72,6 @@ class VerifySignature(
             is VerifySignatureMode.Enabled -> {
                 val signature = mode.signer.signInheritedImplication(
                     inheritedImplication = inheritedImplication,
-                    signingPayload = inheritedImplication.signingPayload(extrinsicVersion),
                     accountId = mode.accountId,
                 )
 
@@ -79,10 +82,9 @@ class VerifySignature(
 
     internal suspend fun v4Signature(
         inheritedImplication: InheritedImplication,
-        extrinsicVersion: ExtrinsicVersion,
         runtimeSnapshot: RuntimeSnapshot,
     ): SignatureInstance? {
-        val explicit = explicit(inheritedImplication, extrinsicVersion, runtimeSnapshot)
+        val explicit = explicit(inheritedImplication, runtimeSnapshot)
         return getSignatureFromExplicit(explicit)
     }
 
@@ -103,19 +105,5 @@ class VerifySignature(
                 )
             )
         )
-    }
-
-    private fun InheritedImplication.signingPayload(extrinsicVersion: ExtrinsicVersion): ByteArray {
-        val encoded = encoded()
-
-        return when (extrinsicVersion) {
-            is ExtrinsicVersion.V4 -> if (encoded.size > PAYLOAD_HASH_THRESHOLD) {
-                encoded.blake2b256()
-            } else {
-                encoded
-            }
-
-            is ExtrinsicVersion.V5 -> encoded.blake2b256()
-        }
     }
 }

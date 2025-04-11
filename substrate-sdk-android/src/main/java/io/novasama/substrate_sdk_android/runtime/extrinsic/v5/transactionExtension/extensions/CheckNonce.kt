@@ -4,16 +4,20 @@ import io.novasama.substrate_sdk_android.runtime.RuntimeSnapshot
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.DefaultSignedExtensions
 import io.novasama.substrate_sdk_android.runtime.definitions.types.skipAliases
-import io.novasama.substrate_sdk_android.runtime.extrinsic.ExtrinsicVersion
 import io.novasama.substrate_sdk_android.runtime.extrinsic.Nonce
+import io.novasama.substrate_sdk_android.runtime.extrinsic.builder.ExtrinsicBuilder
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.InheritedImplication
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.TransactionExtension
 import io.novasama.substrate_sdk_android.runtime.metadata.findSignedExtension
-import java.math.BigInteger
 
-class CheckNonce(
-    val nonce: Nonce,
-) : TransactionExtension {
+class CheckNonce(val nonce: Nonce) : TransactionExtension {
+
+    companion object {
+
+        fun ExtrinsicBuilder.setNonce(nonce: Nonce) {
+            setTransactionExtension(CheckNonce(nonce))
+        }
+    }
 
     override val name: String = DefaultSignedExtensions.CHECK_NONCE
 
@@ -23,13 +27,12 @@ class CheckNonce(
 
     override suspend fun explicit(
         inheritedImplication: InheritedImplication,
-        extrinsicVersion: ExtrinsicVersion,
         runtimeSnapshot: RuntimeSnapshot
     ): Any? {
-        return runtimeSnapshot.encodeNonce(nonce.nonce)
+        return runtimeSnapshot.encodeNonce(nonce)
     }
 
-    private fun RuntimeSnapshot.encodeNonce(nonce: BigInteger): Any {
+    private fun RuntimeSnapshot.encodeNonce(nonce: Nonce): Any {
         val nonceExtension = metadata.extrinsic
             .findSignedExtension(DefaultSignedExtensions.CHECK_NONCE) ?: return nonce
 

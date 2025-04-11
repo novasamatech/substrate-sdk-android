@@ -188,7 +188,7 @@ class SocketService(
         val interceptor = responseInterceptor
 
         if (
-            interceptor != null &&
+            interceptor == null ||
             interceptor.onRpcResponseReceived(rpcResponse).shouldDeliver()
         ) {
             updateState(Event.SendableResponse(rpcResponse))

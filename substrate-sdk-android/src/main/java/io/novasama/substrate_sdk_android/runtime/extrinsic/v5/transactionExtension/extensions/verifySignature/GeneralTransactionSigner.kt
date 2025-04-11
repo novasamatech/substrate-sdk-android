@@ -8,7 +8,6 @@ interface GeneralTransactionSigner {
 
     suspend fun signInheritedImplication(
         inheritedImplication: InheritedImplication,
-        signingPayload: ByteArray,
         accountId: AccountId,
     ): SignatureWrapper
 }

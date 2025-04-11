@@ -27,12 +27,12 @@ class TransactionBuildingPipelineV5(
         val initial = InheritedImplicationV5(
             call = generalTransactionParams.call,
             succeedingExtensions = emptyList(),
-            currentNestedLevel = nesting.nestedLevelOf(lastExtension)
+            currentNestedLevel = nesting.nestedLevelOf(lastExtension),
         )
 
         val finalImplication = allRuntimeExtensions.foldRightIndexed(initial) { idx, extensionMetadata, acc ->
             val extension = generalTransactionParams.extensions.getOrAbsent(extensionMetadata.id)
-            val explicit = extension.explicit(acc, extrinsicVersion, runtime)
+            val explicit = extension.explicit(acc, runtime)
 
             val nextExtension = allRuntimeExtensions.getOrNull(idx - 1)?.id
             val nextNestingLevel = nextExtension?.let(nesting::nestedLevelOf) ?: 0
@@ -49,8 +49,11 @@ class TransactionBuildingPipelineV5(
     private inner class InheritedImplicationV5(
         override val call: GenericCall.Instance,
         override val succeedingExtensions: List<SucceedingExtensionValues>,
-        currentNestedLevel: Int
+        currentNestedLevel: Int,
     ) : BaseInheritedImplication(call, succeedingExtensions, runtime, currentNestedLevel) {
+
+        override val extrinsicVersion: ExtrinsicVersion.V5
+            get() = this@TransactionBuildingPipelineV5.extrinsicVersion
 
         override fun ScaleCodecWriter.encodeImplication() {
             writeByte(extrinsicVersion.extensionVersion)
@@ -67,7 +70,7 @@ class TransactionBuildingPipelineV5(
             return InheritedImplicationV5(
                 call = call,
                 succeedingExtensions = addExtensionValue(extension, extensionMetadata, explicit),
-                currentNestedLevel = nextNestingLevel
+                currentNestedLevel = nextNestingLevel,
             )
         }
     }

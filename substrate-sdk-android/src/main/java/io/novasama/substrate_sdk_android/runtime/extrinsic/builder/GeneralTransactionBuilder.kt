@@ -29,8 +29,21 @@ class ExtrinsicBuilder(
         return this
     }
 
+    inline fun <reified T : TransactionExtension> getExtension(): T? {
+        return getExtension { it is T } as? T
+    }
+
+    fun getExtension(filter: (TransactionExtension) -> Boolean): TransactionExtension? {
+        return transactionExtensions.values.find(filter)
+    }
+
     fun call(call: GenericCall.Instance): ExtrinsicBuilder {
         calls.add(call)
+        return this
+    }
+
+    fun addCalls(calls: List<GenericCall.Instance>): ExtrinsicBuilder {
+        this.calls.addAll(calls)
         return this
     }
 
@@ -41,7 +54,11 @@ class ExtrinsicBuilder(
     }
 
     fun getWrappedCall(): GenericCall.Instance {
-        return wrapInBatch(calls.toMutableList())
+        return wrapInBatch(getCalls())
+    }
+
+    fun getCalls(): List<GenericCall.Instance> {
+        return ArrayList(calls)
     }
 
     suspend fun modify(
@@ -67,8 +84,12 @@ class ExtrinsicBuilder(
 
     private fun createTransactionBuildingPipeline(): TransactionBuildingPipeline {
         return when (extrinsicVersion) {
-            is ExtrinsicVersion.V4 -> TransactionExtensionPipelineV4(runtime, extrinsicVersion)
-            is ExtrinsicVersion.V5 -> TransactionBuildingPipelineV5(runtime, extrinsicVersion, extensionNesting)
+            is ExtrinsicVersion.V4 -> TransactionExtensionPipelineV4(runtime)
+            is ExtrinsicVersion.V5 -> TransactionBuildingPipelineV5(
+                runtime,
+                extrinsicVersion,
+                extensionNesting
+            )
         }
     }
 

@@ -1,6 +1,8 @@
 package io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension
 
+import io.novasama.substrate_sdk_android.runtime.RuntimeSnapshot
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.GenericCall
+import io.novasama.substrate_sdk_android.runtime.extrinsic.ExtrinsicVersion
 import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionMetadata
 
 /**
@@ -41,11 +43,23 @@ import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionMe
  */
 interface InheritedImplication {
 
+    val runtime: RuntimeSnapshot
+
+    val extrinsicVersion: ExtrinsicVersion
+
     val call: GenericCall.Instance
 
     val succeedingExtensions: List<SucceedingExtensionValues>
 
     fun encoded(): ByteArray
+
+    fun encodedExtensions(): ByteArray
+
+    fun encodedImplicits(): ByteArray
+
+    fun encodedExplicits(): ByteArray
+
+    fun encodedCall(): ByteArray
 }
 
 class SucceedingExtensionValues(
@@ -55,8 +69,3 @@ class SucceedingExtensionValues(
     val explicit: Any?,
     val nestingLevel: Int
 )
-
-inline fun <reified T> List<SucceedingExtensionValues>.findExtensionOrThrow(): T {
-    val extensionValues = first { it.transactionExtension is T }
-    return extensionValues.transactionExtension as T
-}
