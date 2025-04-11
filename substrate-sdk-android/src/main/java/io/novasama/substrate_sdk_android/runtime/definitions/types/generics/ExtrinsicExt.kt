@@ -4,6 +4,7 @@ import io.novasama.substrate_sdk_android.encrypt.EncryptionType
 import io.novasama.substrate_sdk_android.runtime.AccountId
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.DictEnum
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.verifySignature.VerifySignature
+import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionId
 import java.util.Locale
 
 class MultiSignature(val encryptionType: EncryptionType, val value: ByteArray)
@@ -35,6 +36,20 @@ fun Extrinsic.Instance.explicits(): ExtrinsicPayloadExtrasInstance? {
         is Extrinsic.ExtrinsicType.GeneralTransaction -> type.extensionExplicits
 
         is Extrinsic.ExtrinsicType.Signed -> type.signedExtras
+    }
+}
+
+fun Extrinsic.Instance.findExplicitOrNull(id: TransactionExtensionId): Any? {
+    return explicits()?.get(id)
+}
+
+fun Extrinsic.Instance.findExplicitOrThrow(id: TransactionExtensionId): Any? {
+    val explicits = explicits() ?: error("Transaction doesn't have explicits")
+
+    return if (id in explicits) {
+        explicits[id]
+    } else {
+        error("Explicit $id is not found")
     }
 }
 

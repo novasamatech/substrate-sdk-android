@@ -17,7 +17,6 @@ open class FixedValueTransactionExtension(
 
     override suspend fun explicit(
         inheritedImplication: InheritedImplication,
-        extrinsicVersion: ExtrinsicVersion,
         runtimeSnapshot: RuntimeSnapshot,
     ): Any? {
         return explicit

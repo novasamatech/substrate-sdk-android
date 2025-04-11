@@ -13,12 +13,12 @@ import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtensi
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.explicitsMap
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.verifySignature.VerifySignature
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.verifySignature.VerifySignatureMode
+import io.novasama.substrate_sdk_android.runtime.metadata.RuntimeMetadata
 import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionId
 import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionMetadata
 
 class TransactionExtensionPipelineV4(
     private val runtime: RuntimeSnapshot,
-    private val extrinsicVersion: ExtrinsicVersion.V4,
 ) : TransactionBuildingPipeline {
 
     override suspend fun constructExtrinsicType(
@@ -27,7 +27,7 @@ class TransactionExtensionPipelineV4(
         val initial = InheritedImplicationV4(
             call = generalTransactionParams.call,
             succeedingExtensions = emptyList(),
-            currentNestedLevel = 0
+            currentNestedLevel = 0,
         )
 
         val allRuntimeExtensions = runtime.metadata.extrinsic.signedExtensions
@@ -35,13 +35,13 @@ class TransactionExtensionPipelineV4(
 
         val implicationWithoutSignature = runtimeExtensionsWithoutSignature.foldRight(initial) { extensionMetadata, acc ->
             val extension = generalTransactionParams.extensions.getOrAbsent(extensionMetadata.id)
-            val explicit = extension.explicit(acc, extrinsicVersion, runtime)
+            val explicit = extension.explicit(acc, runtime)
 
             acc.add(extension, extensionMetadata, explicit)
         }
 
         val signatureExtension = generalTransactionParams.extensions[VerifySignature.ID] as? VerifySignature
-        val v4Signature = signatureExtension?.v4Signature(implicationWithoutSignature, extrinsicVersion, runtime)
+        val v4Signature = signatureExtension?.v4Signature(implicationWithoutSignature, runtime)
 
         return if (v4Signature == null) {
             Extrinsic.ExtrinsicType.Bare
@@ -62,6 +62,8 @@ class TransactionExtensionPipelineV4(
         override val succeedingExtensions: List<SucceedingExtensionValues>,
         currentNestedLevel: Int,
     ) : BaseInheritedImplication(call, succeedingExtensions, runtime, currentNestedLevel) {
+
+        override val extrinsicVersion: ExtrinsicVersion = ExtrinsicVersion.V4
 
         override fun ScaleCodecWriter.encodeImplication() {
             encodeCall()

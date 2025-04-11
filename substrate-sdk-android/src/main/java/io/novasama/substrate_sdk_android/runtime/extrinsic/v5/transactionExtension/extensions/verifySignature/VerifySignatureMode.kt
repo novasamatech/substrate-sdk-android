@@ -18,3 +18,11 @@ sealed class VerifySignatureMode {
 
     object Disabled : VerifySignatureMode()
 }
+
+fun VerifySignatureMode.enabledOrThrow(): VerifySignatureMode.Enabled {
+    require(this is VerifySignatureMode.Enabled) {
+        "VerifySignature is Disabled"
+    }
+
+    return this
+}

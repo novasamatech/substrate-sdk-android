@@ -51,7 +51,6 @@ interface TransactionExtension {
 
     suspend fun explicit(
         inheritedImplication: InheritedImplication,
-        extrinsicVersion: ExtrinsicVersion,
         runtimeSnapshot: RuntimeSnapshot,
     ): Any?
 }
