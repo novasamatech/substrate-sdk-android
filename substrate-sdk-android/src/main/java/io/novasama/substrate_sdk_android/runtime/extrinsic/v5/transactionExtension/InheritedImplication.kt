@@ -1,13 +1,8 @@
 package io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension
 
-import io.emeraldpay.polkaj.scale.ScaleCodecWriter
-import io.novasama.substrate_sdk_android.runtime.AccountId
 import io.novasama.substrate_sdk_android.runtime.RuntimeSnapshot
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.GenericCall
 import io.novasama.substrate_sdk_android.runtime.extrinsic.ExtrinsicVersion
-import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.verifySignature.VerifySignature
-import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.verifySignature.enabledOrThrow
-import io.novasama.substrate_sdk_android.runtime.metadata.RuntimeMetadata
 import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionMetadata
 
 /**

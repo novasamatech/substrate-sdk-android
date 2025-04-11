@@ -50,4 +50,3 @@ fun InheritedImplication.transientEncodedCallData(): ByteArray {
 
     return encodedCallCompact + encodedCallData
 }
-
