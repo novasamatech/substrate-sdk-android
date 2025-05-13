@@ -49,3 +49,20 @@ class TransientStructEncoder(
         return requireValueSet(current)
     }
 }
+
+
+class StructAsTupleEncoder(
+    override val serializersModule: SerializersModule,
+    nodeConsumer: (Any?) -> Unit
+) : BaseCompositeEncoder(nodeConsumer) {
+
+    private var current = mutableListOf<Any?>()
+
+    override fun encodeIdentity(descriptor: SerialDescriptor, index: Int, value: Any?) {
+        current.add(index, value)
+    }
+
+    override fun getEncodedValue(): List<*> {
+        return current
+    }
+}

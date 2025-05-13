@@ -2,6 +2,7 @@
 
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.decoder
 
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations.AsTuple
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations.TransientStruct
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations.findSerializedFallback
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.isAnnotatedWith
@@ -143,14 +144,22 @@ open class PrimitiveDecoder(
     }
 
     private fun SerialDescriptor.createStructDecoder(value: Any?): CompositeDecoder {
-        return if (isAnnotatedWith<TransientStruct>()) {
-            require(elementsCount == 1) {
-                "Cannot use @TransientStruct annotation on a class with more than 1 field"
+        return when {
+            isAnnotatedWith<TransientStruct>() -> {
+                require(elementsCount == 1) {
+                    "Cannot use @TransientStruct annotation on a class with more than 1 field"
+                }
+
+                TransientStructDecoder(serializersModule, value)
             }
 
-            TransientStructDecoder(serializersModule, value)
-        } else {
-            StructDecoder(serializersModule, value as Struct.Instance)
+            isAnnotatedWith<AsTuple>() -> {
+                StructAsTupleDecoder(serializersModule, value as List<*>)
+            }
+
+            else -> {
+                StructDecoder(serializersModule, value as Struct.Instance)
+            }
         }
     }
 

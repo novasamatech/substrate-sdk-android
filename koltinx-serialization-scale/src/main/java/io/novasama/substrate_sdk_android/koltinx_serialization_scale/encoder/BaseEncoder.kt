@@ -2,6 +2,7 @@
 
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.encoder
 
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations.AsTuple
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations.TransientStruct
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.isAnnotatedWith
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -27,7 +28,11 @@ abstract class BaseEncoder : ScaleEncoder {
     override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
         return when (val kind = descriptor.kind) {
             StructureKind.CLASS -> descriptor.createStructEncoder()
-            StructureKind.OBJECT -> ObjectEncoder(serializersModule, nodeConsumer = ::encodeIdentity)
+            StructureKind.OBJECT -> ObjectEncoder(
+                serializersModule,
+                nodeConsumer = ::encodeIdentity
+            )
+
             else -> error("Unsupported descriptor kind: $kind")
         }
     }
@@ -75,14 +80,20 @@ abstract class BaseEncoder : ScaleEncoder {
     }
 
     private fun SerialDescriptor.createStructEncoder(): CompositeEncoder {
-        return if (isAnnotatedWith<TransientStruct>()) {
-            require(elementsCount == 1) {
-                "Cannot use @TransientStruct annotation on a class with more than 1 field"
+        return when {
+            isAnnotatedWith<TransientStruct>() -> {
+                require(elementsCount == 1) {
+                    "Cannot use @TransientStruct annotation on a class with more than 1 field"
+                }
+
+                TransientStructEncoder(serializersModule, nodeConsumer = ::encodeIdentity)
             }
 
-            TransientStructEncoder(serializersModule, nodeConsumer = ::encodeIdentity)
-        } else {
-            StructEncoder(serializersModule, nodeConsumer = ::encodeIdentity)
+            isAnnotatedWith<AsTuple>() -> {
+                StructAsTupleEncoder(serializersModule, nodeConsumer = ::encodeIdentity)
+            }
+
+            else -> StructEncoder(serializersModule, nodeConsumer = ::encodeIdentity)
         }
     }
 }

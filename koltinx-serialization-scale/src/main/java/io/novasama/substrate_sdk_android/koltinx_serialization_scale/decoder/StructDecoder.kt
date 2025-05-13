@@ -54,3 +54,23 @@ class TransientStructDecoder(
         }
     }
 }
+
+class StructAsTupleDecoder(
+    override val serializersModule: SerializersModule,
+    private val value: List<*>
+): BaseCompositeDecoder() {
+
+    private var currentIndex = 0
+
+    override fun decodeIdentity(descriptor: SerialDescriptor, index: Int): Any? {
+       return value[index]
+    }
+
+    override fun decodeElementIndex(descriptor: SerialDescriptor): Int {
+        return if (currentIndex < descriptor.elementsCount) {
+            currentIndex.also { currentIndex++ }
+        } else {
+            DECODE_DONE
+        }
+    }
+}
