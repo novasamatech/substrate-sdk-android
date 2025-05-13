@@ -268,7 +268,7 @@ This is useful when you want to serialize a typed tuple or enum variant with ano
 ```kotlin
 @Serializable
 @AsTuple
-class Transient(val a: Boolean, val b: Boolean)
+class AsTupleStruct(val a: Boolean, val b: Boolean)
 
-assertEquals(listOf(true, false), Scale.encode(Transient(true, false)))
+assertEquals(listOf(true, false), Scale.encode(AsTupleStruct(true, false)))
 ```
