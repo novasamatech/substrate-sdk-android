@@ -1,6 +1,7 @@
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.decode
 
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.Scale
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.decode
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.encode
 import org.junit.Assert.assertArrayEquals
 import org.junit.Test
@@ -33,8 +34,8 @@ class PrimitivesTest : DecodeTest() {
     @Test
     fun `should decode byte array`() {
         val value = byteArrayOf(0x00, 0x01)
-        val result = Scale.encode(value)
+        val result = Scale.decode<ByteArray>(value)
 
-        assertArrayEquals(value, result as ByteArray)
+        assertArrayEquals(value, result)
     }
 }
