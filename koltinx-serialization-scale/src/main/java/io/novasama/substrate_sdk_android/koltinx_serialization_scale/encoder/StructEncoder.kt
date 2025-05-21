@@ -55,7 +55,6 @@ class TransientStructEncoder(
     }
 }
 
-
 class StructAsTupleEncoder(
     override val serializersModule: SerializersModule,
     nodeConsumer: (Any?) -> Unit
