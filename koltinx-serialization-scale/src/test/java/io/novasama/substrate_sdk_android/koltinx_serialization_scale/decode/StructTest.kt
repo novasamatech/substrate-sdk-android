@@ -6,7 +6,6 @@ import io.novasama.substrate_sdk_android.koltinx_serialization_scale.serializers
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import org.junit.Assert
 import org.junit.Test
 import java.math.BigInteger
 

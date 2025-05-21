@@ -1,5 +1,6 @@
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.decode
 
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations.TransientStruct
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.DictEnum
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
 import kotlinx.serialization.Serializable
@@ -9,6 +10,7 @@ import org.junit.Test
 sealed class NullableEnum {
 
     @Serializable
+    @TransientStruct
     data class A(val option: Boolean?): NullableEnum()
 }
 
