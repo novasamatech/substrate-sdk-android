@@ -1,6 +1,7 @@
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.decode
 
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations.SerializedFallback
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations.TransientStruct
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.DictEnum
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
 import kotlinx.serialization.SerialName
@@ -22,6 +23,10 @@ sealed class Sealed {
 
     @Serializable
     data class SingleList(val elements: List<Boolean>) : Sealed()
+
+    @Serializable
+    @TransientStruct
+    data class SingleTransient(val element: Boolean) : Sealed()
 
     @Serializable
     @SerialName("ChangedName")
@@ -48,13 +53,19 @@ class EnumTest : DecodeTest() {
     @Test
     fun `should decode variant value`() = runDecodeTest(
         expected = Sealed.Single(true) as Sealed,
-        raw = DictEnum.Entry("Single", true)
+        raw = DictEnum.Entry("Single", Struct.Instance(mapOf("element" to true)))
     )
 
     @Test
     fun `should decode variant value list`() = runDecodeTest(
         expected = Sealed.SingleList(listOf(true, false)) as Sealed,
-        raw = DictEnum.Entry("SingleList", listOf(true, false))
+        raw = DictEnum.Entry("SingleList",  Struct.Instance(mapOf("elements" to listOf(true, false))))
+    )
+
+    @Test
+    fun `should decode transient struct value`() = runDecodeTest(
+        expected = Sealed.SingleTransient(true) as Sealed,
+        raw = DictEnum.Entry("SingleTransient", true)
     )
 
     @Test
