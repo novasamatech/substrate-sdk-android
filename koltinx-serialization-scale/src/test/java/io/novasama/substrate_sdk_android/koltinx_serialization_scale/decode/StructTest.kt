@@ -6,6 +6,7 @@ import io.novasama.substrate_sdk_android.koltinx_serialization_scale.serializers
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.junit.Assert
 import org.junit.Test
 import java.math.BigInteger
 
@@ -89,6 +90,11 @@ class StructTest : DecodeTest() {
 
         runDecodeTest(
             raw = Struct.Instance(mapOf("some_name" to true)),
+            expected = A(someName = true)
+        )
+
+        runDecodeTest(
+            raw = Struct.Instance(mapOf("someName" to true)),
             expected = A(someName = true)
         )
     }
