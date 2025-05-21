@@ -28,7 +28,7 @@ class StructDecoder(
         val snakeCaseKey = key.camelCaseToSnakeCase()
         if (snakeCaseKey in value) return value[snakeCaseKey]
 
-        error("Key '$key' (or '${snakeCaseKey}') is not found in the $value")
+        error("Key '$key' (or '$snakeCaseKey') is not found in the $value")
     }
 
     override fun decodeElementIndex(descriptor: SerialDescriptor): Int {
@@ -58,6 +58,26 @@ class TransientStructDecoder(
         return if (shouldDecode) {
             shouldDecode = false
             0
+        } else {
+            DECODE_DONE
+        }
+    }
+}
+
+class StructAsTupleDecoder(
+    override val serializersModule: SerializersModule,
+    private val value: List<*>
+) : BaseCompositeDecoder() {
+
+    private var currentIndex = 0
+
+    override fun decodeIdentity(descriptor: SerialDescriptor, index: Int): Any? {
+        return value[index]
+    }
+
+    override fun decodeElementIndex(descriptor: SerialDescriptor): Int {
+        return if (currentIndex < descriptor.elementsCount) {
+            currentIndex.also { currentIndex++ }
         } else {
             DECODE_DONE
         }
