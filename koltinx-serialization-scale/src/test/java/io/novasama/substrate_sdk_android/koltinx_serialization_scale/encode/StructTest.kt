@@ -101,11 +101,11 @@ class StructTest : EncodeTest() {
     fun `should encode camel case as snake case`() {
 
         @Serializable
-        data class A(@SerialName("b") val a: Boolean)
+        data class A(val aB: Boolean)
 
         runEncodeTest(
-            expected = Struct.Instance(mapOf("b" to true)),
-            value = A(a = true)
+            expected = Struct.Instance(mapOf("aB" to true, "a_b" to true)),
+            value = A(aB = true)
         )
     }
 
