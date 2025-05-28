@@ -23,7 +23,7 @@ fun String.asEthereumAddress() = Ethereum.Address(this)
 private val ETHEREUM_ADDRESS_REGEX = "^0x[0-9a-f]{40}$".toRegex()
 
 fun Ethereum.Address.isValid(): Boolean {
-    val withoutChecksum = value.toLowerCase(Locale.ROOT)
+    val withoutChecksum = value.lowercase(Locale.ROOT)
 
     // value is hex string of 40 symbols
     if (!ETHEREUM_ADDRESS_REGEX.matches(withoutChecksum)) {
@@ -70,7 +70,7 @@ fun Ethereum.Address.toAccountId(): Ethereum.AccountId {
         throw Ethereum.InvalidChecksumException()
     }
 
-    val accountId = value.toLowerCase(Locale.ROOT).fromHex()
+    val accountId = value.lowercase(Locale.ROOT).fromHex()
 
     return Ethereum.AccountId(accountId)
 }

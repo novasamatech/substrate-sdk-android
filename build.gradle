@@ -5,11 +5,11 @@ buildscript {
         versionCode = 1
 
         // SDK and tools
-        compileVersion = 28
+        compileVersion = 30
         minVersion = 21
-        targetVersion = 28
+        targetVersion = 30
 
-        kotlinVersion = '1.6.20'
+        kotlinVersion = '2.1.21'
 
         supportVersion = '1.0.0'
         constraintVersion = '1.1.3'
@@ -70,7 +70,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.1'
+        classpath 'com.android.tools.build:gradle:8.10.0'
         classpath 'org.mozilla.rust-android-gradle:plugin:0.9.6'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath 'io.github.gradle-nexus:publish-plugin:1.1.0'

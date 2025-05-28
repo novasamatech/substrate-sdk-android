@@ -1,7 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'org.mozilla.rust-android-gradle.rust-android'
 apply from: '../maven-publish-helper.gradle'
 
@@ -14,6 +13,8 @@ publishing {
 }
 
 android {
+    namespace 'io.novasama.substrate_sdk_android'
+
     compileSdkVersion rootProject.compileVersion
 
     ndkVersion "26.1.10909125"
@@ -38,8 +39,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility 1.8
-        targetCompatibility 1.8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     sourceSets {
