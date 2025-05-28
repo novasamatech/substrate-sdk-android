@@ -52,6 +52,12 @@ android {
             java.srcDirs += "$projectDir/src/testShared/java"
         }
     }
+
+    kotlin {
+        jvmToolchain {
+            languageVersion.set(JavaLanguageVersion.of(17))
+        }
+    }
 }
 
 cargo {
