@@ -48,9 +48,6 @@ afterEvaluate {
 
                 // Adds javadocs and sources as separate jars.
 //                artifact androidJavadocsJar
-                artifact(androidSourcesJar) {
-                    classifier 'sources'
-                }
 
                 version = android.defaultConfig.versionName // or just '1.0'
 
