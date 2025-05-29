@@ -65,7 +65,7 @@ class Metadata14Test {
                     metadataReader.metadata[RuntimeMetadataSchemaV14.lookup],
                     v14Preset()
                 )
-            }.inMilliseconds
+            }.inWholeMilliseconds
         }
         println("Median: ${parseTimes.median()} ms")
     }
