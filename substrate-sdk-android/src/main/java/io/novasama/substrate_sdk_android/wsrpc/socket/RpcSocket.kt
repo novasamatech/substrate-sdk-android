@@ -128,7 +128,7 @@ class RpcSocket(
     }
 
     private fun log(topic: String, message: Any?) {
-        logger?.log("\t[SOCKET][${topic.toUpperCase()}] $message")
+        logger?.log("\t[SOCKET][${topic.uppercase()}] $message")
     }
 
     private fun isBatchReply(response: String): Boolean {
