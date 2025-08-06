@@ -4,7 +4,6 @@ import io.novasama.substrate_sdk_android.encrypt.hmacSHA512
 import io.novasama.substrate_sdk_android.encrypt.junction.Junction
 import io.novasama.substrate_sdk_android.encrypt.junction.JunctionType
 import io.novasama.substrate_sdk_android.encrypt.keypair.ECDSAUtils
-import io.novasama.substrate_sdk_android.encrypt.keypair.KeypairFactory
 import io.novasama.substrate_sdk_android.encrypt.keypair.derivePublicKey
 import io.novasama.substrate_sdk_android.extensions.fromUnsignedBytes
 import io.novasama.substrate_sdk_android.extensions.requireOrException

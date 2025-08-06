@@ -26,7 +26,6 @@ object Bip32Ed25519KeypairFactory : Bip32KeypairFactory() {
         val privateKey = hmacResult.sliceArray(0 until PRIVATE_KEY_SIZE)
         val chainCode = hmacResult.sliceArray(PRIVATE_KEY_SIZE until hmacResult.size)
 
-
         return Bip32ExtendedKeyPair(
             privateKey = privateKey,
             publicKey = deriveEd25519PublicKey(privateKey),
