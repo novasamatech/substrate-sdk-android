@@ -1,6 +1,8 @@
 package io.novasama.substrate_sdk_android.common
 
+import io.novasama.substrate_sdk_android.extensions.toHexString
 import org.junit.Assert
+import org.junit.Assert.assertEquals
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
@@ -33,4 +35,8 @@ inline fun <reified T : Throwable> assertThrows(block: () -> Unit): T {
     )
 
     return throwable as? T ?: throwable.cause as T
+}
+
+fun assertHexEquals(expected: ByteArray, actual: ByteArray) {
+    assertEquals(expected.toHexString(), actual.toHexString())
 }

@@ -1,11 +1,11 @@
-package io.novasama.substrate_sdk_android.encrypt.seed.ethereum
+package io.novasama.substrate_sdk_android.encrypt.seed.bip39
 
 import io.novasama.substrate_sdk_android.encrypt.mnemonic.Mnemonic
 import io.novasama.substrate_sdk_android.encrypt.mnemonic.MnemonicCreator
 import io.novasama.substrate_sdk_android.encrypt.seed.SeedCreator
 import io.novasama.substrate_sdk_android.encrypt.seed.SeedFactory
 
-object EthereumSeedFactory : SeedFactory {
+object Bip39SeedFactory : SeedFactory {
 
     override fun createSeed(length: Mnemonic.Length, password: String?): SeedFactory.Result {
         val mnemonic = MnemonicCreator.randomMnemonic(length)

@@ -1,4 +1,4 @@
-package io.novasama.substrate_sdk_android.encrypt.keypair.ethereum
+package io.novasama.substrate_sdk_android.encrypt.keypair.bip32
 
 import io.novasama.substrate_sdk_android.encrypt.keypair.Keypair
 
