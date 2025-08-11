@@ -84,13 +84,6 @@ afterEvaluate {
         }
 
         repositories {
-            maven {
-                credentials {
-                    username = ossrhUsername
-                    password = ossrhPassword
-                }
-            }
-
             mavenLocal()
         }
     }
