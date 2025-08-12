@@ -9,20 +9,35 @@ import io.novasama.substrate_sdk_android.encrypt.junction.password
 import io.novasama.substrate_sdk_android.encrypt.keypair.substrate.SubstrateKeypairFactory
 import io.novasama.substrate_sdk_android.encrypt.seed.substrate.SubstrateSeedFactory
 import io.novasama.substrate_sdk_android.encrypt.seed.substrate.deriveSeed32
+import io.novasama.substrate_sdk_android.ss58.SS58Encoder.toAddress
+import org.junit.Assert.assertArrayEquals
+import org.junit.Assert.assertEquals
 
 abstract class BaseSubstrateJsonEncoderTest : BaseJsonEncoderTest() {
 
     abstract val encryptionType: EncryptionType
 
-    override fun deriveSeedAndKeypair(mnemonic: String, derivationPath: String?): DerivationResult {
+    protected fun testExternalCompatibility(derivationPath: String?, json: String) {
+        val derivationData = createDerivationData(derivationPath)
+        val testCase = ExternalCompatibilityTestCase(derivationData, json, password)
+        testExternalCompatibility(testCase)
+    }
+
+    protected fun testSelfCompatibility(derivationPath: String?) {
+        val testCase = SelfCompatibilityTestCase(createDerivationData(derivationPath))
+        testSelfCompatibility(testCase)
+    }
+
+    private fun createDerivationData(derivationPath: String?): DerivationData {
         val derivationPathDecoded = SubstrateJunctionDecoder.decode(derivationPath)
-        val seed = SubstrateSeedFactory.deriveSeed32(mnemonic, password = derivationPathDecoded.password())
+        val seed = SubstrateSeedFactory.deriveSeed32(testMnemonic, password = derivationPathDecoded.password())
         val keypair = SubstrateKeypairFactory.generate(encryptionType, seed.seed, derivationPathDecoded.junctions())
 
-        return DerivationResult(
+        return DerivationData(
             seed = seed.seed,
             keypair = keypair,
-            encryption = MultiChainEncryption.Substrate(encryptionType)
+            encryption = MultiChainEncryption.Substrate(encryptionType),
+            address = keypair.publicKey.toAddress(addressPrefix = 0)
         )
     }
 }

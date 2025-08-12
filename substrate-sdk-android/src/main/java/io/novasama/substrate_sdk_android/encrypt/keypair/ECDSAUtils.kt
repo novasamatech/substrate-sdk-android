@@ -34,3 +34,10 @@ fun ECDSAUtils.derivePublicKey(privateKeyOrSeed: ByteArray): ByteArray {
 
     return compressedPublicKeyFromPrivate(privateKeyInt)
 }
+
+fun ECDSAUtils.deriveKeypair(privateKey: ByteArray) : Keypair {
+    return BaseKeypair(
+        privateKey = privateKey,
+        publicKey = derivePublicKey(privateKey)
+    )
+}

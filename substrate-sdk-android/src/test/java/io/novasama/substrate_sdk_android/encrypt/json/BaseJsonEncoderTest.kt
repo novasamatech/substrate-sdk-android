@@ -8,61 +8,63 @@ import io.novasama.substrate_sdk_android.encrypt.keypair.Keypair
 import io.novasama.substrate_sdk_android.ss58.SS58Encoder.toAddress
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.junit.MockitoJUnitRunner
 
-private const val PASSWORD = "12345"
-private const val NAME = "test"
 
-private const val TEST_MNEMONIC = "fine engage seed popular upon round differ belt engage space author pet"
-
-@RunWith(MockitoJUnitRunner::class)
 abstract class BaseJsonEncoderTest {
+
+    protected val testMnemonic =
+        "fine engage seed popular upon round differ belt engage space author pet"
+
+    protected val password = "12345"
+
+    protected val name = "test"
+
+
     private val gson = Gson()
 
     private val decoder = JsonSeedDecoder(gson)
     private val encoder = JsonSeedEncoder(gson)
 
-    abstract fun deriveSeedAndKeypair(mnemonic: String, derivationPath: String?): DerivationResult
+    protected fun testExternalCompatibility(testCase: ExternalCompatibilityTestCase) {
+        val expectedDerivationData = testCase.derivationData
+        val decodedExternal = decoder.decode(testCase.json, password)
 
-    @Test
-    fun `encode should be compatible with decode without derivation path`() {
-        performTest(derivationPath = null)
+        with(decodedExternal) {
+            assertArrayEquals(expectedDerivationData.keypair.publicKey, keypair.publicKey)
+            assertArrayEquals(expectedDerivationData.keypair.privateKey, keypair.privateKey)
+
+            assertEquals(expectedDerivationData.encryption, multiChainEncryption)
+
+            assertEquals(name, username)
+        }
     }
 
-    @Test
-    fun `encode should be compatible with decode with derivation path`() {
-        performTest(derivationPath = "//1//2")
-    }
-
-    private fun performTest(derivationPath: String?) {
-        val derivationResult = deriveSeedAndKeypair(TEST_MNEMONIC, derivationPath)
-
-        val seedExpected = derivationResult.seed
-        val keypairExpected = derivationResult.keypair
+    protected fun testSelfCompatibility(testCase: SelfCompatibilityTestCase) {
+        val derivationData = testCase.derivationData
+        val seedExpected = derivationData.seed
+        val keypairExpected = derivationData.keypair
 
         val address = keypairExpected.publicKey.toAddress(TestAddressBytes.WESTEND)
 
         val json = encoder.generate(
             keypair = keypairExpected,
             seed = seedExpected,
-            password = PASSWORD,
-            name = NAME,
-            multiChainEncryption = derivationResult.encryption,
+            password = password,
+            name = name,
+            multiChainEncryption = derivationData.encryption,
             address = address,
             genesisHash = TestGeneses.WESTEND
         )
 
-        val decoded = decoder.decode(json, PASSWORD)
+        val decoded = decoder.decode(json, password)
 
         with(decoded) {
             assertArrayEquals(keypairExpected.publicKey, keypair.publicKey)
             assertArrayEquals(keypairExpected.privateKey, keypair.privateKey)
 
-            assertEquals(derivationResult.encryption, multiChainEncryption)
+            assertEquals(derivationData.encryption, multiChainEncryption)
 
-            assertEquals(NAME, username)
+            assertEquals(name, username)
 
             seed?.let {
                 assertArrayEquals(seedExpected, it)
@@ -70,9 +72,20 @@ abstract class BaseJsonEncoderTest {
         }
     }
 
-    class DerivationResult(
+    protected data class DerivationData(
         val seed: ByteArray,
         val keypair: Keypair,
-        val encryption: MultiChainEncryption
+        val encryption: MultiChainEncryption,
+        val address: String
+    )
+
+    protected data class SelfCompatibilityTestCase(
+        val derivationData: DerivationData,
+    )
+
+    protected data class ExternalCompatibilityTestCase(
+        val derivationData: DerivationData,
+        val json: String,
+        val password: String,
     )
 }

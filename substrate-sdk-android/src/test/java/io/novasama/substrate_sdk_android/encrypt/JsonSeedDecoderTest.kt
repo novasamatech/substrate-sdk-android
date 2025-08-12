@@ -33,8 +33,7 @@ private const val JSON_NO_GENESIS =
 private const val JSON_NO_NETWORK_INFO =
     "{\"address\":\"0x02f3d42516c317757748b073f5221455e31035286ea7417b827d8eb8ad1a6c49d6\",\"encoded\":\"VsYSlEzIMvgk2lpGigHs8fR6kqyTZAgnz+QkoAwxy/0AgAAAAQAAAAgAAADtvqAkZhcSD94AaYzzDFLgMDgz0U3+ZD6p0eaWqlWXgPJZrTLe6Go6bXgiT0nklIHMipQ4CxDsnJwIO98NY7RJwWDqnH9+72huUq7VODaN7LUyChBLT58AwN0xXvx1cEksMlBZoCZ9W0qU0o98kfhPuLA+goplCb/XLp5PEdE=\",\"encoding\":{\"content\":[\"pkcs8\",\"ecdsa\"],\"type\":[\"scrypt\",\"xsalsa20-poly1305\"],\"version\":\"3\"},\"meta\":{\"name\":\"test\",\"tags\":[],\"whenCreated\":1600433095690}}"
 
-// TODO not possible to use sr25519 library in unit tests for now
-val JSONS = listOf(VALID_JSON_EDWARDS, VALID_JSON_ECDSA)
+val JSONS = listOf(VALID_JSON_EDWARDS, VALID_JSON_ECDSA, VALID_JSON_SR25519)
 
 private const val VALID_PASSWORD = "12345"
 private const val INVALID_PASSWORD = "123456"
