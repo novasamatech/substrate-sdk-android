@@ -15,10 +15,6 @@ abstract class BaseSubstrateJsonEncoderTest : BaseJsonEncoderTest() {
     abstract val encryptionType: EncryptionType
 
     override fun deriveSeedAndKeypair(mnemonic: String, derivationPath: String?): DerivationResult {
-        System.out.println("java.library.path = " + System.getProperty("java.library.path"));
-        System.out.println("os.arch = " + System.getProperty("os.arch"));
-        System.out.println("java.vendor = " + System.getProperty("java.vendor"));
-
         val derivationPathDecoded = SubstrateJunctionDecoder.decode(derivationPath)
         val seed = SubstrateSeedFactory.deriveSeed32(mnemonic, password = derivationPathDecoded.password())
         val keypair = SubstrateKeypairFactory.generate(encryptionType, seed.seed, derivationPathDecoded.junctions())

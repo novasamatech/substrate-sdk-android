@@ -30,7 +30,7 @@ class SubstrateKeypairDerivationTest {
 
     val gson = Gson()
 
-    protected fun performSpecTests(
+    private fun performSpecTests(
         filename: String,
         encryptionType: EncryptionType
     ) {
