@@ -8,7 +8,6 @@ class ImportAccountData(
     val multiChainEncryption: MultiChainEncryption,
     val username: String?,
     val networkTypeIdentifier: NetworkTypeIdentifier,
-    val seed: ByteArray? = null
 )
 
 class ImportAccountMeta(

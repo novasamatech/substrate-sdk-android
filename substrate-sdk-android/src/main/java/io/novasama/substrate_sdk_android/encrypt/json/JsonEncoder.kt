@@ -10,14 +10,12 @@ import io.novasama.substrate_sdk_android.encrypt.keypair.Keypair
 import io.novasama.substrate_sdk_android.encrypt.model.JsonAccountData
 import org.bouncycastle.util.encoders.Base64
 
-@Suppress("EXPERIMENTAL_API_USAGE")
-class JsonSeedEncoder(
+class JsonEncoder(
     private val gson: Gson
 ) {
 
     fun generate(
         keypair: Keypair,
-        seed: ByteArray?,
         password: String,
         name: String,
         multiChainEncryption: MultiChainEncryption,
@@ -32,7 +30,7 @@ class JsonSeedEncoder(
                 JsonAccountData.Encoding.ethereum()
             }
         }
-        val encoded = formEncodedField(keypair, seed, password, encoding)
+        val encoded = formEncodedField(keypair, password, encoding)
 
         val importData = JsonAccountData(
             encoded = encoded,
@@ -50,7 +48,6 @@ class JsonSeedEncoder(
 
     private fun formEncodedField(
         keypair: Keypair,
-        seed: ByteArray?,
         password: String,
         encoding: JsonAccountData.Encoding
     ): String {
@@ -58,7 +55,7 @@ class JsonSeedEncoder(
         val contentEncoder = ContentCoderFactory.getEncoder(encoding.content)!!
         val typeEncoder = TypeCoderFactory.getEncoder(encoding.type)!!
 
-        val encodedContent = contentEncoder.encode(keypair, seed)
+        val encodedContent = contentEncoder.encode(keypair)
         val encryptedContent = typeEncoder.encode(encodedContent, password.encodeToByteArray())
 
         return Base64.toBase64String(encryptedContent)

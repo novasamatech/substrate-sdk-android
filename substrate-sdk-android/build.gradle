@@ -13,6 +13,8 @@ publishing {
     }
 }
 
+// We add desktop libraries depending on the host machine since cross-compilation does not work atm
+// This is only used for running tests
 def isMac = org.gradle.internal.os.OperatingSystem.current().isMacOsX()
 def isLinux = org.gradle.internal.os.OperatingSystem.current().isLinux()
 

@@ -16,9 +16,7 @@ internal abstract class OtherSubstrateJsonSecretCoder : JsonSecretCoder {
 
     abstract fun createKeypair(privateKey: ByteArray): Keypair
 
-    override fun encode(keypair: Keypair, seed: ByteArray?): List<ByteArray> {
-        requireNotNull(seed) { "Seed cannot be null" }
-
+    override fun encode(keypair: Keypair): List<ByteArray> {
         return listOf(keypair.privateKey, keypair.publicKey)
     }
 
@@ -28,13 +26,9 @@ internal abstract class OtherSubstrateJsonSecretCoder : JsonSecretCoder {
         val privateKey = data[0]
         val derivedKeypair = createKeypair(privateKey)
 
-        val expectedPublicKey = data[1]
-        require(expectedPublicKey.contentEquals(derivedKeypair.publicKey)) {
-            "Generated public key does not match derived one"
-        }
+        requirePublicKeyMatch(publicKeyFromJson = data[1], derivedKeyPair = derivedKeypair)
 
         return JsonContentDecoder.SecretDecoder.DecodedSecret(
-            seed = null,
             multiChainEncryption = MultiChainEncryption.Substrate(encryptionType),
             keypair = derivedKeypair
         )

@@ -3,7 +3,7 @@ package io.novasama.substrate_sdk_android.encrypt.json
 import io.novasama.substrate_sdk_android.encrypt.EncryptionType
 import org.junit.Test
 
-class Sr25519JsonSeedEncoderTest : BaseSubstrateJsonEncoderTest() {
+class Sr25519JsonEncoderTest : BaseSubstrateJsonEncoderTest() {
 
     override val encryptionType = EncryptionType.SR25519
 

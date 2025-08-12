@@ -11,7 +11,7 @@ import io.novasama.substrate_sdk_android.extensions.asEthereumPublicKey
 import io.novasama.substrate_sdk_android.extensions.toAddress
 import org.junit.Test
 
-class EthereumJsonSeedEncoderTest : BaseJsonEncoderTest() {
+class EthereumJsonEncoderTest : BaseJsonEncoderTest() {
 
     @Test
     fun `encode should be compatible with decode with derivation path`() {
@@ -43,7 +43,6 @@ class EthereumJsonSeedEncoderTest : BaseJsonEncoderTest() {
         val keypair = Bip32EcdsaKeypairFactory.generate(seed.seed, derivationPathDecoded.junctions())
 
         return DerivationData(
-            seed = seed.seed,
             keypair = keypair,
             encryption = MultiChainEncryption.Ethereum,
             address = keypair.publicKey.asEthereumPublicKey().toAddress().value

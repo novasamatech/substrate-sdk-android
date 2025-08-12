@@ -10,8 +10,6 @@ import io.novasama.substrate_sdk_android.encrypt.keypair.substrate.SubstrateKeyp
 import io.novasama.substrate_sdk_android.encrypt.seed.substrate.SubstrateSeedFactory
 import io.novasama.substrate_sdk_android.encrypt.seed.substrate.deriveSeed32
 import io.novasama.substrate_sdk_android.ss58.SS58Encoder.toAddress
-import org.junit.Assert.assertArrayEquals
-import org.junit.Assert.assertEquals
 
 abstract class BaseSubstrateJsonEncoderTest : BaseJsonEncoderTest() {
 
@@ -34,7 +32,6 @@ abstract class BaseSubstrateJsonEncoderTest : BaseJsonEncoderTest() {
         val keypair = SubstrateKeypairFactory.generate(encryptionType, seed.seed, derivationPathDecoded.junctions())
 
         return DerivationData(
-            seed = seed.seed,
             keypair = keypair,
             encryption = MultiChainEncryption.Substrate(encryptionType),
             address = keypair.publicKey.toAddress(addressPrefix = 0)

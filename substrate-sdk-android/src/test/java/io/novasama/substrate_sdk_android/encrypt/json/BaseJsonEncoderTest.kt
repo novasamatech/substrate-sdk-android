@@ -22,8 +22,8 @@ abstract class BaseJsonEncoderTest {
 
     private val gson = Gson()
 
-    private val decoder = JsonSeedDecoder(gson)
-    private val encoder = JsonSeedEncoder(gson)
+    private val decoder = JsonDecoder(gson)
+    private val encoder = JsonEncoder(gson)
 
     protected fun testExternalCompatibility(testCase: ExternalCompatibilityTestCase) {
         val expectedDerivationData = testCase.derivationData
@@ -41,14 +41,12 @@ abstract class BaseJsonEncoderTest {
 
     protected fun testSelfCompatibility(testCase: SelfCompatibilityTestCase) {
         val derivationData = testCase.derivationData
-        val seedExpected = derivationData.seed
         val keypairExpected = derivationData.keypair
 
         val address = keypairExpected.publicKey.toAddress(TestAddressBytes.WESTEND)
 
         val json = encoder.generate(
             keypair = keypairExpected,
-            seed = seedExpected,
             password = password,
             name = name,
             multiChainEncryption = derivationData.encryption,
@@ -65,15 +63,10 @@ abstract class BaseJsonEncoderTest {
             assertEquals(derivationData.encryption, multiChainEncryption)
 
             assertEquals(name, username)
-
-            seed?.let {
-                assertArrayEquals(seedExpected, it)
-            }
         }
     }
 
     protected data class DerivationData(
-        val seed: ByteArray,
         val keypair: Keypair,
         val encryption: MultiChainEncryption,
         val address: String

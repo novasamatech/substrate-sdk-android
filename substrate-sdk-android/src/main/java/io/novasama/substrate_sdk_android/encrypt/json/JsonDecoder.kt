@@ -31,7 +31,7 @@ private fun MultiChainEncryption.Companion.from(name: String): MultiChainEncrypt
     }
 }
 
-class JsonSeedDecoder(private val gson: Gson) {
+class JsonDecoder(private val gson: Gson) {
 
     fun extractImportMetaData(json: String): ImportAccountMeta {
         val jsonData = decodeJson(json)
@@ -89,7 +89,6 @@ class JsonSeedDecoder(private val gson: Gson) {
             decodedSecret.multiChainEncryption,
             username,
             networkTypeIdentifier,
-            decodedSecret.seed
         )
     }
 

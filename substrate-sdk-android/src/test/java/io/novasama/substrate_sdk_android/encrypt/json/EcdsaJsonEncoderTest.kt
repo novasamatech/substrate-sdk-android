@@ -3,7 +3,7 @@ package io.novasama.substrate_sdk_android.encrypt.json
 import io.novasama.substrate_sdk_android.encrypt.EncryptionType
 import org.junit.Test
 
-class EcdsaJsonSeedEncoderTest : BaseSubstrateJsonEncoderTest() {
+class EcdsaJsonEncoderTest : BaseSubstrateJsonEncoderTest() {
 
     override val encryptionType = EncryptionType.ECDSA
 
