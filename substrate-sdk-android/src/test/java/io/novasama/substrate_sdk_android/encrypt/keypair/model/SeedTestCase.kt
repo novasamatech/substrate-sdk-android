@@ -1,9 +1,9 @@
-package io.novasama.substrate_sdk_android.encrypt.mnemonic
+package io.novasama.substrate_sdk_android.encrypt.keypair.model
 
 import com.google.gson.annotations.SerializedName
 
-data class MnemonicTestCase(
-    val mnemonic: String,
+data class SeedTestCase(
+    val seed: String,
     val path: String,
     @SerializedName("pk")
     val expectedPublicKey: String,

@@ -10,7 +10,7 @@ import io.novasama.substrate_sdk_android.encrypt.keypair.substrate.Sr25519Keypai
 
 object Sr25519JsonSecretCoder : JsonSecretCoder {
 
-    override fun encode(keypair: Keypair, seed: ByteArray?): List<ByteArray> {
+    override fun encode(keypair: Keypair): List<ByteArray> {
         require(keypair is Sr25519Keypair)
 
         val ed25519BytesSecret = Sr25519.toEd25519Bytes(keypair.privateKey + keypair.nonce)
@@ -26,13 +26,14 @@ object Sr25519JsonSecretCoder : JsonSecretCoder {
         val privateAndNonce = Sr25519.fromEd25519Bytes(privateKeyCompressed)
 
         val keypair = Sr25519Keypair(
-            privateAndNonce.copyOfRange(0, 32),
-            publicKey,
-            privateAndNonce.copyOfRange(32, 64)
+            privateKey = privateAndNonce.copyOfRange(0, 32),
+            publicKey = publicKey,
+            nonce = privateAndNonce.copyOfRange(32, 64)
         )
 
+        requirePublicKeyMatch(publicKeyFromJson = data[1], derivedKeyPair = keypair)
+
         return JsonContentDecoder.SecretDecoder.DecodedSecret(
-            seed = null,
             multiChainEncryption = MultiChainEncryption.Substrate(EncryptionType.SR25519),
             keypair = keypair
         )

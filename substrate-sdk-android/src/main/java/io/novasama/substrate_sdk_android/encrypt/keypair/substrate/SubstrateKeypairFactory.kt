@@ -2,6 +2,7 @@ package io.novasama.substrate_sdk_android.encrypt.keypair.substrate
 
 import io.novasama.substrate_sdk_android.encrypt.EncryptionType
 import io.novasama.substrate_sdk_android.encrypt.junction.Junction
+import io.novasama.substrate_sdk_android.encrypt.junction.SubstrateJunctionDecoder
 import io.novasama.substrate_sdk_android.encrypt.keypair.Keypair
 import io.novasama.substrate_sdk_android.encrypt.keypair.generate
 
@@ -15,5 +16,19 @@ object SubstrateKeypairFactory {
         EncryptionType.SR25519 -> Sr25519SubstrateKeypairFactory.generate(seed, junctions)
         EncryptionType.ED25519 -> Ed25519SubstrateKeypairFactory.generate(seed, junctions)
         EncryptionType.ECDSA -> ECDSASubstrateKeypairFactory.generate(seed, junctions)
+    }
+
+    fun generate(
+        encryptionType: EncryptionType,
+        seed: ByteArray,
+        derivationPath: String?
+    ): Keypair {
+        val junctions = if (derivationPath != null) {
+            SubstrateJunctionDecoder.decode(derivationPath).junctions
+        } else {
+            emptyList()
+        }
+
+        return generate(encryptionType, seed, junctions)
     }
 }

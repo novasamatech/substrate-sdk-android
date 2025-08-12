@@ -4,8 +4,8 @@ import io.novasama.substrate_sdk_android.encrypt.SecurityProviders
 import io.novasama.substrate_sdk_android.encrypt.hmacSHA512
 import io.novasama.substrate_sdk_android.encrypt.junction.Junction
 import io.novasama.substrate_sdk_android.encrypt.junction.JunctionType
+import io.novasama.substrate_sdk_android.encrypt.keypair.Ed25519Utils
 import io.novasama.substrate_sdk_android.extensions.fromUnsignedBytes
-import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
 import java.math.BigInteger
 
 object Bip32Ed25519KeypairFactory : Bip32KeypairFactory() {
@@ -28,7 +28,7 @@ object Bip32Ed25519KeypairFactory : Bip32KeypairFactory() {
 
         return Bip32ExtendedKeyPair(
             privateKey = privateKey,
-            publicKey = deriveEd25519PublicKey(privateKey),
+            publicKey = Ed25519Utils.derivePublicFromPrivate(privateKey),
             chaincode = chainCode
         )
     }
@@ -63,14 +63,8 @@ object Bip32Ed25519KeypairFactory : Bip32KeypairFactory() {
 
         return Bip32ExtendedKeyPair(
             privateKey = privateKey,
-            publicKey = deriveEd25519PublicKey(privateKey),
+            publicKey = Ed25519Utils.derivePublicFromPrivate(privateKey),
             chaincode = childChainCode
         )
-    }
-
-    private fun deriveEd25519PublicKey(privateKey: ByteArray): ByteArray {
-        val ed25519PrivateKey = Ed25519PrivateKeyParameters(privateKey, 0)
-        val ed25519PublicKey = ed25519PrivateKey.generatePublicKey()
-        return ed25519PublicKey.encoded
     }
 }

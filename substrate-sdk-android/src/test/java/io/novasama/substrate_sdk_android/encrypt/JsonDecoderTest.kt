@@ -5,7 +5,7 @@ import io.novasama.substrate_sdk_android.common.TestAddressBytes
 import io.novasama.substrate_sdk_android.common.TestGeneses
 import io.novasama.substrate_sdk_android.common.assertInstance
 import io.novasama.substrate_sdk_android.common.assertThrows
-import io.novasama.substrate_sdk_android.encrypt.json.JsonSeedDecoder
+import io.novasama.substrate_sdk_android.encrypt.json.JsonDecoder
 import io.novasama.substrate_sdk_android.encrypt.json.JsonSeedDecodingException.IncorrectPasswordException
 import io.novasama.substrate_sdk_android.encrypt.json.JsonSeedDecodingException.InvalidJsonException
 import io.novasama.substrate_sdk_android.encrypt.model.NetworkTypeIdentifier
@@ -13,12 +13,7 @@ import io.novasama.substrate_sdk_android.extensions.toHexString
 import org.bouncycastle.util.encoders.Hex
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
-import org.junit.Ignore
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.junit.MockitoJUnitRunner
 
 private const val VALID_JSON_SR25519 =
     "{\"address\":\"F2dMuaCik4Ackmo9hoMMV79ETtVNvKSZMVK5sue9q1syPrW\",\"encoded\":\"DjQJTO2m1HlbCuaF0A9B9XJPHQlz1+0dOVURUSSS3VsAgAAAAQAAAAgAAAC9nLArVYH4ip7+fN03vcLOy727cNE6PWMCVXtpPKoAktb4YTIaf/Oe8oPZOUa1KnMCPtTRJPUsZbCMp41rdaT82b6wvOI/CL3kmmPlVIX8GmW6GZHaPVvvu2fGiC7EchpV5V1SR11GhTbqE94JhfSKSJALkd1Nxy4Ilfizyx7UZAw/pzavw7PR7td0MXEjctUhiWg1TDApXXGiUX3+\",\"encoding\":{\"content\":[\"pkcs8\",\"sr25519\"],\"type\":[\"scrypt\",\"xsalsa20-poly1305\"],\"version\":\"3\"},\"meta\":{\"genesisHash\":\"0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe\",\"name\":\"test\",\"tags\":[],\"whenCreated\":1600410143263}}"
@@ -33,8 +28,7 @@ private const val JSON_NO_GENESIS =
 private const val JSON_NO_NETWORK_INFO =
     "{\"address\":\"0x02f3d42516c317757748b073f5221455e31035286ea7417b827d8eb8ad1a6c49d6\",\"encoded\":\"VsYSlEzIMvgk2lpGigHs8fR6kqyTZAgnz+QkoAwxy/0AgAAAAQAAAAgAAADtvqAkZhcSD94AaYzzDFLgMDgz0U3+ZD6p0eaWqlWXgPJZrTLe6Go6bXgiT0nklIHMipQ4CxDsnJwIO98NY7RJwWDqnH9+72huUq7VODaN7LUyChBLT58AwN0xXvx1cEksMlBZoCZ9W0qU0o98kfhPuLA+goplCb/XLp5PEdE=\",\"encoding\":{\"content\":[\"pkcs8\",\"ecdsa\"],\"type\":[\"scrypt\",\"xsalsa20-poly1305\"],\"version\":\"3\"},\"meta\":{\"name\":\"test\",\"tags\":[],\"whenCreated\":1600433095690}}"
 
-// TODO not possible to use sr25519 library in unit tests for now
-val JSONS = listOf(VALID_JSON_EDWARDS, VALID_JSON_ECDSA)
+val JSONS = listOf(VALID_JSON_EDWARDS, VALID_JSON_ECDSA, VALID_JSON_SR25519)
 
 private const val VALID_PASSWORD = "12345"
 private const val INVALID_PASSWORD = "123456"
@@ -49,11 +43,10 @@ private val VALID_GENESIS = TestGeneses.KUSAMA
 private const val INVALID_JSON = "{\"some_field\": 123}"
 private const val NOT_JSON = "not json"
 
-@RunWith(MockitoJUnitRunner::class)
-class JsonSeedDecoderTest {
+class JsonDecoderTest {
     private val gson = Gson()
 
-    private val decoder = JsonSeedDecoder(gson)
+    private val decoder = JsonDecoder(gson)
 
     @Test
     fun `should decode valid json with correct password`() {
@@ -137,23 +130,6 @@ class JsonSeedDecoderTest {
         val result = decoder.decode(JSON_NO_NETWORK_INFO, VALID_PASSWORD)
 
         assertInstance<NetworkTypeIdentifier.Undefined>(result.networkTypeIdentifier)
-    }
-
-    @Test
-    fun `should extract seed from non-sr25519 crypto`() {
-        JSONS.forEach {
-            val result = decoder.decode(it, VALID_PASSWORD)
-
-            assertNotNull(result.seed)
-        }
-    }
-
-    @Test
-    @Ignore("sr25519 is not supported in unit tests")
-    fun `should not extract seed from sr25519 crypto`() {
-        val result = decoder.decode(VALID_JSON_SR25519, VALID_PASSWORD)
-
-        assertNull(result.seed)
     }
 
     @Test
