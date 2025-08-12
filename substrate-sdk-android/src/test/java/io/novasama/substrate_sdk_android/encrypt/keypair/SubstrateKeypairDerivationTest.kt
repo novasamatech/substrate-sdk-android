@@ -1,15 +1,32 @@
-package io.novasama.substrate_sdk_android.encrypt
+package io.novasama.substrate_sdk_android.encrypt.keypair
 
 import com.google.gson.Gson
+import io.novasama.substrate_sdk_android.encrypt.EncryptionType
 import io.novasama.substrate_sdk_android.encrypt.keypair.substrate.SubstrateKeypairFactory
 import io.novasama.substrate_sdk_android.extensions.toHexString
 import io.novasama.substrate_sdk_android.getResourceReader
 import io.novasama.substrate_sdk_android.encrypt.junction.SubstrateJunctionDecoder
-import io.novasama.substrate_sdk_android.encrypt.mnemonic.MnemonicTestCase
+import io.novasama.substrate_sdk_android.encrypt.keypair.model.MnemonicTestCase
 import io.novasama.substrate_sdk_android.encrypt.seed.substrate.SubstrateSeedFactory
 import org.junit.Assert
+import org.junit.Test
 
-abstract class SubstrateKeypairDerivationTest {
+class SubstrateKeypairDerivationTest {
+
+    @Test
+    fun `should pass ed25519 tests`() {
+        performSpecTests("crypto/ed25519HDKD.json", EncryptionType.ED25519)
+    }
+
+    @Test
+    fun `should pass ecdsa tests`() {
+        performSpecTests("crypto/ecdsaHDKD.json", EncryptionType.ECDSA)
+    }
+
+    @Test
+    fun shouldRunSr25519Tests() {
+        performSpecTests("crypto/sr25519HDKD.json", EncryptionType.SR25519)
+    }
 
     val gson = Gson()
 

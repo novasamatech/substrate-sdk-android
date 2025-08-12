@@ -23,11 +23,15 @@ enum class EncryptionType(val rawName: String, val signatureVersion: Int) {
     }
 }
 
-sealed class MultiChainEncryption(val encryptionType: EncryptionType) {
+sealed class MultiChainEncryption {
 
-    companion object // extensions
+    abstract val encryptionType: EncryptionType
 
-    class Substrate(encryptionType: EncryptionType) : MultiChainEncryption(encryptionType)
+    companion object; // extensions
 
-    object Ethereum : MultiChainEncryption(EncryptionType.ECDSA)
+    data class Substrate(override val encryptionType: EncryptionType) : MultiChainEncryption()
+
+    data object Ethereum : MultiChainEncryption() {
+        override val encryptionType: EncryptionType = EncryptionType.ECDSA
+    }
 }

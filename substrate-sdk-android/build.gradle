@@ -13,6 +13,9 @@ publishing {
     }
 }
 
+def isMac = org.gradle.internal.os.OperatingSystem.current().isMacOsX()
+def isLinux = org.gradle.internal.os.OperatingSystem.current().isLinux()
+
 android {
     namespace 'io.novasama.substrate_sdk_android'
 
@@ -44,25 +47,38 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
 
-    sourceSets {
-        test {
-            java.srcDirs += "$projectDir/src/testShared/java"
-        }
-
-        androidTest {
-            java.srcDirs += "$projectDir/src/testShared/java"
-        }
-    }
-
     kotlin {
         jvmToolchain(17)
     }
+
+    testOptions {
+        unitTests.all {
+            dependsOn("cargoBuild")
+
+            if(isMac) {
+                jvmArgs "-Djava.library.path=$buildDir/rustJniLibs/desktop/darwin-aarch64"
+            }
+
+            if (isLinux) {
+                jvmArgs "-Djava.library.path=$buildDir/rustJniLibs/desktop/linux-x86-64"
+            }
+        }
+    }
+}
+
+
+def baseTargets = ["arm", "arm64", "x86", "x86_64"]
+if (isMac) {
+    baseTargets += ["darwin-aarch64"]
+}
+if (isLinux) {
+    baseTargets += ["linux-x86-64"]
 }
 
 cargo {
     module = "../sr25519-java/"
     libname = "sr25519java"
-    targets = ["arm", "arm64", "x86", "x86_64"]
+    targets = baseTargets
 }
 
 tasks.configureEach { task ->

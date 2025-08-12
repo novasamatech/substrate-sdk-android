@@ -1,10 +1,9 @@
-package io.novasama.substrate_sdk_android.encrypt
+package io.novasama.substrate_sdk_android.encrypt.keypair
 
 import com.google.gson.Gson
 import io.novasama.substrate_sdk_android.encrypt.junction.BIP32JunctionDecoder
 import io.novasama.substrate_sdk_android.encrypt.keypair.bip32.Bip32EcdsaKeypairFactory
-import io.novasama.substrate_sdk_android.encrypt.keypair.generate
-import io.novasama.substrate_sdk_android.encrypt.mnemonic.MnemonicTestCase
+import io.novasama.substrate_sdk_android.encrypt.keypair.model.MnemonicTestCase
 import io.novasama.substrate_sdk_android.encrypt.seed.bip39.Bip39SeedFactory
 import io.novasama.substrate_sdk_android.extensions.toHexString
 import io.novasama.substrate_sdk_android.getResourceReader

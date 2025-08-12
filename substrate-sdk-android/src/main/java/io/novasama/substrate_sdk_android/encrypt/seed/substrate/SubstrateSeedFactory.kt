@@ -21,3 +21,14 @@ object SubstrateSeedFactory : SeedFactory {
         return SeedFactory.Result(seed, mnemonic)
     }
 }
+
+fun SubstrateSeedFactory.deriveSeed32(
+    mnemonicWords: String,
+    password: String?
+): SeedFactory.Result {
+    return cropSeedTo32Bytes(deriveSeed(mnemonicWords, password))
+}
+
+private fun cropSeedTo32Bytes(seedResult: SeedFactory.Result): SeedFactory.Result {
+    return SeedFactory.Result(seed = seedResult.seed.copyOfRange(0, 32), seedResult.mnemonic)
+}

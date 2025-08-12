@@ -2,7 +2,7 @@ package io.novasama.substrate_sdk_android.encrypt.keypair.bip32
 
 import com.google.gson.Gson
 import io.novasama.substrate_sdk_android.encrypt.junction.BIP32JunctionDecoder
-import io.novasama.substrate_sdk_android.encrypt.keypair.SeedTestCase
+import io.novasama.substrate_sdk_android.encrypt.keypair.model.SeedTestCase
 import io.novasama.substrate_sdk_android.encrypt.keypair.generate
 import io.novasama.substrate_sdk_android.extensions.fromHex
 import io.novasama.substrate_sdk_android.extensions.toHexString

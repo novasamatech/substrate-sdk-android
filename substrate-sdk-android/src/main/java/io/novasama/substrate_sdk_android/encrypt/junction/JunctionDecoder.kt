@@ -76,3 +76,15 @@ abstract class JunctionDecoder {
 
     protected abstract fun decodeJunction(rawJunction: String, type: JunctionType): Junction
 }
+
+fun JunctionDecoder.decode(derivationPath: String?): JunctionDecoder.DecodeResult? {
+    return derivationPath?.let { decode(derivationPath) }
+}
+
+fun JunctionDecoder.DecodeResult?.password(): String? {
+    return this?.password
+}
+
+fun JunctionDecoder.DecodeResult?.junctions(): List<Junction> {
+    return this?.junctions.orEmpty()
+}
