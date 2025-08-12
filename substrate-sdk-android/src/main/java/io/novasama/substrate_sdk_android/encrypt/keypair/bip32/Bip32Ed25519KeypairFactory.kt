@@ -6,7 +6,6 @@ import io.novasama.substrate_sdk_android.encrypt.junction.Junction
 import io.novasama.substrate_sdk_android.encrypt.junction.JunctionType
 import io.novasama.substrate_sdk_android.encrypt.keypair.Ed25519Utils
 import io.novasama.substrate_sdk_android.extensions.fromUnsignedBytes
-import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
 import java.math.BigInteger
 
 object Bip32Ed25519KeypairFactory : Bip32KeypairFactory() {

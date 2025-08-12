@@ -3,11 +3,9 @@ package io.novasama.substrate_sdk_android.encrypt.json.coders.content.secretCode
 import io.novasama.substrate_sdk_android.encrypt.MultiChainEncryption
 import io.novasama.substrate_sdk_android.encrypt.json.coders.content.JsonContentDecoder
 import io.novasama.substrate_sdk_android.encrypt.json.coders.content.JsonSecretCoder
-import io.novasama.substrate_sdk_android.encrypt.keypair.BaseKeypair
 import io.novasama.substrate_sdk_android.encrypt.keypair.ECDSAUtils
 import io.novasama.substrate_sdk_android.encrypt.keypair.Keypair
 import io.novasama.substrate_sdk_android.encrypt.keypair.deriveKeypair
-import io.novasama.substrate_sdk_android.encrypt.keypair.derivePublicKey
 
 object EthereumJsonSecretCoder : JsonSecretCoder {
 

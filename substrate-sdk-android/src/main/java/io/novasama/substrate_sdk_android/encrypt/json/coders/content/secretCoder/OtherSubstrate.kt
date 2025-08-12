@@ -5,10 +5,7 @@ import io.novasama.substrate_sdk_android.encrypt.MultiChainEncryption
 import io.novasama.substrate_sdk_android.encrypt.MultiChainEncryption.Ethereum.encryptionType
 import io.novasama.substrate_sdk_android.encrypt.json.coders.content.JsonContentDecoder
 import io.novasama.substrate_sdk_android.encrypt.json.coders.content.JsonSecretCoder
-import io.novasama.substrate_sdk_android.encrypt.keypair.Ed25519Utils
 import io.novasama.substrate_sdk_android.encrypt.keypair.Keypair
-import io.novasama.substrate_sdk_android.encrypt.keypair.substrate.SubstrateKeypairFactory
-
 
 internal abstract class OtherSubstrateJsonSecretCoder : JsonSecretCoder {
 
