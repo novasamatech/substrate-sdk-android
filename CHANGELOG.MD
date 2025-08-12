@@ -1,5 +1,23 @@
 # Changelog
 
+## v2.9.0
+
+This release is focused around fixes and refactoring of import from json feature
+
+### Changes
+
+* Fix compatibility of ED25519 and ECDSA JSON files when custom derivation path is used
+* Finally make sr25519 work in tests
+* Refactor and improve coverage of json-related tests. Now tests cover self-compatibility as well as 
+compatibility with external sources (like polkadot-js) for all encryption x derivation path cases
+
+### Breaking changes
+
+* `JsonSeedEncoder` and `JsonSeedDecoder` are renamed to `JsonEncoder` and `JsonDecoder` respectively
+* Removed `seed` argument from `JsonEncoder#generate` as well as from return type of `JsonDecoder#decode`
+Seed is a vague concept in a context of a json import, which is solely focused around private key exports
+so it should not be used
+
 ## v2.8.0 
 
 This release is focused around Bip32 and Bip39 derivation improvements
