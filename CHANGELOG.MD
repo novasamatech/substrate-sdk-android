@@ -10,6 +10,7 @@ This release is focused around fixes and refactoring of import from json feature
 * Finally make sr25519 work in tests
 * Refactor and improve coverage of json-related tests. Now tests cover self-compatibility as well as 
 compatibility with external sources (like polkadot-js) for all encryption x derivation path cases
+* Add post-conditions to ensure we always derive a public key that corresponds to the one present in json 
 
 ### Breaking changes
 
