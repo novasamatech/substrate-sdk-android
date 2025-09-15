@@ -27,13 +27,12 @@ class StructDecoder(
         // This should be addressed better to introducing some annotation to specify field naming strategy per entire struct
         // Also we should check the underlying layer to find out why some fields are not transformed to camel case
         val camelCaseKey = key.snakeCaseToCamelCase()
-        val snakeCaseKey = key.camelCaseToSnakeCase()
+        if (camelCaseKey in value) return value[camelCaseKey]
 
-        return when {
-            camelCaseKey in value -> value[camelCaseKey]
-            snakeCaseKey in value -> value[snakeCaseKey]
-            else -> error("Key '$key' ('$camelCaseKey'/'$snakeCaseKey') is not found in the $value")
-        }
+        val snakeCaseKey = key.camelCaseToSnakeCase()
+        if (snakeCaseKey in value) return value[snakeCaseKey]
+
+        error("Key '$key' ('$camelCaseKey'/'$snakeCaseKey') is not found in the $value")
     }
 
     override fun decodeElementIndex(descriptor: SerialDescriptor): Int {
