@@ -99,6 +99,23 @@ class StructTest : DecodeTest() {
     }
 
     @Test
+    fun `should decode camel case as snake case`() {
+
+        @Serializable
+        data class A(@SerialName("some_name") val someName: Boolean)
+
+        runDecodeTest(
+            raw = Struct.Instance(mapOf("some_name" to true)),
+            expected = A(someName = true)
+        )
+
+        runDecodeTest(
+            raw = Struct.Instance(mapOf("someName" to true)),
+            expected = A(someName = true)
+        )
+    }
+
+    @Test
     fun `should decode transient struct`() {
 
         @Serializable
