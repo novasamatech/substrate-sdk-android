@@ -3,6 +3,7 @@
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.decoder
 
 import io.novasama.substrate_sdk_android.extensions.camelCaseToSnakeCase
+import io.novasama.substrate_sdk_android.extensions.snakeCaseToCamelCase
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.encoder.TransientStructEncoder
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -25,10 +26,13 @@ class StructDecoder(
         // TODO this is a temp solution to cater both camel and snake cases in struct fields
         // This should be addressed better to introducing some annotation to specify field naming strategy per entire struct
         // Also we should check the underlying layer to find out why some fields are not transformed to camel case
+        val camelCaseKey = key.snakeCaseToCamelCase()
+        if (camelCaseKey in value) return value[camelCaseKey]
+
         val snakeCaseKey = key.camelCaseToSnakeCase()
         if (snakeCaseKey in value) return value[snakeCaseKey]
 
-        error("Key '$key' (or '$snakeCaseKey') is not found in the $value")
+        error("Key '$key' ('$camelCaseKey'/'$snakeCaseKey') is not found in the $value")
     }
 
     override fun decodeElementIndex(descriptor: SerialDescriptor): Int {
