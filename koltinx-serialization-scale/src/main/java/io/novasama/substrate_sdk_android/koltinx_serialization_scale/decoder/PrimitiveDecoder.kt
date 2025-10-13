@@ -26,6 +26,10 @@ open class PrimitiveDecoder(
     val value: Any?
 ) : ScaleDecoder {
 
+    override fun decodeRaw(): Any? {
+        return value
+    }
+
     override fun decodeByteArray(): ByteArray {
         return decodeCasted()
     }
@@ -52,13 +56,37 @@ open class PrimitiveDecoder(
     override fun decodeDouble(): Double = unsupportedDecoding("Char")
 
     override fun decodeEnum(enumDescriptor: SerialDescriptor): Int {
-        val name = decodeString()
-        val index = enumDescriptor.getElementIndex(name)
+        val name = detectEnumEntryName()
+        var index = enumDescriptor.getElementIndex(name)
 
         if (index != UNKNOWN_NAME) return index
 
-        val fallback = enumDescriptor.findSerializedFallback() ?: return index
-        return enumDescriptor.getElementIndex(fallback)
+        val fallback = enumDescriptor.findSerializedFallback()
+        if (fallback == null) {
+            error("Enum entry $name not found in ${enumDescriptor.serialName}")
+        }
+
+        index = enumDescriptor.getElementIndex(fallback)
+
+        if (index != UNKNOWN_NAME) {
+            return index
+        } else {
+            error("Fallback enum entry $fallback not found in ${enumDescriptor.serialName}")
+        }
+    }
+
+    private fun detectEnumEntryName(): String {
+        return when(value) {
+            is String -> value
+            is DictEnum.Entry<*> -> {
+                require(value.value == null) {
+                    "Regular enum cannot be decoded with present associated value: $value"
+                }
+
+                value.name
+            }
+            else -> error("Cannot extract enum entry name from: $value")
+        }
     }
 
     override fun decodeFloat(): Float = unsupportedDecoding("Float")
@@ -127,7 +155,7 @@ open class PrimitiveDecoder(
                 ?: serializer.findFallbackFromAnnotations()
                 ?: error("Subtype $variantClassName not registered")
 
-        val enumDecoder = EnumDecoder(serializersModule, enumEntry.value)
+        val enumDecoder = PrimitiveDecoder(serializersModule, enumEntry.value)
         return actualSerializer.deserialize(enumDecoder) as T
     }
 

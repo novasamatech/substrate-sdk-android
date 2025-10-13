@@ -5,6 +5,8 @@ import java.math.BigInteger
 
 interface ScaleDecoder : Decoder {
 
+    fun decodeRaw(): Any?
+
     fun decodeByteArray(): ByteArray
 
     fun decodeNumber(): BigInteger
