@@ -4,7 +4,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialInfo
 
 /**
- * Instruct serializer to encode given regular enum as dict enum
+ * Instruct serializer to encode given regular enum as dict enum entry with null associated value
  *
  * Example:
  * ```
