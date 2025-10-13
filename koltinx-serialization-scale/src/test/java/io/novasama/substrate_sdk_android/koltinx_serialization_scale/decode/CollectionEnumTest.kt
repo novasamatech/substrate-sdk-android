@@ -1,6 +1,7 @@
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.decode
 
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations.SerializedFallback
+import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.DictEnum
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -49,4 +50,28 @@ class CollectionEnumTest : DecodeTest() {
         raw = "a",
         expected = TestEnum2.A
     )
+
+    @Test
+    fun `should decode collection enum from dict entry with null value`() {
+        runDecodeTest(
+            expected = TestEnum.A,
+            raw = DictEnum.Entry("A", null)
+        )
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `should throw when attempting to decode from dict enum with non null value`() {
+        runDecodeTest(
+            expected = TestEnum.A,
+            raw = DictEnum.Entry("A", 1)
+        )
+    }
+
+    @Test
+    fun `should respect custom names for dict entry decoding`() {
+        runDecodeTest(
+            expected = TestEnum2.A,
+            raw = DictEnum.Entry("a", null)
+        )
+    }
 }

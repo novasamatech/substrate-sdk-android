@@ -56,13 +56,27 @@ open class PrimitiveDecoder(
     override fun decodeDouble(): Double = unsupportedDecoding("Char")
 
     override fun decodeEnum(enumDescriptor: SerialDescriptor): Int {
-        val name = decodeString()
+        val name = detectEnumEntryName()
         val index = enumDescriptor.getElementIndex(name)
 
         if (index != UNKNOWN_NAME) return index
 
         val fallback = enumDescriptor.findSerializedFallback() ?: return index
         return enumDescriptor.getElementIndex(fallback)
+    }
+
+    private fun detectEnumEntryName(): String {
+        return when(value) {
+            is String -> value
+            is DictEnum.Entry<*> -> {
+                require(value.value == null) {
+                    "Regular enum cannot be decoded with present associated value: $value"
+                }
+
+                value.name
+            }
+            else -> error("Cannot extract enum entry name from: $value")
+        }
     }
 
     override fun decodeFloat(): Float = unsupportedDecoding("Float")
@@ -131,7 +145,7 @@ open class PrimitiveDecoder(
                 ?: serializer.findFallbackFromAnnotations()
                 ?: error("Subtype $variantClassName not registered")
 
-        val enumDecoder = EnumDecoder(serializersModule, enumEntry.value)
+        val enumDecoder = PrimitiveDecoder(serializersModule, enumEntry.value)
         return actualSerializer.deserialize(enumDecoder) as T
     }
 
