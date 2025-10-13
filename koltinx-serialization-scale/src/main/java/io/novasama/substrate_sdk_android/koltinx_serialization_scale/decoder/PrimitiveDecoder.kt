@@ -57,12 +57,22 @@ open class PrimitiveDecoder(
 
     override fun decodeEnum(enumDescriptor: SerialDescriptor): Int {
         val name = detectEnumEntryName()
-        val index = enumDescriptor.getElementIndex(name)
+        var index = enumDescriptor.getElementIndex(name)
 
         if (index != UNKNOWN_NAME) return index
 
-        val fallback = enumDescriptor.findSerializedFallback() ?: return index
-        return enumDescriptor.getElementIndex(fallback)
+        val fallback = enumDescriptor.findSerializedFallback()
+        if (fallback == null) {
+            error("Enum entry $name not found in ${enumDescriptor.serialName}")
+        }
+
+        index = enumDescriptor.getElementIndex(fallback)
+
+        if (index != UNKNOWN_NAME) {
+            return index
+        } else {
+            error("Fallback enum entry $fallback not found in ${enumDescriptor.serialName}")
+        }
     }
 
     private fun detectEnumEntryName(): String {
