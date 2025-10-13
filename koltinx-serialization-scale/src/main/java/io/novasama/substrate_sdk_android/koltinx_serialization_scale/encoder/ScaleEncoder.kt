@@ -5,6 +5,8 @@ import java.math.BigInteger
 
 interface ScaleEncoder : Encoder {
 
+    fun encodeRaw(value: Any?)
+
     fun encodeNumber(number: BigInteger)
 
     fun encodeByteArray(bytes: ByteArray)

@@ -26,6 +26,10 @@ open class PrimitiveDecoder(
     val value: Any?
 ) : ScaleDecoder {
 
+    override fun decodeRaw(): Any? {
+        return value
+    }
+
     override fun decodeByteArray(): ByteArray {
         return decodeCasted()
     }

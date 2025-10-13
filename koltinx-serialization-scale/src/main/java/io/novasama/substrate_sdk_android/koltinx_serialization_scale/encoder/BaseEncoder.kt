@@ -37,6 +37,8 @@ abstract class BaseEncoder : ScaleEncoder {
         }
     }
 
+    override fun encodeRaw(value: Any?) = encodeIdentity(value)
+
     override fun encodeNumber(number: BigInteger) = encodeIdentity(number)
 
     override fun encodeByteArray(bytes: ByteArray) = encodeIdentity(bytes)
