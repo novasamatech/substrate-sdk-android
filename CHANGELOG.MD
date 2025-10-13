@@ -4,6 +4,7 @@
 
 * Support for raw scale serialization
 * Support for encoding regular enums to DictEnum.Entry with null associated value
+* Improve error messages for enum decoding
 
 ### Changes
 
