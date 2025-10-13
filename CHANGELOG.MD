@@ -4,11 +4,15 @@
 
 Support for raw scale serialization
 
-* Usefully when we want to operate low level scale structures for some of the fields / arguments
+### Changes
+
+* Useful when we want to operate low level scale structures for some of the fields / arguments
 * `RawScaleValue` can be used for fields
 * `AsRawScaleValue` wrapper can be used for top-level serialization (e.g. storage keys / whole values)
 
 ## v2.9.1
+
+### Changes
 
 * Automatically convert between snake and camel case for struct fields
 
