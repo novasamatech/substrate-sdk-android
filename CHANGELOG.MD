@@ -2,13 +2,20 @@
 
 ## v2.9.2
 
-Support for raw scale serialization
+* Support for raw scale serialization
+* Support for encoding regular enums to DictEnum.Entry with null associated value
 
 ### Changes
+
+#### Raw scale serialization
 
 * Useful when we want to operate low level scale structures for some of the fields / arguments
 * `RawScaleValue` can be used for fields
 * `AsRawScaleValue` wrapper can be used for top-level serialization (e.g. storage keys / whole values)
+
+#### Regular enum encoding to DictEnum.Entry with null associated value
+
+* Introduced`AsDictEnum` annotation that can be applied to `enum class` to signal that it should be encoded as `DictEnum.Entry`
 
 ## v2.9.1
 

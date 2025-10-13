@@ -8,14 +8,16 @@ import kotlinx.serialization.SerialInfo
  *
  * Example:
  * ```
- * @AsDictEnum
  * @Serializable
- * data enum AsDictEnum(val field1: Boolean, val field2: Boolean)
+ * @AsDictEnum
+ * enum class TestEnumDict {
+ *     A, B
+ * }
  *
- * val decoded = AsTupleStruct(true, false)
- * val encoded = listOf(true, false)
+ * val decoded = TestEnumDict.A
+ * val encoded = DictEnum.Entry("A", null)
  *
- * assert(decoded == Scale.decode<AsTupleStruct>(encoded))
+ * assert(decoded == Scale.decode<TestEnumDict>(encoded))
  * assert(encoded == Scale.encode(decoded))
  * ```
  **/
