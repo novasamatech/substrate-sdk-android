@@ -5,6 +5,7 @@ import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator
 import org.bouncycastle.crypto.params.KeyParameter
 import java.text.Normalizer
 import java.text.Normalizer.normalize
+import java.security.SecureRandom
 
 internal object SeedCreator {
 
@@ -23,5 +24,12 @@ internal object SeedCreator {
         )
         val key = generator.generateDerivedMacParameters(FULL_SEED_LENGTH * 8) as KeyParameter
         return key.key.copyOfRange(0, FULL_SEED_LENGTH)
+    }
+
+    fun randomSeed(sizeBytes: Int = FULL_SEED_LENGTH): ByteArray {
+        val secureRandom = SecureRandom()
+        val seed = ByteArray(sizeBytes)
+        secureRandom.nextBytes(seed)
+        return seed
     }
 }
