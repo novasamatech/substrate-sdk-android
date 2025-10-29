@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.9.3
+
+### Changes
+
+#### Randomly generated seed
+
+* Useful to create temporary accounts without mnemonic such as for gifts
+
 ## v2.9.2
 
 * Support for raw scale serialization
