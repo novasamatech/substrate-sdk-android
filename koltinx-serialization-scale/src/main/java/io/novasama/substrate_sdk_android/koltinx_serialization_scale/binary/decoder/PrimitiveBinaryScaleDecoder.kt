@@ -86,8 +86,8 @@ class PrimitiveBinaryScaleDecoder(
     }
 
     @ExperimentalSerializationApi
-    override fun decodeInline(inlineDescriptor: SerialDescriptor): Decoder {
-        TODO("Not yet implemented")
+    override fun decodeInline(descriptor: SerialDescriptor): Decoder {
+        return this
     }
 
     override fun decodeInt(): Int {
