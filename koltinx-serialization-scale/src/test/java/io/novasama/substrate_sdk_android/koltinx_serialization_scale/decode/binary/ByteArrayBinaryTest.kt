@@ -23,6 +23,14 @@ class ByteArrayBinaryTest : BinaryDecodeTest() {
     }
 
     @Test
+    fun `should decode variable length byte array`() {
+        val value = ByteArray(25) { it.toByte() }
+        val data = useScaleWriter { writeByteArray(value) }
+        val result = BinaryScale.decodeFromByteArray<ByteArray>(data)
+        assertArrayEquals(value, result)
+    }
+
+    @Test
     fun `should decode fixed byte array from type alias`() {
         @Serializable
         class TestData(val list: List<ScaleByteArray20>)

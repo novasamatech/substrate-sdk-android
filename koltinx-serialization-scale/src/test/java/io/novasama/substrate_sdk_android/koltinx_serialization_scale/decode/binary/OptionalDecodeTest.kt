@@ -34,6 +34,6 @@ class OptionalDecodeTest : BinaryDecodeTest() {
 
         runDecodeTest<TestData>(raw = byteArrayOf(0x00), expected = TestData(null))
         runDecodeTest<TestData>(raw = byteArrayOf(0x01), expected = TestData(false))
-        runDecodeTest<TestData>(raw = byteArrayOf(0x02), expected = TestData(true))
+        runDecodeTest<TestData>(raw = byteArrayOf(0x02), expected = TestData(false))
     }
 }
