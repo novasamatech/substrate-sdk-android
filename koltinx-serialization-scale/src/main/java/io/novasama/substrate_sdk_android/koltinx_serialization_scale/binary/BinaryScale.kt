@@ -50,13 +50,13 @@ open class BinaryScale(
         bytes: ByteArray
     ): T {
         val scaleReader = ScaleCodecReader(bytes)
-        val decoder = PrimitiveBinaryScaleDecoder(serializersModule, scaleReader, elementContext = null)
+        val decoder = PrimitiveBinaryScaleDecoder(serializersModule, scaleReader, null, null)
         return decoder.decodeSerializableValue(deserializer)
     }
 
     override fun <T> encodeToByteArray(serializer: SerializationStrategy<T>, value: T): ByteArray {
         return useScaleWriter {
-            val encoder = PrimitiveBinaryScaleEncoder(serializersModule, this@useScaleWriter)
+            val encoder = PrimitiveBinaryScaleEncoder(serializersModule, this@useScaleWriter, null)
             encoder.encodeSerializableValue(serializer, value)
         }
     }

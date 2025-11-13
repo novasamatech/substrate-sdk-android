@@ -32,9 +32,10 @@ class PrimitiveBinaryScaleDecoder(
     override val serializersModule: SerializersModule,
     private val reader: ScaleCodecReader,
     private val elementContext: ElementDeclarationContext?,
+    nullabilityByteFromParent: Byte? // non null in case the upper type level was "option"
 ) : BinaryScaleDecoder {
 
-    private var nullabilityByte: Byte? = elementContext?.nullabilityByte
+    private var nullabilityByte: Byte? = nullabilityByteFromParent
 
     override fun decodeCompact(): BigInteger {
         return compactInt.read(reader)

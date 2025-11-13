@@ -48,7 +48,7 @@ abstract class BaseCompositeBinaryDecoder(
 
     @ExperimentalSerializationApi
     override fun decodeInlineElement(descriptor: SerialDescriptor, index: Int): Decoder {
-        return PrimitiveBinaryScaleDecoder(serializersModule, reader, null)
+        return PrimitiveBinaryScaleDecoder(serializersModule, reader, null, null)
     }
 
     override fun decodeIntElement(descriptor: SerialDescriptor, index: Int): Int {
@@ -69,8 +69,8 @@ abstract class BaseCompositeBinaryDecoder(
         val nullabilityByte = reader.readByte()
         if (nullabilityByte == NULL_MARK) return null
 
-        val elementContext = ElementDeclarationContext(index, descriptor, nullabilityByte)
-        val delegate = PrimitiveBinaryScaleDecoder(serializersModule, reader, elementContext)
+        val elementContext = ElementDeclarationContext(index, descriptor)
+        val delegate = PrimitiveBinaryScaleDecoder(serializersModule, reader, elementContext, nullabilityByte)
         return delegate.decodeSerializableValue(deserializer)
     }
 
@@ -80,8 +80,8 @@ abstract class BaseCompositeBinaryDecoder(
         deserializer: DeserializationStrategy<T>,
         previousValue: T?
     ): T {
-        val elementContext = ElementDeclarationContext(index, descriptor, null)
-        val delegate = PrimitiveBinaryScaleDecoder(serializersModule, reader, elementContext)
+        val elementContext = ElementDeclarationContext(index, descriptor)
+        val delegate = PrimitiveBinaryScaleDecoder(serializersModule, reader, elementContext, null)
         return delegate.decodeSerializableValue(deserializer)
     }
 
