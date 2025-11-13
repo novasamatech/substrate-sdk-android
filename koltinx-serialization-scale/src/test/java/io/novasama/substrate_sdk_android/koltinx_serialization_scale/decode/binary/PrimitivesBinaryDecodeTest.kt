@@ -1,5 +1,8 @@
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.decode.binary
 
+import io.novasama.substrate_sdk_android.runtime.definitions.types.primitives.u8
+import io.novasama.substrate_sdk_android.runtime.definitions.types.useScaleWriter
+import io.novasama.substrate_sdk_android.scale.dataType.uint8
 import kotlinx.serialization.Serializable
 import org.junit.Test
 
@@ -21,8 +24,22 @@ class PrimitivesBinaryDecodeTest : BinaryDecodeTest() {
     }
 
     @Test
-    fun `should decode byte as root`() {
+    fun `should decode byte`() {
         runDecodeTest(raw = byteArrayOf(0x12), expected = 0x12.toByte())
+    }
+
+    @Test
+    fun `should decode long`() {
+        val expected: Long = 123
+        val encoded = useScaleWriter { writeLong(expected) }
+        runDecodeTest(raw = encoded, expected = expected)
+    }
+
+    @Test
+    fun `should decode short`() {
+        val expected: Short = 123
+        val encoded = useScaleWriter { writeShort(expected) }
+        runDecodeTest(raw = encoded, expected = expected)
     }
 
     @Test

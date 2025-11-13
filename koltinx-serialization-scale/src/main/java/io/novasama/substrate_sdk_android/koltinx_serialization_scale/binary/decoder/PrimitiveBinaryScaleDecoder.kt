@@ -110,7 +110,7 @@ class PrimitiveBinaryScaleDecoder(
     }
 
     override fun decodeShort(): Short {
-        TODO("Not yet implemented")
+        return reader.readShort()
     }
 
     override fun decodeString(): String {
