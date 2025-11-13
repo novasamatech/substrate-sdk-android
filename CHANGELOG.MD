@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+### v2.10.0
+
+#### Binary Scale Format (BinaryScale)
+
+* Added comprehensive support for binary SCALE codec encoding and decoding
+* `BinaryScale` provides direct conversion between Kotlin types and SCALE-encoded byte arrays
+* Supports all SCALE types: primitives, compact integers, strings, byte arrays, lists, optionals, classes, objects, value classes, enums, and sealed classes
+* Introduced binary-specific annotations:
+  * `@EnumIndex` - Specify custom indices for enum entries and sealed class variants
+  * `@FixedLength` - Encode collections without length prefix for fixed-size arrays and lists
+  * Wrapper classes `WithLength20`, `WithLength32`, `WithLength64` for generic fixed-length types
+* Added complete test coverage with symmetrical encode/decode test suites
+
 ## v2.9.3
 
 ### Changes
