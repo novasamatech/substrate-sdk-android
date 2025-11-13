@@ -4,4 +4,4 @@ import kotlinx.serialization.SerialInfo
 
 @SerialInfo
 @Target(AnnotationTarget.PROPERTY, AnnotationTarget.FIELD, AnnotationTarget.CLASS)
-annotation class EnumIndex(val index: Byte)
+annotation class EnumIndex(val index: Int)

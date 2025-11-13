@@ -3,6 +3,7 @@ package io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.enc
 import io.emeraldpay.polkaj.scale.ScaleCodecWriter
 import io.novasama.substrate_sdk_android.extensions.toSignedBytes
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.ElementDeclarationContext
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.annotations.EnumIndex
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.annotations.FixedLength
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.ScaleOptional.NOT_NULL_MARK
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.ScaleOptional.NULL_MARK
@@ -10,14 +11,12 @@ import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.comm
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.ScaleOptional.OPTIONAL_TRUE
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.decoder.isByteArrayDescriptor
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.findElementAnnotation
-import io.novasama.substrate_sdk_android.scale.dataType.byte
-import io.novasama.substrate_sdk_android.scale.dataType.byteArray
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.findAnnotation
 import io.novasama.substrate_sdk_android.scale.dataType.compactInt
 import io.novasama.substrate_sdk_android.scale.utils.directWrite
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.SerializationStrategy
-import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.CompositeEncoder
@@ -92,8 +91,14 @@ class PrimitiveBinaryScaleEncoder(
         enumDescriptor: SerialDescriptor,
         index: Int
     ) {
-        TODO("Not yet implemented")
+        val indexFromAnnotation = enumDescriptor.getElementAnnotations(index)
+            .findAnnotation<EnumIndex>()
+            ?.index
+        val indexToWrite = indexFromAnnotation ?: index
+
+        writer.writeByte(indexToWrite.toByte())
     }
+
 
     override fun encodeInline(descriptor: SerialDescriptor): Encoder {
         return this

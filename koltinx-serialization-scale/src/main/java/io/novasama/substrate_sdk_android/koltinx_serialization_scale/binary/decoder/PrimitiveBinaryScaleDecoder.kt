@@ -115,7 +115,7 @@ class PrimitiveBinaryScaleDecoder(
     private fun SerialDescriptor.enumElementUsesIndexDirectly(index: Int): Boolean {
         return try {
             val customEnumIndex = getElementAnnotations(index).findAnnotation<EnumIndex>()
-                ?.index?.toInt()
+                ?.index
 
             customEnumIndex == null || customEnumIndex == index
         } catch (_: IndexOutOfBoundsException) {
@@ -128,7 +128,6 @@ class PrimitiveBinaryScaleDecoder(
             val indexFromAnnotation = getElementAnnotations(i)
                 .findAnnotation<EnumIndex>()
                 ?.index
-                ?.toInt()
 
             if (indexFromAnnotation == customIndex) return i
         }
@@ -195,7 +194,6 @@ class PrimitiveBinaryScaleDecoder(
             val indexFromAnnotation = descriptor
                 .findAnnotation<EnumIndex>()
                 ?.index
-                ?.toInt()
 
             indexFromAnnotation == customIndex
         }.also {
