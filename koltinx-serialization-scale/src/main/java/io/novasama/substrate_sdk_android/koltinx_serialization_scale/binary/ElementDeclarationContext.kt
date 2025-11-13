@@ -8,7 +8,8 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 
 class ElementDeclarationContext(
     val index: Int,
-    val descriptor: SerialDescriptor
+    val descriptor: SerialDescriptor,
+    val nullabilityByte: Byte? // non null in case the upper type level was "option"
 )
 
 val ElementDeclarationContext.elementAnnotations: List<Annotation>

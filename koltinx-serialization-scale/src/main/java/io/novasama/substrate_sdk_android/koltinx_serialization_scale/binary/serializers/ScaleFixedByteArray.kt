@@ -10,7 +10,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
 typealias ScaleByteArray20 = @Serializable(ScaleFixedByteArray20Serializer::class) ByteArray
-typealias FixedByteArray32 = @Serializable(ScaleFixedByteArray32Serializer::class) ByteArray
+typealias ScaleByteArray32 = @Serializable(ScaleFixedByteArray32Serializer::class) ByteArray
 typealias ScaleByteArray64 = @Serializable(ScaleFixedByteArray64Serializer::class) ByteArray
 
 class ScaleFixedByteArray20Serializer : ScaleFixedByteArraySerializer(20)

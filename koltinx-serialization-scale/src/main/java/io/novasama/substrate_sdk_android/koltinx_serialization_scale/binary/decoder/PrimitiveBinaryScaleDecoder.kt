@@ -5,6 +5,9 @@ package io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.dec
 import io.emeraldpay.polkaj.scale.ScaleCodecReader
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.ElementDeclarationContext
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.annotations.FixedLengthBytes
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.ScaleOptional.NULL_MARK
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.ScaleOptional.OPTIONAL_FALSE
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.ScaleOptional.OPTIONAL_TRUE
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.findElementAnnotation
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -14,17 +17,13 @@ import kotlinx.serialization.encoding.CompositeDecoder
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.modules.SerializersModule
 
-private const val NULL_MARK: Byte = 0
-private const val OPTIONAL_FALSE: Byte = 1
-private const val OPTIONAL_TRUE: Byte = 2
-
 class PrimitiveBinaryScaleDecoder(
     override val serializersModule: SerializersModule,
     private val reader: ScaleCodecReader,
     private val elementContext: ElementDeclarationContext?,
 ) : BinaryScaleDecoder {
 
-    private var nullabilityByte: Byte? = null
+    private var nullabilityByte: Byte? = elementContext?.nullabilityByte
 
     override fun decodeFixedSizeArray(size: Int): ByteArray {
         return reader.readByteArray(size)

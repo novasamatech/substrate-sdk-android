@@ -26,4 +26,14 @@ class OptionalDecodeTest : BinaryDecodeTest() {
         runDecodeTest<Boolean?>(raw = byteArrayOf(0x01), expected = false)
         runDecodeTest<Boolean?>(raw = byteArrayOf(0x02), expected = true)
     }
+
+    @Test
+    fun `should decode optional boolean as element`() {
+        @Serializable
+        data class TestData(val a: Boolean?)
+
+        runDecodeTest<TestData>(raw = byteArrayOf(0x00), expected = TestData(null))
+        runDecodeTest<TestData>(raw = byteArrayOf(0x01), expected = TestData(false))
+        runDecodeTest<TestData>(raw = byteArrayOf(0x02), expected = TestData(true))
+    }
 }
