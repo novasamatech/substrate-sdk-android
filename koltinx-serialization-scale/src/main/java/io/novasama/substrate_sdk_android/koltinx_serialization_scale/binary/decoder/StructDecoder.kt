@@ -10,7 +10,7 @@ import kotlinx.serialization.modules.SerializersModule
 class StructDecoder(
     private val reader: ScaleCodecReader,
     override val serializersModule: SerializersModule,
-): BaseCompositeBinaryDecoder(reader) {
+) : BaseCompositeBinaryDecoder(reader) {
 
     override fun elementsCount(descriptor: SerialDescriptor): Int {
         return descriptor.elementsCount

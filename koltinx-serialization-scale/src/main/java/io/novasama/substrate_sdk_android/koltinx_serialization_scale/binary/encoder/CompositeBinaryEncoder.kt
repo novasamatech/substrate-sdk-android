@@ -6,14 +6,12 @@ import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.Elem
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.ScaleOptional.NOT_NULL_MARK
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.ScaleOptional.NULL_MARK
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.encodeOptionalBoolean
-import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.isOptionalBoolean
 import io.novasama.substrate_sdk_android.scale.utils.directWrite
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.descriptors.SerialKind
 import kotlinx.serialization.encoding.CompositeEncoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.modules.SerializersModule

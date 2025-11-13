@@ -52,7 +52,7 @@ abstract class BaseCompositeBinaryDecoder(
     }
 
     override fun decodeIntElement(descriptor: SerialDescriptor, index: Int): Int {
-       return ScaleCodecReader.INT32.read(reader)
+        return ScaleCodecReader.INT32.read(reader)
     }
 
     override fun decodeLongElement(descriptor: SerialDescriptor, index: Int): Long {

@@ -12,27 +12,21 @@ import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.comm
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.decoder.isByteArrayDescriptor
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.findElementAnnotation
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.findAnnotation
-import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.isAnnotatedWith
-import io.novasama.substrate_sdk_android.scale.dataType.byteArray
 import io.novasama.substrate_sdk_android.scale.dataType.compactInt
 import io.novasama.substrate_sdk_android.scale.utils.directWrite
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.InternalSerializationApi
-import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.SealedClassSerializer
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.descriptors.SerialKind
 import kotlinx.serialization.descriptors.StructureKind
 import kotlinx.serialization.encoding.CompositeEncoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.findPolymorphicSerializer
 import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.serializer
 import java.math.BigInteger
 import java.nio.ByteOrder
-import kotlin.Any
 
 internal class PrimitiveBinaryScaleEncoder(
     override val serializersModule: SerializersModule,

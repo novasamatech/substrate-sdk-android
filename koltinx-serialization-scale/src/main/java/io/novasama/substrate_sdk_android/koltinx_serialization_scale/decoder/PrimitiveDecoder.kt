@@ -76,7 +76,7 @@ open class PrimitiveDecoder(
     }
 
     private fun detectEnumEntryName(): String {
-        return when(value) {
+        return when (value) {
             is String -> value
             is DictEnum.Entry<*> -> {
                 require(value.value == null) {

@@ -14,6 +14,6 @@ class ElementDeclarationContext(
 val ElementDeclarationContext.elementAnnotations: List<Annotation>
     get() = descriptor.getElementAnnotations(index)
 
-inline fun <reified T: Annotation> ElementDeclarationContext.findElementAnnotation(): T? {
+inline fun <reified T : Annotation> ElementDeclarationContext.findElementAnnotation(): T? {
     return elementAnnotations.findAnnotation()
 }

@@ -3,9 +3,9 @@ package io.novasama.substrate_sdk_android.encrypt.seed
 import org.bouncycastle.crypto.digests.SHA512Digest
 import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator
 import org.bouncycastle.crypto.params.KeyParameter
+import java.security.SecureRandom
 import java.text.Normalizer
 import java.text.Normalizer.normalize
-import java.security.SecureRandom
 
 object SeedCreator {
 

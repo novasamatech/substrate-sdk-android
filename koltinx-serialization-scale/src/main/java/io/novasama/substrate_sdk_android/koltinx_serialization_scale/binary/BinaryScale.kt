@@ -38,12 +38,11 @@ fun <T> BinaryScale.encodeToByteArray(type: KType, value: T): ByteArray {
     return encodeToByteArray(serializersModule.serializer(type) as KSerializer<T>, value)
 }
 
-
 open class BinaryScale(
     serializersModules: SerializersModule
 ) : BinaryFormat {
 
-    override val serializersModule: SerializersModule =  defaultSerializers + serializersModules
+    override val serializersModule: SerializersModule = defaultSerializers + serializersModules
 
     override fun <T> decodeFromByteArray(
         deserializer: DeserializationStrategy<T>,

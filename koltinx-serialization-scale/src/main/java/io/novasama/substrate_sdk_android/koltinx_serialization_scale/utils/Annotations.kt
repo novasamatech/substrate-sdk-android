@@ -5,7 +5,7 @@ package io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.descriptors.SerialDescriptor
 
-inline fun <reified T: Annotation> List<Annotation>.findAnnotation(): T? {
+inline fun <reified T : Annotation> List<Annotation>.findAnnotation(): T? {
     return find { it is T } as? T
 }
 

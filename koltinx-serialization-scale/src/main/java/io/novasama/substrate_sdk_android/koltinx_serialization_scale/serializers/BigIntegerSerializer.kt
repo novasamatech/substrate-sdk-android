@@ -4,7 +4,6 @@ import io.novasama.substrate_sdk_android.koltinx_serialization_scale.decoder.Sca
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.encoder.ScaleEncoder
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
