@@ -2,6 +2,7 @@ package io.novasama.substrate_sdk_android.koltinx_serialization_scale.serializer
 
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.decoder.ScaleDecoder
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.encoder.ScaleEncoder
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -11,7 +12,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import java.math.BigInteger
 
-typealias BigIntegerSerializable = @Serializable(BigIntegerSerializer::class) BigInteger
+typealias BigIntegerSerializable = @Contextual BigInteger
 
 object BigIntegerSerializer : KSerializer<BigInteger> {
 

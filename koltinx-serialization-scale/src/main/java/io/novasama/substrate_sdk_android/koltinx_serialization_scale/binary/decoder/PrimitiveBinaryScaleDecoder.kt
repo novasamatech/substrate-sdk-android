@@ -12,6 +12,7 @@ import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.comm
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.findElementAnnotation
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.decoder.StubCompositeDecoder
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.findAnnotation
+import io.novasama.substrate_sdk_android.scale.dataType.compactInt
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.InternalSerializationApi
@@ -24,6 +25,7 @@ import kotlinx.serialization.encoding.CompositeDecoder
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.findPolymorphicSerializer
 import kotlinx.serialization.modules.SerializersModule
+import java.math.BigInteger
 
 @OptIn(InternalSerializationApi::class)
 class PrimitiveBinaryScaleDecoder(
@@ -36,6 +38,10 @@ class PrimitiveBinaryScaleDecoder(
 
     override fun decodeFixedSizeArray(size: Int): ByteArray {
         return reader.readByteArray(size)
+    }
+
+    override fun decodeCompact(): BigInteger {
+        return compactInt.read(reader)
     }
 
     override fun beginStructure(descriptor: SerialDescriptor): CompositeDecoder {

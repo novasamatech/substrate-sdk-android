@@ -4,6 +4,7 @@ import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.Bina
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.annotations.FixedLengthBytes
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.decodeFromByteArray
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.serializers.ScaleByteArray20
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.serializers.ByteArraySerializable
 import io.novasama.substrate_sdk_android.runtime.definitions.types.useScaleWriter
 import io.novasama.substrate_sdk_android.scale.dataType.byteArray
 import io.novasama.substrate_sdk_android.scale.dataType.string
@@ -46,6 +47,19 @@ class ByteArrayBinaryDecodeTest : BinaryDecodeTest() {
 
         val result = BinaryScale.decodeFromByteArray<TestData>(data)
         assertArrayEquals(fixedBytes20, result.list.single())
+    }
+
+    @JvmInline
+    @Serializable
+    value class ByteArraySerializableTestData(val a: ByteArraySerializable)
+
+    @Test
+    fun `should keep compatibility with ByteArraySerializable`() {
+        val value = ByteArray(25) { it.toByte() }
+        val data = byteArray.toByteArray(value)
+
+        val result = BinaryScale.decodeFromByteArray<ByteArraySerializableTestData>(data)
+        assertArrayEquals(value, result.a)
     }
 
     @Test

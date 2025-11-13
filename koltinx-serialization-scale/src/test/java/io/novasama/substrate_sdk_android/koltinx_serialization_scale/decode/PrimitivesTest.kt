@@ -30,12 +30,4 @@ class PrimitivesTest : DecodeTest() {
         raw = true,
         expected = true
     )
-
-    @Test
-    fun `should decode byte array`() {
-        val value = byteArrayOf(0x00, 0x01)
-        val result = Scale.decode<ByteArray>(value)
-
-        assertArrayEquals(value, result)
-    }
 }

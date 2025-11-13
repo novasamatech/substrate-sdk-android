@@ -2,17 +2,15 @@ package io.novasama.substrate_sdk_android.koltinx_serialization_scale.serializer
 
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.decoder.ScaleDecoder
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.encoder.ScaleEncoder
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
-typealias ByteArraySerializable = @Serializable(ByteArraySerializer::class) ByteArray
-
-object ByteArraySerializer : KSerializer<ByteArray> {
+object ByteArrayDynamicStructSerializer : KSerializer<ByteArray> {
 
     override fun deserialize(decoder: Decoder): ByteArray {
         require(decoder is ScaleDecoder)
