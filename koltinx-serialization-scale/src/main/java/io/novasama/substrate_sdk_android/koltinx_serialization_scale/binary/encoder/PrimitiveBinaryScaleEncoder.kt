@@ -17,6 +17,9 @@ import io.novasama.substrate_sdk_android.scale.dataType.byteArray
 import io.novasama.substrate_sdk_android.scale.dataType.compactInt
 import io.novasama.substrate_sdk_android.scale.utils.directWrite
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.PolymorphicSerializer
+import kotlinx.serialization.SealedClassSerializer
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -24,10 +27,12 @@ import kotlinx.serialization.descriptors.SerialKind
 import kotlinx.serialization.descriptors.StructureKind
 import kotlinx.serialization.encoding.CompositeEncoder
 import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.findPolymorphicSerializer
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.serializer
 import java.math.BigInteger
 import java.nio.ByteOrder
+import kotlin.Any
 
 internal class PrimitiveBinaryScaleEncoder(
     override val serializersModule: SerializersModule,
@@ -112,7 +117,10 @@ internal class PrimitiveBinaryScaleEncoder(
         return when (val kind = descriptor.kind) {
             StructureKind.CLASS,
             StructureKind.OBJECT,
+                // For LIST, length is written in encodeSerializableValue - where we can access the list itself
+                // to know its size
             StructureKind.LIST -> CompositeBinaryEncoder(serializersModule, writer)
+
             else -> error("Unsupported descriptor kind: $kind")
         }
     }
@@ -126,6 +134,8 @@ internal class PrimitiveBinaryScaleEncoder(
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
+    @OptIn(InternalSerializationApi::class)
     override fun <T> encodeSerializableValue(serializer: SerializationStrategy<T>, value: T) {
         val descriptor = serializer.descriptor
 
@@ -133,11 +143,29 @@ internal class PrimitiveBinaryScaleEncoder(
             descriptor.isOptionalBoolean() -> writer.encodeOptionalBoolean(value as Boolean?)
             descriptor.isByteArrayDescriptor() -> encodeByteArray(value as ByteArray)
             descriptor.isList() -> {
+                // Encode list size here since it is the last time we will have access to `value`
                 maybeWriteListLength((value as Collection<*>).size)
+                // And then delegate to default logic with `beginStructure`
                 super.encodeSerializableValue(serializer, value)
             }
+
+            serializer is SealedClassSerializer<*> -> encodePolymorphic(serializer as SealedClassSerializer<T & Any>, value as (T & Any))
             else -> super.encodeSerializableValue(serializer, value)
         }
+    }
+
+    @OptIn(InternalSerializationApi::class)
+    private fun <T : Any> encodePolymorphic(
+        serializer: SealedClassSerializer<T>,
+        value: T
+    ) {
+        val actualSerializer = serializer.findPolymorphicSerializer(this, value)
+        val index = actualSerializer.descriptor.findAnnotation<EnumIndex>()?.index
+            ?: throw SerializationException("@EnumIndex annotation is required for sealed hierarchies")
+
+        writer.writeByte(index)
+
+        actualSerializer.serialize(this, value)
     }
 
     private fun encodeByteArray(byteArray: ByteArray) {

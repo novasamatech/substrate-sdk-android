@@ -54,7 +54,7 @@ class PrimitiveBinaryScaleDecoder(
     override fun <T> decodeSerializableValue(deserializer: DeserializationStrategy<T>): T {
         return when {
             deserializer.descriptor.isByteArrayDescriptor() -> decodeByteArray() as T
-            deserializer is SealedClassSerializer<*> -> decodePolymorphic(deserializer as SealedClassSerializer<T & Any>)
+            deserializer is SealedClassSerializer -> decodePolymorphic(deserializer as SealedClassSerializer<T & Any>)
             else -> return super.decodeSerializableValue(deserializer)
         }
     }
