@@ -2,7 +2,6 @@
 
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.decoder
 
-import android.util.Log.i
 import io.emeraldpay.polkaj.scale.ScaleCodecReader
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.ElementDeclarationContext
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.annotations.EnumIndex
@@ -11,10 +10,8 @@ import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.comm
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.ScaleOptional.OPTIONAL_FALSE
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.ScaleOptional.OPTIONAL_TRUE
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.findElementAnnotation
-import io.novasama.substrate_sdk_android.koltinx_serialization_scale.decoder.PrimitiveDecoder
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.decoder.StubCompositeDecoder
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.findAnnotation
-import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.DictEnum
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.InternalSerializationApi
@@ -27,7 +24,6 @@ import kotlinx.serialization.encoding.CompositeDecoder
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.findPolymorphicSerializer
 import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.serializer
 
 @OptIn(InternalSerializationApi::class)
 class PrimitiveBinaryScaleDecoder(

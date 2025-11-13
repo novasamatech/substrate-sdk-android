@@ -51,11 +51,10 @@ class PrimitivesBinaryDecodeTest : BinaryDecodeTest() {
     }
 
     @Test
-    fun `should decode byte as element`() {
-        @Serializable
-        data class TestData(val a: Byte)
-
-        runDecodeTest(raw = byteArrayOf(0x12), expected = TestData(0x12))
+    fun `should decode int`() {
+        val expected = 123
+        val encoded = useScaleWriter { writeUint32(expected) }
+        runDecodeTest(raw = encoded, expected = expected)
     }
 
     @Test
@@ -90,5 +89,32 @@ class PrimitivesBinaryDecodeTest : BinaryDecodeTest() {
             val result = BinaryScale.decodeFromByteArray<ULong>(raw)
             Assert.assertEquals(it, result)
         }
+    }
+
+    @Test
+    fun `should decode numbers as element`() {
+        @Serializable
+        data class TestData(
+            val s1: Byte, val s2: Short, val s3: Int, val s4: Long,
+            val u1: UByte, val u2: UShort, val u3: UInt, val u4: ULong,
+        )
+
+        val encoded = useScaleWriter {
+            writeByte(1)
+            writeShort(2)
+            writeUint32(3)
+            writeLong(4)
+
+            writeByte(5)
+            writeUint16(6)
+            writeUint32(7)
+            uint64.write(this, 8.toBigInteger())
+        }
+        val expected = TestData(
+            1, 2, 3, 4,
+            5.toUByte(), 6.toUShort(), 7.toUInt(), 8.toULong()
+        )
+
+        runDecodeTest(encoded, expected)
     }
 }

@@ -35,28 +35,28 @@ abstract class BaseCompositeBinaryDecoder(
     }
 
     override fun decodeCharElement(descriptor: SerialDescriptor, index: Int): Char {
-        TODO("Not yet implemented")
+        unsupportedDecoding("Char")
     }
 
     override fun decodeDoubleElement(descriptor: SerialDescriptor, index: Int): Double {
-        TODO("Not yet implemented")
+        unsupportedDecoding("Double")
     }
 
     override fun decodeFloatElement(descriptor: SerialDescriptor, index: Int): Float {
-        TODO("Not yet implemented")
+        unsupportedDecoding("Float")
     }
 
     @ExperimentalSerializationApi
     override fun decodeInlineElement(descriptor: SerialDescriptor, index: Int): Decoder {
-        TODO("Not yet implemented")
+        return PrimitiveBinaryScaleDecoder(serializersModule, reader, null)
     }
 
     override fun decodeIntElement(descriptor: SerialDescriptor, index: Int): Int {
-        TODO("Not yet implemented")
+       return ScaleCodecReader.INT32.read(reader)
     }
 
     override fun decodeLongElement(descriptor: SerialDescriptor, index: Int): Long {
-        TODO("Not yet implemented")
+        return reader.readLong()
     }
 
     @ExperimentalSerializationApi
@@ -86,12 +86,16 @@ abstract class BaseCompositeBinaryDecoder(
     }
 
     override fun decodeShortElement(descriptor: SerialDescriptor, index: Int): Short {
-        TODO("Not yet implemented")
+        return reader.readShort()
     }
 
     override fun decodeStringElement(descriptor: SerialDescriptor, index: Int): String {
-        TODO("Not yet implemented")
+        return reader.readString()
     }
 
     override fun endStructure(descriptor: SerialDescriptor) {}
+
+    private fun unsupportedDecoding(type: String): Nothing {
+        error("Decoding $type is not supported")
+    }
 }
