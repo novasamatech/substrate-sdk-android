@@ -3,7 +3,7 @@ package io.novasama.substrate_sdk_android.koltinx_serialization_scale.decode.bin
 import kotlinx.serialization.Serializable
 import org.junit.Test
 
-class PrimitivesBinaryTest : BinaryDecodeTest() {
+class PrimitivesBinaryDecodeTest : BinaryDecodeTest() {
 
     @Test
     fun `should decode boolean as element`() {

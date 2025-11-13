@@ -114,7 +114,7 @@ class PrimitiveBinaryScaleDecoder(
     }
 
     override fun decodeString(): String {
-        TODO("Not yet implemented")
+        return reader.readString()
     }
 
     private fun unsupportedDecoding(type: String): Nothing {

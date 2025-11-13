@@ -3,7 +3,7 @@ package io.novasama.substrate_sdk_android.koltinx_serialization_scale.decode.bin
 import kotlinx.serialization.Serializable
 import org.junit.Test
 
-class OptionalDecodeTest : BinaryDecodeTest() {
+class OptionalBinaryDecodeTest : BinaryDecodeTest() {
 
     @Test
     fun `should decode optional value as root`() {

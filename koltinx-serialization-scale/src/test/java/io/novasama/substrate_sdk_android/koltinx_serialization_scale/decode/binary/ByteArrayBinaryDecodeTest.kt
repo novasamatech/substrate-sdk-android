@@ -5,12 +5,15 @@ import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.anno
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.decodeFromByteArray
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.serializers.ScaleByteArray20
 import io.novasama.substrate_sdk_android.runtime.definitions.types.useScaleWriter
+import io.novasama.substrate_sdk_android.scale.dataType.byteArray
+import io.novasama.substrate_sdk_android.scale.dataType.string
+import io.novasama.substrate_sdk_android.scale.dataType.toByteArray
 import io.novasama.substrate_sdk_android.scale.utils.directWrite
 import kotlinx.serialization.Serializable
 import org.junit.Assert.assertArrayEquals
 import org.junit.Test
 
-class ByteArrayBinaryTest : BinaryDecodeTest() {
+class ByteArrayBinaryDecodeTest : BinaryDecodeTest() {
 
     @Test
     fun `should decode fixed byte array from annotation`() {
@@ -25,7 +28,7 @@ class ByteArrayBinaryTest : BinaryDecodeTest() {
     @Test
     fun `should decode variable length byte array`() {
         val value = ByteArray(25) { it.toByte() }
-        val data = useScaleWriter { writeByteArray(value) }
+        val data = byteArray.toByteArray(value)
         val result = BinaryScale.decodeFromByteArray<ByteArray>(data)
         assertArrayEquals(value, result)
     }
@@ -43,5 +46,13 @@ class ByteArrayBinaryTest : BinaryDecodeTest() {
 
         val result = BinaryScale.decodeFromByteArray<TestData>(data)
         assertArrayEquals(fixedBytes20, result.list.single())
+    }
+
+    @Test
+    fun `should decode string`() {
+        val expected = "Test"
+        val encoded = string.toByteArray(expected)
+
+        runDecodeTest(raw =encoded, expected =expected)
     }
 }
