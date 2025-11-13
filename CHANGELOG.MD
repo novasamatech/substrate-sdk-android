@@ -1,8 +1,8 @@
 # Changelog
 
-## Unreleased
+## v2.10.0
 
-### v2.10.0
+### Changes
 
 #### Binary Scale Format (BinaryScale)
 
