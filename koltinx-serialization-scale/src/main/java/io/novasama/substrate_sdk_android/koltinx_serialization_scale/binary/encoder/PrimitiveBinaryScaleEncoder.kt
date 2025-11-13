@@ -7,25 +7,29 @@ import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.anno
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.annotations.FixedLength
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.ScaleOptional.NOT_NULL_MARK
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.ScaleOptional.NULL_MARK
-import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.ScaleOptional.OPTIONAL_FALSE
-import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.ScaleOptional.OPTIONAL_TRUE
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.encodeOptionalBoolean
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.isOptionalBoolean
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.decoder.isByteArrayDescriptor
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.findElementAnnotation
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.findAnnotation
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.isAnnotatedWith
+import io.novasama.substrate_sdk_android.scale.dataType.byteArray
 import io.novasama.substrate_sdk_android.scale.dataType.compactInt
 import io.novasama.substrate_sdk_android.scale.utils.directWrite
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.SerializationStrategy
-import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.SerialKind
+import kotlinx.serialization.descriptors.StructureKind
 import kotlinx.serialization.encoding.CompositeEncoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.serializer
 import java.math.BigInteger
 import java.nio.ByteOrder
 
-class PrimitiveBinaryScaleEncoder(
+internal class PrimitiveBinaryScaleEncoder(
     override val serializersModule: SerializersModule,
     private val writer: ScaleCodecWriter,
     private val elementContext: ElementDeclarationContext?,
@@ -105,13 +109,33 @@ class PrimitiveBinaryScaleEncoder(
     }
 
     override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
-        TODO("Not yet implemented")
+        return when (val kind = descriptor.kind) {
+            StructureKind.CLASS,
+            StructureKind.OBJECT,
+            StructureKind.LIST -> CompositeBinaryEncoder(serializersModule, writer)
+            else -> error("Unsupported descriptor kind: $kind")
+        }
+    }
+
+    private fun maybeWriteListLength(collectionSize: Int) {
+        val fixedLength = elementContext?.findElementAnnotation<FixedLength>()?.length
+        if (fixedLength != null) {
+            checkFixedLengthSize(fixedLength, collectionSize)
+        } else {
+            writer.writeCompact(collectionSize)
+        }
     }
 
     override fun <T> encodeSerializableValue(serializer: SerializationStrategy<T>, value: T) {
+        val descriptor = serializer.descriptor
+
         return when {
-            serializer.descriptor.isOptionalBoolean() -> encodeOptionalBoolean(value as Boolean?)
-            serializer.descriptor.isByteArrayDescriptor() -> encodeByteArray(value as ByteArray)
+            descriptor.isOptionalBoolean() -> writer.encodeOptionalBoolean(value as Boolean?)
+            descriptor.isByteArrayDescriptor() -> encodeByteArray(value as ByteArray)
+            descriptor.isList() -> {
+                maybeWriteListLength((value as Collection<*>).size)
+                super.encodeSerializableValue(serializer, value)
+            }
             else -> super.encodeSerializableValue(serializer, value)
         }
     }
@@ -120,12 +144,7 @@ class PrimitiveBinaryScaleEncoder(
         val fixedSize = elementContext?.findElementAnnotation<FixedLength>()?.length
 
         return if (fixedSize != null) {
-            val actualSize = byteArray.size
-
-            if (actualSize != fixedSize) {
-                val msg = "Size mismatch. Specified in @FixedLength: $fixedSize. Got: $actualSize"
-                throw SerializationException(msg)
-            }
+            checkFixedLengthSize(fixedSize, byteArray.size)
 
             writer.directWrite(byteArray)
         } else {
@@ -133,17 +152,15 @@ class PrimitiveBinaryScaleEncoder(
         }
     }
 
-    private fun encodeOptionalBoolean(value: Boolean?) {
-        val byte = when (value) {
-            null -> NULL_MARK
-            true -> OPTIONAL_TRUE
-            false -> OPTIONAL_FALSE
+    private fun checkFixedLengthSize(sizeFromAnnotation: Int, actual: Int) {
+        if (sizeFromAnnotation != actual) {
+            val msg = "Size mismatch. Specified in @FixedLength: $sizeFromAnnotation. Got: $actual"
+            throw SerializationException(msg)
         }
-        writer.writeByte(byte)
     }
 
-    private fun SerialDescriptor.isOptionalBoolean(): Boolean {
-        return kind == PrimitiveKind.BOOLEAN && isNullable
+    private fun SerialDescriptor.isList(): Boolean {
+        return kind == StructureKind.LIST
     }
 
     private fun unsupported(label: String): Nothing {
