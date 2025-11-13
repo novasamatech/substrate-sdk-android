@@ -2,6 +2,7 @@
 
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.decoder
 
+import android.util.Log.i
 import io.emeraldpay.polkaj.scale.ScaleCodecReader
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.ElementDeclarationContext
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.annotations.EnumIndex
@@ -10,16 +11,25 @@ import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.comm
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.ScaleOptional.OPTIONAL_FALSE
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.ScaleOptional.OPTIONAL_TRUE
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.findElementAnnotation
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.decoder.PrimitiveDecoder
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.decoder.StubCompositeDecoder
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.findAnnotation
+import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.DictEnum
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.SealedClassSerializer
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.StructureKind
 import kotlinx.serialization.descriptors.elementDescriptors
 import kotlinx.serialization.encoding.CompositeDecoder
 import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.findPolymorphicSerializer
 import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.serializer
 
+@OptIn(InternalSerializationApi::class)
 class PrimitiveBinaryScaleDecoder(
     override val serializersModule: SerializersModule,
     private val reader: ScaleCodecReader,
@@ -36,6 +46,7 @@ class PrimitiveBinaryScaleDecoder(
         return when (val kind = descriptor.kind) {
             StructureKind.CLASS -> StructDecoder(reader, serializersModule)
             StructureKind.LIST -> ListDecoder(reader, serializersModule)
+            StructureKind.OBJECT -> ObjectBinaryDecoder(reader, serializersModule)
             else -> error("Unsupported descriptor kind: $kind")
         }
     }
@@ -44,6 +55,7 @@ class PrimitiveBinaryScaleDecoder(
     override fun <T> decodeSerializableValue(deserializer: DeserializationStrategy<T>): T {
         return when {
             deserializer.descriptor.isByteArrayDescriptor() -> decodeByteArray() as T
+            deserializer is SealedClassSerializer<*> -> decodePolymorphic(deserializer as SealedClassSerializer<T & Any>)
             else -> return super.decodeSerializableValue(deserializer)
         }
     }
@@ -154,4 +166,34 @@ class PrimitiveBinaryScaleDecoder(
     private fun unsupportedDecoding(type: String): Nothing {
         error("Decoding $type is not supported")
     }
+
+    private fun <T : Any> decodePolymorphic(serializer: SealedClassSerializer<T>): T {
+        // Get the second element from descriptor which contains info about subclasses
+        // See source code of SealedClassSerializer.descriptor for more details
+        val subclassesDesc = serializer.descriptor.getElementDescriptor(1)
+
+        val readIndex = reader.readByte().toInt()
+        val indexInSealedHierarchy =  subclassesDesc.findRequiredSealedHierarchyIndex(readIndex)
+
+        val actualName = subclassesDesc.getElementName(indexInSealedHierarchy)
+        val actualSerializer = serializer.findPolymorphicSerializer(StubCompositeDecoder(serializersModule), actualName)
+
+        return actualSerializer.deserialize(this)
+    }
+
+    private fun SerialDescriptor.findRequiredSealedHierarchyIndex(customIndex: Int): Int {
+        return elementDescriptors.indexOfFirst { descriptor ->
+            val indexFromAnnotation = descriptor
+                .findAnnotation<EnumIndex>()
+                ?.index
+                ?.toInt()
+
+            indexFromAnnotation == customIndex
+        }.also {
+            if (it == -1) {
+                throw SerializationException("@EnumIndex annotation is required for sealed hierarchies")
+            }
+        }
+    }
+
 }

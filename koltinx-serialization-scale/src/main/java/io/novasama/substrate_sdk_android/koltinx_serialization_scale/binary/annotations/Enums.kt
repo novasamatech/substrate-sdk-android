@@ -3,5 +3,5 @@ package io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.ann
 import kotlinx.serialization.SerialInfo
 
 @SerialInfo
-@Target(AnnotationTarget.PROPERTY, AnnotationTarget.FIELD)
+@Target(AnnotationTarget.PROPERTY, AnnotationTarget.FIELD, AnnotationTarget.CLASS)
 annotation class EnumIndex(val index: Byte)
