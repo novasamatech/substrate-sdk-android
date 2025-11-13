@@ -4,15 +4,18 @@ package io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.dec
 
 import io.emeraldpay.polkaj.scale.ScaleCodecReader
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.ElementDeclarationContext
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.annotations.EnumIndex
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.annotations.FixedLengthBytes
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.ScaleOptional.NULL_MARK
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.ScaleOptional.OPTIONAL_FALSE
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.ScaleOptional.OPTIONAL_TRUE
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.findElementAnnotation
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.findAnnotation
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.StructureKind
+import kotlinx.serialization.descriptors.elementDescriptors
 import kotlinx.serialization.encoding.CompositeDecoder
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.modules.SerializersModule
@@ -57,7 +60,7 @@ class PrimitiveBinaryScaleDecoder(
 
     override fun decodeBoolean(): Boolean {
         // Option<Boolean> uses single byte encoding, so we check previously read mark
-        return when(val data = nullabilityByte) {
+        return when (val data = nullabilityByte) {
             null -> reader.readBoolean()
             OPTIONAL_FALSE -> false
             OPTIONAL_TRUE -> true
@@ -78,7 +81,38 @@ class PrimitiveBinaryScaleDecoder(
     }
 
     override fun decodeEnum(enumDescriptor: SerialDescriptor): Int {
-        TODO("Not yet implemented")
+        val index = reader.readByte().toInt()
+
+        if (enumDescriptor.enumElementUsesIndexDirectly(index)) {
+            return index
+        }
+
+        return enumDescriptor.findRealEnumElementIndex(index)
+            ?: index // Return index as the fallback so kotlinx serialization will throw readable error
+    }
+
+    private fun SerialDescriptor.enumElementUsesIndexDirectly(index: Int): Boolean {
+        return try {
+            val customEnumIndex = getElementAnnotations(index).findAnnotation<EnumIndex>()
+                ?.index?.toInt()
+
+            customEnumIndex == null || customEnumIndex == index
+        } catch (_: IndexOutOfBoundsException) {
+            false
+        }
+    }
+
+    private fun SerialDescriptor.findRealEnumElementIndex(customIndex: Int): Int? {
+        for (i in 0 until elementsCount) {
+            val indexFromAnnotation = getElementAnnotations(i)
+                .findAnnotation<EnumIndex>()
+                ?.index
+                ?.toInt()
+
+            if (indexFromAnnotation == customIndex) return i
+        }
+
+        return null
     }
 
     override fun decodeFloat(): Float {
@@ -91,7 +125,7 @@ class PrimitiveBinaryScaleDecoder(
     }
 
     override fun decodeInt(): Int {
-       return ScaleCodecReader.INT32.read(reader)
+        return ScaleCodecReader.INT32.read(reader)
     }
 
     override fun decodeLong(): Long {
