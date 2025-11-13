@@ -258,3 +258,17 @@ class Transient(val value: Boolean)
 
 assertEquals(true, Scale.encode(Transient(true)))
 ```
+
+#### `@AsTuple` annotation
+
+`@AsTuple` annotation can be used on regular classes to enable encoding to and decoding from tuples.
+When it is applied, serializer will threat fields declaration order to be equal to the tuple element index.
+This is useful when you want to serialize a typed tuple or enum variant with anonymous associated values
+
+```kotlin
+@Serializable
+@AsTuple
+class AsTupleStruct(val a: Boolean, val b: Boolean)
+
+assertEquals(listOf(true, false), Scale.encode(AsTupleStruct(true, false)))
+```

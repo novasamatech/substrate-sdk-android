@@ -1,5 +1,6 @@
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.decode
 
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations.AsTuple
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations.TransientStruct
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.serializers.BigIntegerSerializable
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
@@ -90,6 +91,28 @@ class StructTest : DecodeTest() {
             raw = Struct.Instance(mapOf("some_name" to true)),
             expected = A(someName = true)
         )
+
+        runDecodeTest(
+            raw = Struct.Instance(mapOf("someName" to true)),
+            expected = A(someName = true)
+        )
+    }
+
+    @Test
+    fun `should decode camel case as snake case`() {
+
+        @Serializable
+        data class A(@SerialName("some_name") val someName: Boolean)
+
+        runDecodeTest(
+            raw = Struct.Instance(mapOf("some_name" to true)),
+            expected = A(someName = true)
+        )
+
+        runDecodeTest(
+            raw = Struct.Instance(mapOf("someName" to true)),
+            expected = A(someName = true)
+        )
     }
 
     @Test
@@ -102,6 +125,19 @@ class StructTest : DecodeTest() {
         runDecodeTest(
             expected = A(a = true),
             raw = true
+        )
+    }
+
+    @Test
+    fun `should decode transient as tuple struct`() {
+
+        @Serializable
+        @AsTuple
+        data class A(val a: Boolean, val b: Boolean)
+
+        runDecodeTest(
+            expected = A(a = true, b = false),
+            raw = listOf(true, false)
         )
     }
 

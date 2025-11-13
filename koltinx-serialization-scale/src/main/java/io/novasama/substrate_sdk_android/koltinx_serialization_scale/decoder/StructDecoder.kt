@@ -3,6 +3,7 @@
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.decoder
 
 import io.novasama.substrate_sdk_android.extensions.camelCaseToSnakeCase
+import io.novasama.substrate_sdk_android.extensions.snakeCaseToCamelCase
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.encoder.TransientStructEncoder
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -18,8 +19,20 @@ class StructDecoder(
     private var currentIndex = 0
 
     override fun decodeIdentity(descriptor: SerialDescriptor, index: Int): Any? {
-        val key = descriptor.getElementName(index).camelCaseToSnakeCase()
-        return value[key]
+        val key = descriptor.getElementName(index)
+
+        if (key in value) return value[key]
+
+        // TODO this is a temp solution to cater both camel and snake cases in struct fields
+        // This should be addressed better to introducing some annotation to specify field naming strategy per entire struct
+        // Also we should check the underlying layer to find out why some fields are not transformed to camel case
+        val camelCaseKey = key.snakeCaseToCamelCase()
+        if (camelCaseKey in value) return value[camelCaseKey]
+
+        val snakeCaseKey = key.camelCaseToSnakeCase()
+        if (snakeCaseKey in value) return value[snakeCaseKey]
+
+        error("Key '$key' ('$camelCaseKey'/'$snakeCaseKey') is not found in the $value")
     }
 
     override fun decodeElementIndex(descriptor: SerialDescriptor): Int {
@@ -49,6 +62,26 @@ class TransientStructDecoder(
         return if (shouldDecode) {
             shouldDecode = false
             0
+        } else {
+            DECODE_DONE
+        }
+    }
+}
+
+class StructAsTupleDecoder(
+    override val serializersModule: SerializersModule,
+    private val value: List<*>
+) : BaseCompositeDecoder() {
+
+    private var currentIndex = 0
+
+    override fun decodeIdentity(descriptor: SerialDescriptor, index: Int): Any? {
+        return value[index]
+    }
+
+    override fun decodeElementIndex(descriptor: SerialDescriptor): Int {
+        return if (currentIndex < descriptor.elementsCount) {
+            currentIndex.also { currentIndex++ }
         } else {
             DECODE_DONE
         }

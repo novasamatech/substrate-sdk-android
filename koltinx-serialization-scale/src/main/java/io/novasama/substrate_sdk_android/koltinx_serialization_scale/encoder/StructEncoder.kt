@@ -20,8 +20,13 @@ class StructEncoder(
     private var current = mutableMapOf<String, Any?>()
 
     override fun encodeIdentity(descriptor: SerialDescriptor, index: Int, value: Any?) {
-        val tag = descriptor.getElementName(index).camelCaseToSnakeCase()
+        val tag = descriptor.getElementName(index)
+
+        // TODO this is a temp solution to cater both camel and snake cases in struct fields
+        // This should be addressed better to introducing some annotation to specify field naming strategy per entire struct
+        // Also we should check the underlying layer to find out why some fields are not transformed to camel case
         current[tag] = value
+        current[tag.camelCaseToSnakeCase()] = value
     }
 
     override fun getEncodedValue(): Struct.Instance {
@@ -47,5 +52,21 @@ class TransientStructEncoder(
 
     override fun getEncodedValue(): Any? {
         return requireValueSet(current)
+    }
+}
+
+class StructAsTupleEncoder(
+    override val serializersModule: SerializersModule,
+    nodeConsumer: (Any?) -> Unit
+) : BaseCompositeEncoder(nodeConsumer) {
+
+    private var current = mutableListOf<Any?>()
+
+    override fun encodeIdentity(descriptor: SerialDescriptor, index: Int, value: Any?) {
+        current.add(index, value)
+    }
+
+    override fun getEncodedValue(): List<*> {
+        return current
     }
 }

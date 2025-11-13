@@ -65,7 +65,7 @@ fun Extrinsic.Instance.tryExtractMultiSignature(): MultiSignature? {
     val value = enumEntry.value as? ByteArray ?: return null
 
     val encryptionType =
-        EncryptionType.fromStringOrNull(enumEntry.name.toLowerCase()) ?: return null
+        EncryptionType.fromStringOrNull(enumEntry.name.lowercase()) ?: return null
 
     return MultiSignature(encryptionType, value)
 }

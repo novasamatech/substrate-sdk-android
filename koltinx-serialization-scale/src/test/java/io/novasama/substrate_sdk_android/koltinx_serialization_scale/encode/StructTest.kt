@@ -1,5 +1,6 @@
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.encode
 
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations.AsTuple
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations.TransientStruct
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.serializers.BigIntegerSerializable
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
@@ -99,13 +100,12 @@ class StructTest : EncodeTest() {
 
     @Test
     fun `should encode camel case as snake case`() {
-
         @Serializable
-        data class A(@SerialName("b") val a: Boolean)
+        data class A(val aB: Boolean)
 
         runEncodeTest(
-            expected = Struct.Instance(mapOf("b" to true)),
-            value = A(a = true)
+            expected = Struct.Instance(mapOf("aB" to true, "a_b" to true)),
+            value = A(aB = true)
         )
     }
 
@@ -119,6 +119,19 @@ class StructTest : EncodeTest() {
         runEncodeTest(
             expected = true,
             value = A(a = true)
+        )
+    }
+
+    @Test
+    fun `should encode as tuple struct`() {
+
+        @Serializable
+        @AsTuple
+        data class A(val a: Boolean, val b: Boolean)
+
+        runEncodeTest(
+            expected = listOf(true, false),
+            value = A(a = true, b = false)
         )
     }
 }

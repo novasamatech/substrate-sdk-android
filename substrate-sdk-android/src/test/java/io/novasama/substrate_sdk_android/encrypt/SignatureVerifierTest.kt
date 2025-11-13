@@ -44,7 +44,6 @@ class SignatureVerifierTest {
     }
 
     @Test
-    @Ignore("TODO - make Sr25519 .dylib loading work on Linux/Macos")
     fun `should verify sr25519`() {
         runSignTests(::signAndVerifySr25519)
     }

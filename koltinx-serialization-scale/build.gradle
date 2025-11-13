@@ -1,7 +1,7 @@
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
-    id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.20'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '2.1.21'
 }
 
 apply from: '../maven-publish-helper.gradle'
@@ -15,6 +15,8 @@ publishing {
 }
 
 android {
+    namespace 'io.novasama.substrate_sdk_android.koltinx_serialization_scale'
+
     compileSdkVersion rootProject.compileVersion
 
     defaultConfig {
@@ -33,20 +35,17 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility 1.8
-        targetCompatibility 1.8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = '1.8'
+    kotlin {
+        jvmToolchain(17)
     }
 }
 
 dependencies {
-    api "org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.3.3"
-
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.3.3"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-cbor-jvm:1.3.3"
+    api "org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.1"
 
     testImplementation jUnitDep
     testImplementation mockitoDep

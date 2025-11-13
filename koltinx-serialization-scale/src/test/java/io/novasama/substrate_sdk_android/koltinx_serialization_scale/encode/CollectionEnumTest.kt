@@ -1,5 +1,9 @@
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.encode
 
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations.AsDictEnum
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.decode.CollectionEnumTest
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.decode.CollectionEnumTest.TestEnum2
+import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.DictEnum
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -36,4 +40,26 @@ class CollectionEnumTest : EncodeTest() {
         value = TestEnum.C,
         expected = "c"
     )
+
+    @Serializable
+    @AsDictEnum
+    enum class TestEnumDict {
+        A, B, @SerialName("c") C
+    }
+
+    @Test
+    fun `should encode collection enum to dict entry with null value`() {
+        runEncodeTest(
+            expected = DictEnum.Entry("A", null),
+            value = TestEnumDict.A
+        )
+    }
+
+    @Test
+    fun `should respect custom names for dict entry encoding`() {
+        runEncodeTest(
+            expected = DictEnum.Entry("c", null),
+            value = TestEnumDict.C
+        )
+    }
 }

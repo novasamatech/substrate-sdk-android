@@ -1,8 +1,8 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'org.mozilla.rust-android-gradle.rust-android'
+
 apply from: '../maven-publish-helper.gradle'
 
 publishing {
@@ -13,7 +13,14 @@ publishing {
     }
 }
 
+// We add desktop libraries depending on the host machine since cross-compilation does not work atm
+// This is only used for running tests
+def isMac = org.gradle.internal.os.OperatingSystem.current().isMacOsX()
+def isLinux = org.gradle.internal.os.OperatingSystem.current().isLinux()
+
 android {
+    namespace 'io.novasama.substrate_sdk_android'
+
     compileSdkVersion rootProject.compileVersion
 
     ndkVersion "26.1.10909125"
@@ -38,28 +45,45 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility 1.8
-        targetCompatibility 1.8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
-    sourceSets {
-        test {
-            java.srcDirs += "$projectDir/src/testShared/java"
-        }
+    kotlin {
+        jvmToolchain(17)
+    }
 
-        androidTest {
-            java.srcDirs += "$projectDir/src/testShared/java"
+    testOptions {
+        unitTests.all {
+            dependsOn("cargoBuild")
+
+            if(isMac) {
+                jvmArgs "-Djava.library.path=$buildDir/rustJniLibs/desktop/darwin-aarch64"
+            }
+
+            if (isLinux) {
+                jvmArgs "-Djava.library.path=$buildDir/rustJniLibs/desktop/linux-x86-64"
+            }
         }
     }
+}
+
+
+def baseTargets = ["arm", "arm64", "x86", "x86_64"]
+if (isMac) {
+    baseTargets += ["darwin-aarch64"]
+}
+if (isLinux) {
+    baseTargets += ["linux-x86-64"]
 }
 
 cargo {
     module = "../sr25519-java/"
     libname = "sr25519java"
-    targets = ["arm", "arm64", "x86", "x86_64"]
+    targets = baseTargets
 }
 
-tasks.whenTaskAdded { task ->
+tasks.configureEach { task ->
     if ((task.name == 'javaPreCompileDebug' || task.name == 'javaPreCompileRelease')) {
         task.dependsOn 'cargoBuild'
     }

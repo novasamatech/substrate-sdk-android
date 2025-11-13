@@ -3,14 +3,13 @@ package io.novasama.substrate_sdk_android.encrypt.json.coders.content.secretCode
 import io.novasama.substrate_sdk_android.encrypt.MultiChainEncryption
 import io.novasama.substrate_sdk_android.encrypt.json.coders.content.JsonContentDecoder
 import io.novasama.substrate_sdk_android.encrypt.json.coders.content.JsonSecretCoder
-import io.novasama.substrate_sdk_android.encrypt.keypair.BaseKeypair
 import io.novasama.substrate_sdk_android.encrypt.keypair.ECDSAUtils
 import io.novasama.substrate_sdk_android.encrypt.keypair.Keypair
-import io.novasama.substrate_sdk_android.encrypt.keypair.derivePublicKey
+import io.novasama.substrate_sdk_android.encrypt.keypair.deriveKeypair
 
 object EthereumJsonSecretCoder : JsonSecretCoder {
 
-    override fun encode(keypair: Keypair, seed: ByteArray?): List<ByteArray> {
+    override fun encode(keypair: Keypair): List<ByteArray> {
         return listOf(keypair.privateKey, keypair.publicKey)
     }
 
@@ -18,14 +17,13 @@ object EthereumJsonSecretCoder : JsonSecretCoder {
         require(data.size == 2) { "Unknown secret structure (size: ${data.size}" }
 
         val privateKey = data[0]
+        val derivedKeypair = ECDSAUtils.deriveKeypair(privateKey)
+
+        requirePublicKeyMatch(publicKeyFromJson = data[1], derivedKeyPair = derivedKeypair)
 
         return JsonContentDecoder.SecretDecoder.DecodedSecret(
-            seed = null,
             multiChainEncryption = MultiChainEncryption.Ethereum,
-            keypair = BaseKeypair(
-                privateKey = privateKey,
-                publicKey = ECDSAUtils.derivePublicKey(privateKey)
-            )
+            keypair = derivedKeypair
         )
     }
 }

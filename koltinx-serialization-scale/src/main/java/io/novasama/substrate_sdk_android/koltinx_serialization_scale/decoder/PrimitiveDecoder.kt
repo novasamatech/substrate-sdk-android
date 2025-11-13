@@ -2,6 +2,7 @@
 
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.decoder
 
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations.AsTuple
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations.TransientStruct
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations.findSerializedFallback
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.isAnnotatedWith
@@ -24,6 +25,10 @@ open class PrimitiveDecoder(
     override val serializersModule: SerializersModule,
     val value: Any?
 ) : ScaleDecoder {
+
+    override fun decodeRaw(): Any? {
+        return value
+    }
 
     override fun decodeByteArray(): ByteArray {
         return decodeCasted()
@@ -51,13 +56,37 @@ open class PrimitiveDecoder(
     override fun decodeDouble(): Double = unsupportedDecoding("Char")
 
     override fun decodeEnum(enumDescriptor: SerialDescriptor): Int {
-        val name = decodeString()
-        val index = enumDescriptor.getElementIndex(name)
+        val name = detectEnumEntryName()
+        var index = enumDescriptor.getElementIndex(name)
 
         if (index != UNKNOWN_NAME) return index
 
-        val fallback = enumDescriptor.findSerializedFallback() ?: return index
-        return enumDescriptor.getElementIndex(fallback)
+        val fallback = enumDescriptor.findSerializedFallback()
+        if (fallback == null) {
+            error("Enum entry $name not found in ${enumDescriptor.serialName}")
+        }
+
+        index = enumDescriptor.getElementIndex(fallback)
+
+        if (index != UNKNOWN_NAME) {
+            return index
+        } else {
+            error("Fallback enum entry $fallback not found in ${enumDescriptor.serialName}")
+        }
+    }
+
+    private fun detectEnumEntryName(): String {
+        return when(value) {
+            is String -> value
+            is DictEnum.Entry<*> -> {
+                require(value.value == null) {
+                    "Regular enum cannot be decoded with present associated value: $value"
+                }
+
+                value.name
+            }
+            else -> error("Cannot extract enum entry name from: $value")
+        }
     }
 
     override fun decodeFloat(): Float = unsupportedDecoding("Float")
@@ -126,7 +155,7 @@ open class PrimitiveDecoder(
                 ?: serializer.findFallbackFromAnnotations()
                 ?: error("Subtype $variantClassName not registered")
 
-        val enumDecoder = EnumDecoder(serializersModule, enumEntry.value)
+        val enumDecoder = PrimitiveDecoder(serializersModule, enumEntry.value)
         return actualSerializer.deserialize(enumDecoder) as T
     }
 
@@ -143,14 +172,22 @@ open class PrimitiveDecoder(
     }
 
     private fun SerialDescriptor.createStructDecoder(value: Any?): CompositeDecoder {
-        return if (isAnnotatedWith<TransientStruct>()) {
-            require(elementsCount == 1) {
-                "Cannot use @TransientStruct annotation on a class with more than 1 field"
+        return when {
+            isAnnotatedWith<TransientStruct>() -> {
+                require(elementsCount == 1) {
+                    "Cannot use @TransientStruct annotation on a class with more than 1 field"
+                }
+
+                TransientStructDecoder(serializersModule, value)
             }
 
-            TransientStructDecoder(serializersModule, value)
-        } else {
-            StructDecoder(serializersModule, value as Struct.Instance)
+            isAnnotatedWith<AsTuple>() -> {
+                StructAsTupleDecoder(serializersModule, value as List<*>)
+            }
+
+            else -> {
+                StructDecoder(serializersModule, value as Struct.Instance)
+            }
         }
     }
 

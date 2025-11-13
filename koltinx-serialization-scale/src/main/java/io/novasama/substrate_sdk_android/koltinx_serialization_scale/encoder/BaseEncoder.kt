@@ -2,8 +2,11 @@
 
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.encoder
 
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations.AsDictEnum
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations.AsTuple
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.annotations.TransientStruct
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.utils.isAnnotatedWith
+import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.DictEnum
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.SerializationStrategy
@@ -27,10 +30,16 @@ abstract class BaseEncoder : ScaleEncoder {
     override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
         return when (val kind = descriptor.kind) {
             StructureKind.CLASS -> descriptor.createStructEncoder()
-            StructureKind.OBJECT -> ObjectEncoder(serializersModule, nodeConsumer = ::encodeIdentity)
+            StructureKind.OBJECT -> ObjectEncoder(
+                serializersModule,
+                nodeConsumer = ::encodeIdentity
+            )
+
             else -> error("Unsupported descriptor kind: $kind")
         }
     }
+
+    override fun encodeRaw(value: Any?) = encodeIdentity(value)
 
     override fun encodeNumber(number: BigInteger) = encodeIdentity(number)
 
@@ -43,7 +52,13 @@ abstract class BaseEncoder : ScaleEncoder {
     override fun encodeDouble(value: Double) = unsupportedEncoding("Double")
 
     override fun encodeEnum(enumDescriptor: SerialDescriptor, index: Int) {
-        encodeIdentity(enumDescriptor.getElementName(index))
+        val elementName = enumDescriptor.getElementName(index)
+
+        if (enumDescriptor.isAnnotatedWith<AsDictEnum>()) {
+            encodeIdentity(DictEnum.Entry(elementName, null))
+        } else {
+            encodeIdentity(elementName)
+        }
     }
 
     override fun encodeFloat(value: Float) = unsupportedEncoding("Float")
@@ -75,14 +90,20 @@ abstract class BaseEncoder : ScaleEncoder {
     }
 
     private fun SerialDescriptor.createStructEncoder(): CompositeEncoder {
-        return if (isAnnotatedWith<TransientStruct>()) {
-            require(elementsCount == 1) {
-                "Cannot use @TransientStruct annotation on a class with more than 1 field"
+        return when {
+            isAnnotatedWith<TransientStruct>() -> {
+                require(elementsCount == 1) {
+                    "Cannot use @TransientStruct annotation on a class with more than 1 field"
+                }
+
+                TransientStructEncoder(serializersModule, nodeConsumer = ::encodeIdentity)
             }
 
-            TransientStructEncoder(serializersModule, nodeConsumer = ::encodeIdentity)
-        } else {
-            StructEncoder(serializersModule, nodeConsumer = ::encodeIdentity)
+            isAnnotatedWith<AsTuple>() -> {
+                StructAsTupleEncoder(serializersModule, nodeConsumer = ::encodeIdentity)
+            }
+
+            else -> StructEncoder(serializersModule, nodeConsumer = ::encodeIdentity)
         }
     }
 }

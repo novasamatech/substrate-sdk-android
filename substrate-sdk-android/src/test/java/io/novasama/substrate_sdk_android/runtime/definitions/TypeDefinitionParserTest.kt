@@ -450,7 +450,7 @@ class TypeDefinitionParserTest {
         val parseTimes = (0..times).map {
             measureTime {
                 TypeDefinitionParser.parseBaseDefinitions(tree, v13Preset())
-            }.inMilliseconds
+            }.inWholeMilliseconds
         }
 
         println(parseTimes)

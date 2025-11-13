@@ -18,17 +18,13 @@ interface JsonContentEncoder {
 
     interface SecretEncoder {
 
-        fun encode(
-            keypair: Keypair,
-            seed: ByteArray?
-        ): List<ByteArray>
+        fun encode(keypair: Keypair): List<ByteArray>
     }
 }
 
-fun JsonContentEncoder.encode(
-    keypair: Keypair,
-    seed: ByteArray?
-) = checksumEncoder.encode(secretEncoder.encode(keypair, seed))
+fun JsonContentEncoder.encode(keypair: Keypair): ByteArray {
+    return checksumEncoder.encode(secretEncoder.encode(keypair))
+}
 
 interface JsonContentDecoder {
 
@@ -44,7 +40,6 @@ interface JsonContentDecoder {
     interface SecretDecoder {
 
         class DecodedSecret(
-            val seed: ByteArray?,
             val multiChainEncryption: MultiChainEncryption,
             val keypair: Keypair
         )
