@@ -4,7 +4,9 @@ package io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary
 
 import io.emeraldpay.polkaj.scale.ScaleCodecReader
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.decoder.PrimitiveBinaryScaleDecoder
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.encoder.PrimitiveBinaryScaleEncoder
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.serializers.BigIntegerBinarySerializer
+import io.novasama.substrate_sdk_android.runtime.definitions.types.useScaleWriter
 import kotlinx.serialization.BinaryFormat
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -22,10 +24,20 @@ inline fun <reified T> BinaryScale.decodeFromByteArray(bytes: ByteArray): T {
     return decodeFromByteArray(typeOf<T>(), bytes)
 }
 
+inline fun <reified T> BinaryScale.encodeToByteArray(value: T): ByteArray {
+    return encodeToByteArray(typeOf<T>(), value)
+}
+
 @Suppress("UNCHECKED_CAST")
 fun <T> BinaryScale.decodeFromByteArray(type: KType, bytes: ByteArray): T {
     return decodeFromByteArray(serializersModule.serializer(type) as KSerializer<T>, bytes)
 }
+
+@Suppress("UNCHECKED_CAST")
+fun <T> BinaryScale.encodeToByteArray(type: KType, value: T): ByteArray {
+    return encodeToByteArray(serializersModule.serializer(type) as KSerializer<T>, value)
+}
+
 
 open class BinaryScale(
     serializersModules: SerializersModule
@@ -43,7 +55,10 @@ open class BinaryScale(
     }
 
     override fun <T> encodeToByteArray(serializer: SerializationStrategy<T>, value: T): ByteArray {
-        TODO("Not yet implemented")
+        return useScaleWriter {
+            val encoder = PrimitiveBinaryScaleEncoder(serializersModule, this@useScaleWriter)
+            encoder.encodeSerializableValue(serializer, value)
+        }
     }
 
     companion object Default : BinaryScale(EmptySerializersModule())

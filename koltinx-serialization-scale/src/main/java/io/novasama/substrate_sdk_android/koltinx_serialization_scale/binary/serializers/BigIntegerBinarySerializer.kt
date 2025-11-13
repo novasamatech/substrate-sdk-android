@@ -1,6 +1,7 @@
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.serializers
 
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.decoder.BinaryScaleDecoder
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.encoder.BinaryScaleEncoder
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
@@ -20,6 +21,7 @@ object BigIntegerBinarySerializer : KSerializer<BigInteger> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("BigInteger", PrimitiveKind.STRING)
 
     override fun serialize(encoder: Encoder, value: BigInteger) {
-        TODO("Not yet implemented")
+        require(encoder is BinaryScaleEncoder)
+        encoder.encodeCompact(value)
     }
 }

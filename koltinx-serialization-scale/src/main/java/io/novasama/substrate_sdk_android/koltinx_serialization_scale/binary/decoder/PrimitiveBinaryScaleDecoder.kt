@@ -36,10 +36,6 @@ class PrimitiveBinaryScaleDecoder(
 
     private var nullabilityByte: Byte? = elementContext?.nullabilityByte
 
-    override fun decodeFixedSizeArray(size: Int): ByteArray {
-        return reader.readByteArray(size)
-    }
-
     override fun decodeCompact(): BigInteger {
         return compactInt.read(reader)
     }
@@ -76,7 +72,7 @@ class PrimitiveBinaryScaleDecoder(
         val fixedSize = elementContext?.findElementAnnotation<FixedLength>()?.length
 
         return if (fixedSize != null) {
-            decodeFixedSizeArray(fixedSize)
+            reader.readByteArray(fixedSize)
         } else {
             reader.readByteArray()
         }
