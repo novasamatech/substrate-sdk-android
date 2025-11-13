@@ -4,6 +4,52 @@ This module provides support for SCALE codec serialization in two formats:
 - **Dynamic Format (Scale)**: Converts between Kotlin types and dynamic structures used by the core substrate-sdk-android module
 - **Binary Format (BinaryScale)**: Direct binary encoding/decoding following the SCALE codec specification
 
+## Table of Contents
+
+- [Get started](#get-started)
+  - [Installation](#installation)
+- [Dynamic Format (Scale)](#dynamic-format-scale)
+  - [Usage](#usage)
+  - [Scale Types](#scale-types)
+    - [Primitives](#primitives)
+    - [Strings](#strings)
+    - [Byte Arrays](#byte-arrays)
+    - [Booleans](#booleans)
+    - [Regular enums](#regular-enums)
+    - [Classes](#classes)
+    - [Objects](#objects)
+    - [Value classes](#value-classes)
+    - [Sealed classes](#sealed-classes)
+  - [Annotations](#annotations)
+    - [@SerialName](#serialname-annotation)
+    - [@SerializedFallback](#serializedfallback-annotation)
+    - [@TransientStruct](#transientstruct-annotation)
+    - [@AsTuple](#astuple-annotation)
+- [Binary Format (BinaryScale)](#binary-format-binaryscale)
+  - [Usage](#usage-1)
+  - [Binary Types](#binary-types)
+    - [Primitives](#primitives-1)
+      - [Booleans](#booleans-1)
+      - [Numbers](#numbers)
+    - [Compact Integers](#compact-integers)
+    - [Strings](#strings-1)
+    - [Byte Arrays](#byte-arrays-1)
+      - [Variable Length](#variable-length)
+      - [Fixed Length](#fixed-length)
+    - [Lists](#lists)
+      - [Variable Length](#variable-length-1)
+      - [Fixed Length](#fixed-length-1)
+    - [Optional Types](#optional-types)
+      - [Optional Booleans](#optional-booleans)
+    - [Classes](#classes-1)
+    - [Objects](#objects-1)
+    - [Value Classes](#value-classes-1)
+    - [Enums](#enums)
+    - [Sealed Classes (Discriminated Unions)](#sealed-classes-discriminated-unions)
+  - [Annotations](#annotations-1)
+    - [@EnumIndex](#enumindex)
+    - [@FixedLength](#fixedlength)
+
 ## Get started
 
 ### Installation
