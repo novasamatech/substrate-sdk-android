@@ -5,7 +5,7 @@ package io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.dec
 import io.emeraldpay.polkaj.scale.ScaleCodecReader
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.ElementDeclarationContext
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.annotations.EnumIndex
-import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.annotations.FixedLengthBytes
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.annotations.FixedLength
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.ScaleOptional.NULL_MARK
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.ScaleOptional.OPTIONAL_FALSE
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.ScaleOptional.OPTIONAL_TRUE
@@ -47,7 +47,7 @@ class PrimitiveBinaryScaleDecoder(
     override fun beginStructure(descriptor: SerialDescriptor): CompositeDecoder {
         return when (val kind = descriptor.kind) {
             StructureKind.CLASS -> StructDecoder(reader, serializersModule)
-            StructureKind.LIST -> ListDecoder(reader, serializersModule)
+            StructureKind.LIST -> createListDecoder()
             StructureKind.OBJECT -> ObjectBinaryDecoder(reader, serializersModule)
             else -> error("Unsupported descriptor kind: $kind")
         }
@@ -62,8 +62,18 @@ class PrimitiveBinaryScaleDecoder(
         }
     }
 
+    private fun createListDecoder() : CompositeDecoder {
+        val fixedSize = elementContext?.findElementAnnotation<FixedLength>()?.length
+
+        return if (fixedSize != null) {
+            FixedLengthListBinaryDecoder(fixedSize, reader, serializersModule)
+        } else {
+            VariableLengthListBinaryDecoder(reader, serializersModule)
+        }
+    }
+
     private fun decodeByteArray(): ByteArray {
-        val fixedSize = elementContext?.findElementAnnotation<FixedLengthBytes>()?.length
+        val fixedSize = elementContext?.findElementAnnotation<FixedLength>()?.length
 
         return if (fixedSize != null) {
             decodeFixedSizeArray(fixedSize)

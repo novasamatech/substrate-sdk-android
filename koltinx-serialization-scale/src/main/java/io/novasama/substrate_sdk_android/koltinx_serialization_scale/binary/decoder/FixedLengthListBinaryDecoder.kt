@@ -4,14 +4,13 @@ import io.emeraldpay.polkaj.scale.ScaleCodecReader
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.modules.SerializersModule
 
-class ListDecoder(
+class FixedLengthListBinaryDecoder(
+    private val length: Int,
     private val reader: ScaleCodecReader,
     override val serializersModule: SerializersModule
 ) : BaseCompositeBinaryDecoder(reader) {
 
-    private val size = reader.readCompactInt()
-
     override fun elementsCount(descriptor: SerialDescriptor): Int {
-        return size
+        return length
     }
 }
