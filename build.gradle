@@ -9,7 +9,7 @@ buildscript {
         minVersion = 21
         targetVersion = 30
 
-        kotlinVersion = '2.1.21'
+        kotlinVersion = '2.2.21'
 
         supportVersion = '1.0.0'
         constraintVersion = '1.1.3'
