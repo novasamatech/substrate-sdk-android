@@ -1,8 +1,7 @@
-package io.novasama.substrate_sdk_android.koltinx_serialization_scale.serializers
+package io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.serializers
 
-import io.novasama.substrate_sdk_android.koltinx_serialization_scale.decoder.ScaleDecoder
-import io.novasama.substrate_sdk_android.koltinx_serialization_scale.encoder.ScaleEncoder
-import kotlinx.serialization.Contextual
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.decoder.BinaryScaleDecoder
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.encoder.BinaryScaleEncoder
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
@@ -11,21 +10,18 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import java.math.BigInteger
 
-typealias BigIntegerSerializable = @Contextual BigInteger
-
-object BigIntegerSerializer : KSerializer<BigInteger> {
+object BigIntegerBinarySerializer : KSerializer<BigInteger> {
 
     override fun deserialize(decoder: Decoder): BigInteger {
-        require(decoder is ScaleDecoder)
+        require(decoder is BinaryScaleDecoder)
 
-        return decoder.decodeNumber()
+        return decoder.decodeCompact()
     }
 
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("BigInteger", PrimitiveKind.STRING)
 
     override fun serialize(encoder: Encoder, value: BigInteger) {
-        require(encoder is ScaleEncoder)
-
-        encoder.encodeNumber(value)
+        require(encoder is BinaryScaleEncoder)
+        encoder.encodeCompact(value)
     }
 }

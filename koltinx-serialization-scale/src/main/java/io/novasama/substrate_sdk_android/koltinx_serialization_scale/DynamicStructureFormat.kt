@@ -3,7 +3,7 @@ package io.novasama.substrate_sdk_android.koltinx_serialization_scale
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.decoder.PrimitiveDecoder
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.encoder.RootEncoder
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.serializers.BigIntegerSerializer
-import io.novasama.substrate_sdk_android.koltinx_serialization_scale.serializers.ByteArraySerializer
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.serializers.ByteArrayDynamicStructSerializer
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
@@ -44,7 +44,7 @@ fun <T> DynamicStructureFormat.decode(type: KType, dynamicStructure: Any?): T {
 private fun <T> SerializersModule.modifiedSerializer(kType: KType): KSerializer<T> {
     return when {
         // We need to overwrite built-in serializer for ByteArray
-        kType == typeOf<ByteArray>() -> ByteArraySerializer as KSerializer<T>
+        kType == typeOf<ByteArray>() -> ByteArrayDynamicStructSerializer as KSerializer<T>
         else -> serializer(kType) as KSerializer<T>
     }
 }
@@ -72,5 +72,5 @@ open class Scale(
 
 private val defaultSerializers = SerializersModule {
     contextual(BigInteger::class, BigIntegerSerializer)
-    contextual(ByteArray::class, ByteArraySerializer)
+    contextual(ByteArray::class, ByteArrayDynamicStructSerializer)
 }

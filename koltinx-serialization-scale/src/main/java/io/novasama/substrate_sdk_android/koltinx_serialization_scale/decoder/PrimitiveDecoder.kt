@@ -76,7 +76,7 @@ open class PrimitiveDecoder(
     }
 
     private fun detectEnumEntryName(): String {
-        return when(value) {
+        return when (value) {
             is String -> value
             is DictEnum.Entry<*> -> {
                 require(value.value == null) {
@@ -143,7 +143,7 @@ open class PrimitiveDecoder(
 
         val enumEntry = value as DictEnum.Entry<*>
 
-        val stubDecoder = StubCompositeDecoder()
+        val stubDecoder = StubCompositeDecoder(serializersModule)
 
         val variantClassName = createClassName(serializer.descriptor, enumEntry.name)
 
@@ -163,7 +163,7 @@ open class PrimitiveDecoder(
         val fallback = descriptor.findSerializedFallback() ?: return null
         val fallbackClassName = createClassName(descriptor, fallback)
 
-        return findPolymorphicSerializerOrNull(StubCompositeDecoder(), fallbackClassName)
+        return findPolymorphicSerializerOrNull(StubCompositeDecoder(serializersModule), fallbackClassName)
             ?: error("Subtype $fallbackClassName specified as fallback via @FallbackAnnotation is not registered")
     }
 
@@ -188,22 +188,6 @@ open class PrimitiveDecoder(
             else -> {
                 StructDecoder(serializersModule, value as Struct.Instance)
             }
-        }
-    }
-
-    // This is needed because `findPolymorphicSerializerOrNull` only accepts `CompositeDecoder`
-    // whereas actually only using `serializersModule` under the hood
-    private inner class StubCompositeDecoder : BaseCompositeDecoder() {
-
-        override val serializersModule: SerializersModule
-            get() = this@PrimitiveDecoder.serializersModule
-
-        override fun decodeIdentity(descriptor: SerialDescriptor, index: Int): Any? {
-            error("STUB")
-        }
-
-        override fun decodeElementIndex(descriptor: SerialDescriptor): Int {
-            error("STUB")
         }
     }
 }
