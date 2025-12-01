@@ -19,6 +19,12 @@ internal object Sr25519SubstrateKeypairFactory : KeypairFactory<Sr25519Keypair> 
         return decodeSr25519Keypair(keypairBytes)
     }
 
+    override fun deriveFromRaw(raw: ByteArray): Sr25519Keypair {
+        val publicKey = Sr25519.getPublicKeyFromSecret(raw)
+        val keypairBytes = raw + publicKey
+        return decodeSr25519Keypair(keypairBytes)
+    }
+
     override fun deriveChild(parent: Sr25519Keypair, junction: Junction): Sr25519Keypair {
         return when (junction.type) {
             JunctionType.SOFT -> deriveSr25519SoftKeypair(junction.chaincode, parent)

@@ -11,13 +11,13 @@ public final class Sr25519 {
     /// Size of SR25519 PUBLIC KEY, bytes
     public static final int PUBLIC_SIZE = 32;
 
-    /// Size of SR25519 PRIVATE (SECRET) KEY, which consists of [32 bytes key | 32 bytes nonce]
+    /// Size of SR25519 PRIVATE (SECRET) KEY, which consists of [32bytes key|32bytes nonce]
     public static final int SECRET_SIZE = 64;
 
     /// Size of SR25519 SIGNATURE, bytes
     public static final int SIGNATURE_SIZE = 64;
 
-    /// Size of SR25519 KEYPAIR. [32 bytes key | 32 bytes nonce | 32 bytes public]
+    /// Size of SR25519 KEYPAIR. [32bytes key|32bytes nonce|32bytes public]
     public static final int KEYPAIR_SIZE = 96;
 
     static {
@@ -74,6 +74,21 @@ public final class Sr25519 {
      */
     public static native byte[] derivePublicSoft(byte[] public_key, byte[] cc);
 
+    /**
+     * Derive a public key from a raw secret key (soft derivation result).
+     *
+     * @param secret: [32 bytes private key scalar | 32 bytes nonce]
+     * @return public key: pre-allocated output buffer of PUBLIC_SIZE bytes (32 bytes)
+     */
+    public static native byte[] getPublicKeyFromSecret(byte[] secret);
+
+    /**
+     * Derive a public key from a generation seed.
+     *
+     * @param seed: generation seed - input buffer of SEED_SIZE bytes
+     * @return public key: pre-allocated output buffer of PUBLIC_SIZE bytes (32 bytes)
+     */
+    public static native byte[] getPublicKeyFromSeed(byte[] seed);
 
     /**
      * Generate a key pair.
@@ -86,6 +101,7 @@ public final class Sr25519 {
     /**
      * Converts a secret key, provided as an array of 64 bytes,
      * to a corresponding ed25519 expanded secret key
+     *
      * @return an array of 64 bytes, with the first 32 bytes being the secret scalar shifted ed25519 style,
      * and the last 32 bytes being the seed for nonces
      */
@@ -93,6 +109,7 @@ public final class Sr25519 {
 
     /**
      * Converts an ed25519 expanded secret key to a corresponding sr25519 secret key.
+     *
      * @return an array of 64 bytes, with the first 32 bytes being the secret scalar
      * represented canonically, and the last 32 bytes being the seed for nonces
      */
