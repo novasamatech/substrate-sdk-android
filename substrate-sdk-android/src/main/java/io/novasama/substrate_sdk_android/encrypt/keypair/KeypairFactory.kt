@@ -15,14 +15,9 @@ fun <K : Keypair> KeypairFactory<K>.generate(
     seed: ByteArray,
     junctions: List<Junction>
 ): K {
-    return deriveKeyPair(deriveFromSeed(seed), junctions)
-}
+    val parentKeypair = deriveFromSeed(seed)
 
-internal fun <K : Keypair> KeypairFactory<K>.deriveKeyPair(
-    keypair: K,
-    junctions: List<Junction>
-): K {
-    return junctions.fold(keypair) { currentKeyPair, junction ->
+    return junctions.fold(parentKeypair) { currentKeyPair, junction ->
         deriveChild(currentKeyPair, junction)
     }
 }

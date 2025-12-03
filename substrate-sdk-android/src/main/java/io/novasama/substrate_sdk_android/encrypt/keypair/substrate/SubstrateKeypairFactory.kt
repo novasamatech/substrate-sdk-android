@@ -4,7 +4,6 @@ import io.novasama.substrate_sdk_android.encrypt.EncryptionType
 import io.novasama.substrate_sdk_android.encrypt.junction.Junction
 import io.novasama.substrate_sdk_android.encrypt.junction.SubstrateJunctionDecoder
 import io.novasama.substrate_sdk_android.encrypt.keypair.Keypair
-import io.novasama.substrate_sdk_android.encrypt.keypair.deriveKeyPair
 import io.novasama.substrate_sdk_android.encrypt.keypair.generate
 
 object SubstrateKeypairFactory {
@@ -24,15 +23,12 @@ object SubstrateKeypairFactory {
         seed: ByteArray,
         derivationPath: String?
     ): Keypair {
-        val junctions = getJunctions(derivationPath)
-        return generate(encryptionType, seed, junctions)
-    }
-
-    private fun getJunctions(derivationPath: String?): List<Junction> {
-        return if (derivationPath != null) {
+        val junctions = if (derivationPath != null) {
             SubstrateJunctionDecoder.decode(derivationPath).junctions
         } else {
             emptyList()
         }
+
+        return generate(encryptionType, seed, junctions)
     }
 }
