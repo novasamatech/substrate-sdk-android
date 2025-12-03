@@ -83,14 +83,6 @@ public final class Sr25519 {
     public static native byte[] getPublicKeyFromSecret(byte[] secret);
 
     /**
-     * Derive a public key from a generation seed.
-     *
-     * @param seed: generation seed - input buffer of SEED_SIZE bytes
-     * @return public key: pre-allocated output buffer of PUBLIC_SIZE bytes (32 bytes)
-     */
-    public static native byte[] getPublicKeyFromSeed(byte[] seed);
-
-    /**
      * Generate a key pair.
      *
      * @param seed: generation seed - input buffer of   SEED_SIZE bytes

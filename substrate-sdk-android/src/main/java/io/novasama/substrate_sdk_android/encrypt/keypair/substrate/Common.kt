@@ -29,8 +29,4 @@ abstract class OtherSubstrateKeypairFactory(
             throw KeypairFactory.SoftDerivationNotSupported()
         }
     }
-
-    override fun deriveFromRaw(raw: ByteArray): KeypairWithSeed {
-        throw KeypairFactory.SoftDerivationNotSupported()
-    }
 }

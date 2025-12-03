@@ -287,24 +287,3 @@ pub unsafe extern "system" fn Java_io_novasama_substrate_1sdk_1android_encrypt_S
 
     try_or_throw_null!(jni_env, jni_env.byte_array_from_slice(public_key.to_bytes().as_ref()))
 }
-
-/**
- * Extract Public Key from a generation seed.
- *
- * @param seed: generation seed - input buffer of SR25519_SEED_SIZE bytes
- * @return public key [32 bytes]
- */
-#[no_mangle]
-pub unsafe extern "system" fn Java_io_novasama_substrate_1sdk_1android_encrypt_Sr25519_getPublicKeyFromSeed(
-    jni_env: JNIEnv,
-    _: JClass,
-    seed: jbyteArray,
-) -> jbyteArray {
-    let seed_vec = try_or_throw_null!(jni_env, jni_env.convert_byte_array(seed));
-
-    let keypair = try_or_throw_null!(jni_env, create_from_seed(&seed_vec));
-
-    let public_key = keypair.public;
-
-    try_or_throw_null!(jni_env, jni_env.byte_array_from_slice(public_key.to_bytes().as_ref()))
-}

@@ -8,8 +8,6 @@ interface KeypairFactory<K : Keypair> {
 
     fun deriveFromSeed(seed: ByteArray): K
 
-    fun deriveFromRaw(raw: ByteArray): K
-
     fun deriveChild(parent: K, junction: Junction): K
 }
 
@@ -20,14 +18,7 @@ fun <K : Keypair> KeypairFactory<K>.generate(
     return deriveKeyPair(deriveFromSeed(seed), junctions)
 }
 
-fun <K : Keypair> KeypairFactory<K>.generateFromRaw(
-    rawKey: ByteArray,
-    junctions: List<Junction>
-): K {
-    return deriveKeyPair(deriveFromRaw(rawKey), junctions)
-}
-
-private fun <K : Keypair> KeypairFactory<K>.deriveKeyPair(
+internal fun <K : Keypair> KeypairFactory<K>.deriveKeyPair(
     keypair: K,
     junctions: List<Junction>
 ): K {

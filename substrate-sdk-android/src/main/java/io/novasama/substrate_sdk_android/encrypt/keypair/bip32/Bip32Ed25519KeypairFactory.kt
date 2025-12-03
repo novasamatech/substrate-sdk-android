@@ -23,12 +23,8 @@ object Bip32Ed25519KeypairFactory : Bip32KeypairFactory() {
     override fun deriveFromSeed(seed: ByteArray): Bip32ExtendedKeyPair {
         val hmacResult = seed.hmacSHA512(secret = CURVE_SEED)
 
-        return deriveFromRaw(hmacResult)
-    }
-
-    override fun deriveFromRaw(raw: ByteArray): Bip32ExtendedKeyPair {
-        val privateKey = raw.sliceArray(0 until PRIVATE_KEY_SIZE)
-        val chainCode = raw.sliceArray(PRIVATE_KEY_SIZE until raw.size)
+        val privateKey = hmacResult.sliceArray(0 until PRIVATE_KEY_SIZE)
+        val chainCode = hmacResult.sliceArray(PRIVATE_KEY_SIZE until hmacResult.size)
 
         return Bip32ExtendedKeyPair(
             privateKey = privateKey,

@@ -1,7 +1,6 @@
 package io.novasama.substrate_sdk_android.encrypt.qr
 
 import io.novasama.substrate_sdk_android.common.assertThrows
-import io.novasama.substrate_sdk_android.encrypt.qr.QrFormat.Payload
 import io.novasama.substrate_sdk_android.encrypt.qr.formats.SubstrateQrFormat
 import io.novasama.substrate_sdk_android.extensions.fromHex
 import org.junit.Assert.assertEquals
@@ -27,7 +26,7 @@ class SubstrateQrFormatTest {
 
     @Test
     fun `should encode with name`() {
-        val payload = Payload(address, publicKeyBytes, name)
+        val payload = PublicQrFormat.Payload(address, publicKeyBytes, name)
 
         val result = format.encode(payload)
 
@@ -36,7 +35,7 @@ class SubstrateQrFormatTest {
 
     @Test
     fun `should encode without name`() {
-        val payload = Payload(address, publicKeyBytes, null)
+        val payload = PublicQrFormat.Payload(address, publicKeyBytes, null)
 
         val result = format.encode(payload)
 

@@ -19,7 +19,7 @@ internal object Sr25519SubstrateKeypairFactory : KeypairFactory<Sr25519Keypair> 
         return decodeSr25519Keypair(keypairBytes)
     }
 
-    override fun deriveFromRaw(raw: ByteArray): Sr25519Keypair {
+    fun deriveEncryptedKeypair(raw: ByteArray): Sr25519Keypair {
         val publicKey = Sr25519.getPublicKeyFromSecret(raw)
         val keypairBytes = raw + publicKey
         return decodeSr25519Keypair(keypairBytes)

@@ -4,8 +4,8 @@ import io.novasama.substrate_sdk_android.encrypt.EncryptionType
 import io.novasama.substrate_sdk_android.encrypt.junction.Junction
 import io.novasama.substrate_sdk_android.encrypt.junction.SubstrateJunctionDecoder
 import io.novasama.substrate_sdk_android.encrypt.keypair.Keypair
+import io.novasama.substrate_sdk_android.encrypt.keypair.deriveKeyPair
 import io.novasama.substrate_sdk_android.encrypt.keypair.generate
-import io.novasama.substrate_sdk_android.encrypt.keypair.generateFromRaw
 
 object SubstrateKeypairFactory {
 
@@ -19,15 +19,13 @@ object SubstrateKeypairFactory {
         EncryptionType.ECDSA -> ECDSASubstrateKeypairFactory.generate(seed, junctions)
     }
 
-    fun generateFromRaw(
-        encryptionType: EncryptionType,
-        rawKey: ByteArray,
+    fun decodeSr25519Keypair(
+        encryptedKey: ByteArray,
         junctions: List<Junction> = emptyList()
-    ): Keypair = when (encryptionType) {
-        EncryptionType.SR25519 -> Sr25519SubstrateKeypairFactory.generateFromRaw(rawKey, junctions)
-        EncryptionType.ED25519 -> Ed25519SubstrateKeypairFactory.generateFromRaw(rawKey, junctions)
-        EncryptionType.ECDSA -> ECDSASubstrateKeypairFactory.generateFromRaw(rawKey, junctions)
-    }
+    ): Keypair = Sr25519SubstrateKeypairFactory.deriveKeyPair(
+        Sr25519SubstrateKeypairFactory.deriveEncryptedKeypair(encryptedKey),
+        junctions
+    )
 
     fun generate(
         encryptionType: EncryptionType,
@@ -38,13 +36,12 @@ object SubstrateKeypairFactory {
         return generate(encryptionType, seed, junctions)
     }
 
-    fun generateFromRaw(
-        encryptionType: EncryptionType,
+    fun decodeSr25519Keypair(
         rawKey: ByteArray,
         derivationPath: String?
     ): Keypair {
         val junctions = getJunctions(derivationPath)
-        return generateFromRaw(encryptionType, rawKey, junctions)
+        return decodeSr25519Keypair(rawKey, junctions)
     }
 
     private fun getJunctions(derivationPath: String?): List<Junction> {

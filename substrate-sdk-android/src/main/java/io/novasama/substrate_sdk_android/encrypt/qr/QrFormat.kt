@@ -16,7 +16,6 @@ interface PublicQrFormat : QrFormat<PublicQrFormat.Payload> {
     class Payload(
         val address: String,
         val publicKey: ByteArray? = null,
-        val seed: ByteArray? = null,
         val name: String? = null
     )
 }
