@@ -10,7 +10,7 @@ import java.security.KeyFactory
 private const val ED25519_PRIVATE_KEY_PREFIX = "302e020100300506032b657004220420"
 private const val ED25519_PUBLIC_KEY_PREFIX = "302a300506032b6570032100"
 
-internal object Ed25519SubstrateKeypairFactory : OtherSubstrateKeypairFactory("Ed25519HDKD") {
+object Ed25519SubstrateKeypairFactory : OtherSubstrateKeypairFactory("Ed25519HDKD") {
 
     init {
         SecurityProviders.requireEdDSA

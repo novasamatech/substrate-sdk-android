@@ -62,9 +62,9 @@ class SignatureVerifierTest {
     @Test
     fun `should verify sr25519 encrypted key`() {
         runSignTests(
-            validSecret = TestData.ENCRYPTED_KEY_BYTES,
+            validSecret = TestData.SUBSTRATE_SECRET_KEY_BYTES,
             invalidSecret = WRONG_ENCRYPTED_KEY,
-            ::signAndVerifySr25519WithEncryptedKey
+            ::signAndVerifySr25519WithSecretKey
         )
     }
 
@@ -93,15 +93,15 @@ class SignatureVerifierTest {
         assertEquals(shouldBeValid, isValid)
     }
 
-    private fun signAndVerifySr25519WithEncryptedKey(
+    private fun signAndVerifySr25519WithSecretKey(
         signKey: ByteArray,
         verifyKey: ByteArray,
         signMessage: ByteArray,
         verifyMessage: ByteArray,
         shouldBeValid: Boolean,
     ) {
-        val signKeypair = Sr25519SubstrateKeypairFactory.deriveEncryptedKeypair(signKey)
-        val verifyKeypair = Sr25519SubstrateKeypairFactory.deriveEncryptedKeypair(verifyKey)
+        val signKeypair = Sr25519SubstrateKeypairFactory.createKeypairFromSecret(signKey)
+        val verifyKeypair = Sr25519SubstrateKeypairFactory.createKeypairFromSecret(verifyKey)
 
         val signature = Signer.sign(
             multiChainEncryption = MultiChainEncryption.Substrate(EncryptionType.SR25519),

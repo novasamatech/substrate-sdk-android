@@ -19,14 +19,6 @@ object SubstrateKeypairFactory {
         EncryptionType.ECDSA -> ECDSASubstrateKeypairFactory.generate(seed, junctions)
     }
 
-    fun decodeSr25519Keypair(
-        encryptedKey: ByteArray,
-        junctions: List<Junction> = emptyList()
-    ): Keypair = Sr25519SubstrateKeypairFactory.deriveKeyPair(
-        Sr25519SubstrateKeypairFactory.deriveEncryptedKeypair(encryptedKey),
-        junctions
-    )
-
     fun generate(
         encryptionType: EncryptionType,
         seed: ByteArray,
@@ -34,14 +26,6 @@ object SubstrateKeypairFactory {
     ): Keypair {
         val junctions = getJunctions(derivationPath)
         return generate(encryptionType, seed, junctions)
-    }
-
-    fun decodeSr25519Keypair(
-        rawKey: ByteArray,
-        derivationPath: String?
-    ): Keypair {
-        val junctions = getJunctions(derivationPath)
-        return decodeSr25519Keypair(rawKey, junctions)
     }
 
     private fun getJunctions(derivationPath: String?): List<Junction> {
