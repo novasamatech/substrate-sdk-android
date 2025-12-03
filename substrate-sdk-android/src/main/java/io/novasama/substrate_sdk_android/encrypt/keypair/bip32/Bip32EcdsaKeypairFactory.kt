@@ -50,7 +50,6 @@ object Bip32EcdsaKeypairFactory : Bip32KeypairFactory() {
 
                 padding + parent.privateKey + junction.chaincode
             }
-
             JunctionType.SOFT -> {
                 parent.publicKey + junction.chaincode
             }
