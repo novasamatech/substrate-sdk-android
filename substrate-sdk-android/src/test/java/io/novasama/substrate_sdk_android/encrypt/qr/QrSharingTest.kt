@@ -13,17 +13,17 @@ import org.mockito.junit.MockitoJUnitRunner
 class QrSharingTest {
 
     @Mock
-    lateinit var succeedingFormat: QrFormat
+    lateinit var succeedingFormat: PublicQrFormat
 
     @Mock
-    lateinit var failingFormat: QrFormat
+    lateinit var failingFormat: PublicQrFormat
 
     lateinit var qrSharing: QrSharing
 
     @Before
     fun setup() {
         given(failingFormat.decode(any())).will { throw QrFormat.InvalidFormatException("error") }
-        given(succeedingFormat.decode(any())).willReturn(QrFormat.Payload("test"))
+        given(succeedingFormat.decode(any())).willReturn(PublicQrFormat.Payload("test"))
 
         qrSharing = QrSharing(
             decodingFormats = listOf(failingFormat, succeedingFormat),

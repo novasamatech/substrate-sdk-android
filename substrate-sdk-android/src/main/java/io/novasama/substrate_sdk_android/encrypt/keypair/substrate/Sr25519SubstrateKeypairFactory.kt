@@ -12,10 +12,16 @@ class Sr25519Keypair(
     val nonce: ByteArray
 ) : Keypair
 
-internal object Sr25519SubstrateKeypairFactory : KeypairFactory<Sr25519Keypair> {
+object Sr25519SubstrateKeypairFactory : KeypairFactory<Sr25519Keypair> {
     override fun deriveFromSeed(seed: ByteArray): Sr25519Keypair {
         val keypairBytes = Sr25519.keypairFromSeed(seed)
 
+        return decodeSr25519Keypair(keypairBytes)
+    }
+
+    fun createKeypairFromSecret(secret: ByteArray): Sr25519Keypair {
+        val publicKey = Sr25519.getPublicKeyFromSecret(secret)
+        val keypairBytes = secret + publicKey
         return decodeSr25519Keypair(keypairBytes)
     }
 
@@ -56,4 +62,8 @@ internal object Sr25519SubstrateKeypairFactory : KeypairFactory<Sr25519Keypair> 
             nonce
         )
     }
+}
+
+fun Sr25519SubstrateKeypairFactory.getPublicKeyFromSeed(seed: ByteArray): ByteArray {
+    return deriveFromSeed(seed).publicKey
 }

@@ -74,6 +74,13 @@ public final class Sr25519 {
      */
     public static native byte[] derivePublicSoft(byte[] public_key, byte[] cc);
 
+    /**
+     * Derive a public key from a raw secret key (soft derivation result).
+     *
+     * @param secret: [32 bytes private key scalar | 32 bytes nonce]
+     * @return public key: pre-allocated output buffer of PUBLIC_SIZE bytes (32 bytes)
+     */
+    public static native byte[] getPublicKeyFromSecret(byte[] secret);
 
     /**
      * Generate a key pair.

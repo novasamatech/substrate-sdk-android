@@ -6,16 +6,16 @@ import io.novasama.substrate_sdk_android.encrypt.keypair.substrate.ECDSASubstrat
 import io.novasama.substrate_sdk_android.encrypt.keypair.substrate.Ed25519SubstrateKeypairFactory
 import io.novasama.substrate_sdk_android.encrypt.keypair.substrate.Sr25519SubstrateKeypairFactory
 import org.junit.Assert.assertEquals
-import org.junit.Ignore
 import org.junit.Test
 
 private val MESSAGE = "Test message".encodeToByteArray()
 private val WRONG_MESSAGE = "Wrong message".encodeToByteArray()
 private val WRONG_SEED = ByteArray(32) { 1 }
+private val WRONG_ENCRYPTED_KEY = ByteArray(64) { 1 }
 
 fun interface SignTest {
 
-    fun run(signSeed: ByteArray, verifySeed: ByteArray, signMessage: ByteArray, verifyMessage: ByteArray, shouldBeValid: Boolean)
+    fun run(signSecret: ByteArray, verifySecret: ByteArray, signMessage: ByteArray, verifyMessage: ByteArray, shouldBeValid: Boolean)
 }
 
 class SignatureVerifierTest {
@@ -25,7 +25,10 @@ class SignatureVerifierTest {
         val isSubstrateOptions = listOf(true, false)
 
         isSubstrateOptions.forEach { isSubstrate ->
-            runSignTests { signSeed, verifySeed, signMessage, verifyMessage, shouldBeValid ->
+            runSignTests(
+                validSecret = TestData.SEED_BYTES,
+                invalidSecret = WRONG_SEED
+            ) { signSeed, verifySeed, signMessage, verifyMessage, shouldBeValid ->
                 signAndVerifyEcdsa(
                     isSubstrate = isSubstrate,
                     signSeed = signSeed,
@@ -40,12 +43,29 @@ class SignatureVerifierTest {
 
     @Test
     fun `should verify Ed25519`() {
-        runSignTests(::signAndVerifyEd25519)
+        runSignTests(
+            validSecret = TestData.SEED_BYTES,
+            invalidSecret = WRONG_SEED,
+            ::signAndVerifyEd25519
+        )
     }
 
     @Test
     fun `should verify sr25519`() {
-        runSignTests(::signAndVerifySr25519)
+        runSignTests(
+            validSecret = TestData.SEED_BYTES,
+            invalidSecret = WRONG_SEED,
+            ::signAndVerifySr25519
+        )
+    }
+
+    @Test
+    fun `should verify sr25519 encrypted key`() {
+        runSignTests(
+            validSecret = TestData.SUBSTRATE_SECRET_KEY_BYTES,
+            invalidSecret = WRONG_ENCRYPTED_KEY,
+            ::signAndVerifySr25519WithSecretKey
+        )
     }
 
     private fun signAndVerifySr25519(
@@ -57,6 +77,31 @@ class SignatureVerifierTest {
     ) {
         val signKeypair = Sr25519SubstrateKeypairFactory.deriveFromSeed(signSeed)
         val verifyKeypair = Sr25519SubstrateKeypairFactory.deriveFromSeed(verifySeed)
+
+        val signature = Signer.sign(
+            multiChainEncryption = MultiChainEncryption.Substrate(EncryptionType.SR25519),
+            message = signMessage,
+            keypair = signKeypair
+        )
+        val isValid = SignatureVerifier.verify(
+            signatureWrapper = signature,
+            messageHashing = MessageHashing.SUBSTRATE,
+            data = verifyMessage,
+            publicKey = verifyKeypair.publicKey
+        )
+
+        assertEquals(shouldBeValid, isValid)
+    }
+
+    private fun signAndVerifySr25519WithSecretKey(
+        signKey: ByteArray,
+        verifyKey: ByteArray,
+        signMessage: ByteArray,
+        verifyMessage: ByteArray,
+        shouldBeValid: Boolean,
+    ) {
+        val signKeypair = Sr25519SubstrateKeypairFactory.createKeypairFromSecret(signKey)
+        val verifyKeypair = Sr25519SubstrateKeypairFactory.createKeypairFromSecret(verifyKey)
 
         val signature = Signer.sign(
             multiChainEncryption = MultiChainEncryption.Substrate(EncryptionType.SR25519),
@@ -137,27 +182,29 @@ class SignatureVerifierTest {
     }
 
     private fun runSignTests(
+        validSecret: ByteArray,
+        invalidSecret: ByteArray,
         test: SignTest
     ) {
         test.run(
-            signSeed = TestData.SEED_BYTES,
-            verifySeed = TestData.SEED_BYTES,
+            signSecret = validSecret,
+            verifySecret = validSecret,
             signMessage = MESSAGE,
             verifyMessage = MESSAGE,
             shouldBeValid = true
         )
 
         test.run(
-            signSeed = TestData.SEED_BYTES,
-            verifySeed = WRONG_SEED,
+            signSecret = validSecret,
+            verifySecret = invalidSecret,
             signMessage = MESSAGE,
             verifyMessage = MESSAGE,
             shouldBeValid = false
         )
 
         test.run(
-            signSeed = TestData.SEED_BYTES,
-            verifySeed = TestData.SEED_BYTES,
+            signSecret = validSecret,
+            verifySecret = validSecret,
             signMessage = MESSAGE,
             verifyMessage = WRONG_MESSAGE,
             shouldBeValid = false

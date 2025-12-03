@@ -17,6 +17,7 @@ publishing {
 // This is only used for running tests
 def isMac = org.gradle.internal.os.OperatingSystem.current().isMacOsX()
 def isLinux = org.gradle.internal.os.OperatingSystem.current().isLinux()
+def isWindows = org.gradle.internal.os.OperatingSystem.current().isWindows()
 
 android {
     namespace 'io.novasama.substrate_sdk_android'
@@ -64,6 +65,10 @@ android {
             if (isLinux) {
                 jvmArgs "-Djava.library.path=$buildDir/rustJniLibs/desktop/linux-x86-64"
             }
+
+            if (isWindows) {
+                jvmArgs "-Djava.library.path=$buildDir/rustJniLibs/desktop/win32-x86-64"
+            }
         }
     }
 }
@@ -75,6 +80,9 @@ if (isMac) {
 }
 if (isLinux) {
     baseTargets += ["linux-x86-64"]
+}
+if (isWindows) {
+    baseTargets += ["win32-x86-64-msvc"]
 }
 
 cargo {
