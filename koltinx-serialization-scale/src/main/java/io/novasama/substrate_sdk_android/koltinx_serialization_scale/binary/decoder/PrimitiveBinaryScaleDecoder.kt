@@ -102,7 +102,7 @@ class PrimitiveBinaryScaleDecoder(
     }
 
     override fun decodeEnum(enumDescriptor: SerialDescriptor): Int {
-        val index = reader.readByte().toInt()
+        val index = reader.readByte().toUByte().toInt()
 
         if (enumDescriptor.enumElementUsesIndexDirectly(index)) {
             return index
@@ -180,8 +180,8 @@ class PrimitiveBinaryScaleDecoder(
         // See source code of SealedClassSerializer.descriptor for more details
         val subclassesDesc = serializer.descriptor.getElementDescriptor(1)
 
-        val readIndex = reader.readByte().toInt()
-        val indexInSealedHierarchy =  subclassesDesc.findRequiredSealedHierarchyIndex(readIndex)
+        val readIndex = reader.readByte().toUByte().toInt()
+        val indexInSealedHierarchy = subclassesDesc.findRequiredSealedHierarchyIndex(readIndex)
 
         val actualName = subclassesDesc.getElementName(indexInSealedHierarchy)
         val actualSerializer = serializer.findPolymorphicSerializer(StubCompositeDecoder(serializersModule), actualName)

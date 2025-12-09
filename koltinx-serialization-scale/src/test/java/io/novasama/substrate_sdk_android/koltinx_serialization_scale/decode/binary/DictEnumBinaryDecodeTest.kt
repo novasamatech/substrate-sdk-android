@@ -20,6 +20,10 @@ class DictEnumBinaryDecodeTest : BinaryDecodeTest() {
         @Serializable
         @EnumIndex(2)
         data class Double(val a: Boolean, val b: Boolean) : Sealed()
+
+        @Serializable
+        @EnumIndex(255)
+        object LastPossibleIndex : Sealed()
     }
 
     @Test
@@ -38,5 +42,11 @@ class DictEnumBinaryDecodeTest : BinaryDecodeTest() {
     fun `should decode variant struct`() = runDecodeTest(
         expected = Sealed.Double(a = true, b = false) as Sealed,
         raw =  byteArrayOf(0x02, 0x01, 0x00)
+    )
+
+    @Test
+    fun `should decode last possible index`() = runDecodeTest(
+        expected = Sealed.LastPossibleIndex as Sealed,
+        raw =  ubyteArrayOf(0xffu).toByteArray()
     )
 }

@@ -44,7 +44,10 @@ class EnumBinaryDecodeTest : BinaryDecodeTest() {
         @EnumIndex(1)
         B,
         @EnumIndex(0)
-        C
+        C,
+
+        @EnumIndex(255)
+        LAST_POSSIBLE_INDEX
     }
 
     @Test
@@ -52,5 +55,10 @@ class EnumBinaryDecodeTest : BinaryDecodeTest() {
         runDecodeTest(byteArrayOf(0x02), TestDataMismatchingIndices.A)
         runDecodeTest(byteArrayOf(0x01), TestDataMismatchingIndices.B)
         runDecodeTest(byteArrayOf(0x00), TestDataMismatchingIndices.C)
+    }
+
+    @Test
+    fun `should decode last possible index`() {
+        runDecodeTest(ubyteArrayOf(0xffu).toByteArray(), TestDataMismatchingIndices.LAST_POSSIBLE_INDEX)
     }
 }
