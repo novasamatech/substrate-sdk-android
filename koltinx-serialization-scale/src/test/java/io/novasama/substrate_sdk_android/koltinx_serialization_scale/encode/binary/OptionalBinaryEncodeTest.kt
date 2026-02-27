@@ -32,8 +32,8 @@ class OptionalBinaryEncodeTest : BinaryEncodeTest() {
         @Serializable
         data class TestData(val a: Boolean?)
 
-//        runEncodeTest<TestData>(value = TestData(null), expected = byteArrayOf(0x00))
+        runEncodeTest<TestData>(value = TestData(null), expected = byteArrayOf(0x00))
         runEncodeTest<TestData>(value = TestData(false), expected = byteArrayOf(0x01))
-//        runEncodeTest<TestData>(value = TestData(true), expected = byteArrayOf(0x02))
+        runEncodeTest<TestData>(value = TestData(true), expected = byteArrayOf(0x02))
     }
 }
