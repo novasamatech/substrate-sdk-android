@@ -9,7 +9,7 @@ inline fun <reified T : Annotation> List<Annotation>.findAnnotation(): T? {
     return find { it is T } as? T
 }
 
-inline fun <reified T> SerialDescriptor.findAnnotation(): T? {
+inline fun <reified T : Annotation> SerialDescriptor.findAnnotation(): T? {
     return annotations.findAnnotation()
 }
 
