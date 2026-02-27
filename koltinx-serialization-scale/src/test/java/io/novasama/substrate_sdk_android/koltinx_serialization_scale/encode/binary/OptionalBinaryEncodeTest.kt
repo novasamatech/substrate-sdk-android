@@ -1,5 +1,6 @@
 package io.novasama.substrate_sdk_android.koltinx_serialization_scale.encode.binary
 
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.annotations.DisableOptionalBooleanOptimization
 import kotlinx.serialization.Serializable
 import org.junit.Test
 
@@ -35,5 +36,15 @@ class OptionalBinaryEncodeTest : BinaryEncodeTest() {
         runEncodeTest<TestData>(value = TestData(null), expected = byteArrayOf(0x00))
         runEncodeTest<TestData>(value = TestData(false), expected = byteArrayOf(0x01))
         runEncodeTest<TestData>(value = TestData(true), expected = byteArrayOf(0x02))
+    }
+
+    @Test
+    fun `should encode optional boolean without optimization when annotated`() {
+        @Serializable
+        data class TestData(@DisableOptionalBooleanOptimization val a: Boolean?)
+
+        runEncodeTest<TestData>(value = TestData(null), expected = byteArrayOf(0x00))
+        runEncodeTest<TestData>(value = TestData(false), expected = byteArrayOf(0x01, 0x00))
+        runEncodeTest<TestData>(value = TestData(true), expected = byteArrayOf(0x01, 0x01))
     }
 }
