@@ -1,7 +1,7 @@
 package io.novasama.substrate_sdk_android.encrypt.junction
 
 import io.novasama.substrate_sdk_android.extensions.fromHex
-import io.novasama.substrate_sdk_android.hash.Hasher.blake2b128
+import io.novasama.substrate_sdk_android.hash.Hasher.blake2b256
 import io.novasama.substrate_sdk_android.scale.dataType.string
 import io.novasama.substrate_sdk_android.scale.dataType.toByteArray
 import java.nio.ByteBuffer
@@ -36,7 +36,7 @@ object SubstrateJunctionDecoder : JunctionDecoder() {
         bytes.size < CHAINCODE_LENGTH -> ByteArray(CHAINCODE_LENGTH).apply {
             bytes.copyInto(this)
         }
-        bytes.size > CHAINCODE_LENGTH -> bytes.blake2b128()
+        bytes.size > CHAINCODE_LENGTH -> bytes.blake2b256()
         else -> bytes
     }
 }
