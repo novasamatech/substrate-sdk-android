@@ -52,12 +52,6 @@ afterEvaluate {
                 version = android.defaultConfig.versionName // or just '1.0'
 
                 pom {
-                    if (!project.hasProperty('skip.signing')) {
-                        signing {
-                            sign publishing.publications.release
-                            sign configurations.archives
-                        }
-                    }
                     name = "substrate-sdk-android"
                     description = "Nova Substrate SDK is a native Android library to help developers build native mobile apps for Substrate-based networks, e.g. Polkadot, Kusama & parachains"
                     url = "https://github.com/nova-wallet/substrate-sdk-android"
@@ -85,6 +79,12 @@ afterEvaluate {
 
         repositories {
             mavenLocal()
+        }
+    }
+
+    if (!project.hasProperty('skip.signing')) {
+        signing {
+            sign publishing.publications.release
         }
     }
 }
