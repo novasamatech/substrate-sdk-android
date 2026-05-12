@@ -24,7 +24,7 @@ android {
 
     compileSdkVersion rootProject.compileVersion
 
-    ndkVersion "26.1.10909125"
+    ndkVersion "29.0.14206865"
 
     defaultConfig {
         minSdkVersion rootProject.minVersion
