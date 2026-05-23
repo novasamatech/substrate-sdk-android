@@ -2,7 +2,9 @@ package io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.dec
 
 import io.emeraldpay.polkaj.scale.ScaleCodecReader
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.ElementDeclarationContext
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.annotations.DisableOptionalBooleanOptimization
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.ScaleOptional.NULL_MARK
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.findElementAnnotation
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -70,7 +72,9 @@ abstract class BaseCompositeBinaryDecoder(
         if (nullabilityByte == NULL_MARK) return null
 
         val elementContext = ElementDeclarationContext(index, descriptor)
-        val delegate = PrimitiveBinaryScaleDecoder(serializersModule, reader, elementContext, nullabilityByte)
+        val disableOptBool = elementContext.findElementAnnotation<DisableOptionalBooleanOptimization>() != null
+        val passedNullabilityByte = if (disableOptBool) null else nullabilityByte
+        val delegate = PrimitiveBinaryScaleDecoder(serializersModule, reader, elementContext, passedNullabilityByte)
         return delegate.decodeSerializableValue(deserializer)
     }
 

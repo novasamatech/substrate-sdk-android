@@ -17,3 +17,7 @@ val ElementDeclarationContext.elementAnnotations: List<Annotation>
 inline fun <reified T : Annotation> ElementDeclarationContext.findElementAnnotation(): T? {
     return elementAnnotations.findAnnotation()
 }
+
+inline fun <reified T : Annotation> ElementDeclarationContext.hasAnnotation(): Boolean {
+    return findElementAnnotation<T>() != null
+}

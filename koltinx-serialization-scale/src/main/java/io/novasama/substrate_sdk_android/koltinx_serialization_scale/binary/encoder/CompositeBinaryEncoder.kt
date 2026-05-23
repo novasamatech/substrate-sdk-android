@@ -3,9 +3,12 @@ package io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.enc
 import io.emeraldpay.polkaj.scale.ScaleCodecWriter
 import io.novasama.substrate_sdk_android.extensions.toSignedBytes
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.ElementDeclarationContext
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.annotations.DisableOptionalBooleanOptimization
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.ScaleOptional.NOT_NULL_MARK
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.ScaleOptional.NULL_MARK
 import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.common.encodeOptionalBoolean
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.findElementAnnotation
+import io.novasama.substrate_sdk_android.koltinx_serialization_scale.binary.hasAnnotation
 import io.novasama.substrate_sdk_android.scale.utils.directWrite
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerializationException
@@ -130,7 +133,7 @@ internal class CompositeBinaryEncoder(
     ) {
         when {
             serializer.descriptor.kind == PrimitiveKind.BOOLEAN -> {
-                writer.encodeOptionalBoolean(value as Boolean?)
+                encodeOptionalBoolean(descriptor, index, value)
             }
 
             value == null -> {
@@ -140,6 +143,26 @@ internal class CompositeBinaryEncoder(
             else -> {
                 writer.writeByte(NOT_NULL_MARK)
                 encodeSerializableElement(descriptor, index, serializer, value)
+            }
+        }
+    }
+
+    private fun <T> encodeOptionalBoolean(
+        descriptor: SerialDescriptor,
+        index: Int,
+        value: T?
+    ) {
+        val elementContext = ElementDeclarationContext(index, descriptor)
+        val optimizeBool = !elementContext.hasAnnotation<DisableOptionalBooleanOptimization>()
+
+        when {
+            optimizeBool -> writer.encodeOptionalBoolean(value as Boolean?)
+
+            value == null -> writer.writeByte(NULL_MARK)
+
+            else -> {
+                writer.writeByte(NOT_NULL_MARK)
+                ScaleCodecWriter.BOOL.write(writer, value as Boolean)
             }
         }
     }
