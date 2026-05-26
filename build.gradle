@@ -1,7 +1,7 @@
 buildscript {
     ext {
         // App version
-        versionName = '2.11.5'
+        versionName = '2.11.6'
         versionCode = 1
 
         // SDK and tools
@@ -41,7 +41,7 @@ buildscript {
 
         gsonDep = "com.google.code.gson:gson:$gsonVersion"
 
-        bouncyCastleDep = 'org.bouncycastle:bcprov-jdk15on:1.65'
+        bouncyCastleDep = 'org.bouncycastle:bcprov-jdk18on:1.78.1'
 
         ed25519Dep = "net.i2p.crypto:eddsa:$ed25519Version"
         web3jDep = "org.web3j:crypto:$web3jVersion"
