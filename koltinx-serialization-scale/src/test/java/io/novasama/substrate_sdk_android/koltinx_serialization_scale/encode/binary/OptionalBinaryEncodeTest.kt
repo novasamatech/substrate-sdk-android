@@ -23,8 +23,8 @@ class OptionalBinaryEncodeTest : BinaryEncodeTest() {
     @Test
     fun `should encode optional boolean value`() {
         runEncodeTest<Boolean?>(value = null, expected = byteArrayOf(0x00))
-        runEncodeTest<Boolean?>(value = false, expected = byteArrayOf(0x01))
-        runEncodeTest<Boolean?>(value = true, expected = byteArrayOf(0x02))
+        runEncodeTest<Boolean?>(value = true, expected = byteArrayOf(0x01))
+        runEncodeTest<Boolean?>(value = false, expected = byteArrayOf(0x02))
     }
 
     @Test
@@ -32,8 +32,8 @@ class OptionalBinaryEncodeTest : BinaryEncodeTest() {
         @Serializable
         data class TestData(val a: Boolean?)
 
-//        runEncodeTest<TestData>(value = TestData(null), expected = byteArrayOf(0x00))
-        runEncodeTest<TestData>(value = TestData(false), expected = byteArrayOf(0x01))
-//        runEncodeTest<TestData>(value = TestData(true), expected = byteArrayOf(0x02))
+        runEncodeTest<TestData>(value = TestData(null), expected = byteArrayOf(0x00))
+        runEncodeTest<TestData>(value = TestData(true), expected = byteArrayOf(0x01))
+        runEncodeTest<TestData>(value = TestData(false), expected = byteArrayOf(0x02))
     }
 }

@@ -27,7 +27,7 @@ class OptionTest : BaseTypeTest() {
 
     @Test
     fun `should decode optional true`() {
-        val inHex = "0x02"
+        val inHex = "0x01"
         val decoded = optionalBoolean.fromHex(runtime, inHex)
 
         assertEquals(true, decoded)
@@ -44,7 +44,7 @@ class OptionTest : BaseTypeTest() {
 
     @Test
     fun `should decode optional false`() {
-        val inHex = "0x01"
+        val inHex = "0x02"
         val decoded = optionalBoolean.fromHex(runtime, inHex)
 
         assertEquals(false, decoded)
@@ -92,7 +92,21 @@ class OptionTest : BaseTypeTest() {
     fun `should encode boolean instance`() {
         val encoded = optionalBoolean.toHex(runtime, true)
 
+        assertEquals("0x01", encoded)
+    }
+
+    @Test
+    fun `should encode false boolean instance`() {
+        val encoded = optionalBoolean.toHex(runtime, false)
+
         assertEquals("0x02", encoded)
+    }
+
+    @Test
+    fun `should encode null boolean instance`() {
+        val encoded = optionalBoolean.toHex(runtime, null)
+
+        assertEquals("0x00", encoded)
     }
 
     @Test
