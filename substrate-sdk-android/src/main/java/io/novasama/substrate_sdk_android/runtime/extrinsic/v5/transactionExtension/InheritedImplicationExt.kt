@@ -30,16 +30,21 @@ private const val PAYLOAD_HASH_THRESHOLD = 256
  * Convert given [InheritedImplication] to the payload [VerifySignature] expects to be signed by the user
  */
 fun InheritedImplication.signingPayload(): ByteArray {
-    val encoded = encoded()
-
     return when (extrinsicVersion) {
-        is ExtrinsicVersion.V4 -> if (encoded.size > PAYLOAD_HASH_THRESHOLD) {
-            encoded.blake2b256()
-        } else {
-            encoded
+        // Legacy V4-signed extrinsics use the envelope SignedPayload `(call, extra, implicit)`, which is
+        // version-byte-free. V4 `encoded()` now carries the TxBaseImplication version byte for embedded
+        // extensions, so build the envelope payload explicitly from call + extensions to exclude it.
+        is ExtrinsicVersion.V4 -> {
+            val encoded = encodedCall() + encodedExtensions()
+
+            if (encoded.size > PAYLOAD_HASH_THRESHOLD) {
+                encoded.blake2b256()
+            } else {
+                encoded
+            }
         }
 
-        is ExtrinsicVersion.V5 -> encoded.blake2b256()
+        is ExtrinsicVersion.V5 -> encoded().blake2b256()
     }
 }
 
