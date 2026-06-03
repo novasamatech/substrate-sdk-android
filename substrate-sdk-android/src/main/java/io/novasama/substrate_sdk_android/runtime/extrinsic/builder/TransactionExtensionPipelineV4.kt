@@ -14,6 +14,11 @@ import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtensi
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.transactionExtension.extensions.verifySignature.VerifySignature
 import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionMetadata
 
+// Version of the transaction extension pipeline used for the base implication. Legacy V4-signed
+// extrinsics are validated by the runtime through the new TransactionExtension pipeline with
+// `TxBaseImplication((EXTENSION_V0_VERSION, call))`, so embedded extensions observe this leading byte.
+private const val EXTENSION_V0_VERSION: Byte = 0
+
 class TransactionExtensionPipelineV4(
     private val runtime: RuntimeSnapshot,
 ) : TransactionBuildingPipeline {
@@ -63,6 +68,7 @@ class TransactionExtensionPipelineV4(
         override val extrinsicVersion: ExtrinsicVersion = ExtrinsicVersion.V4
 
         override fun ScaleCodecWriter.encodeImplication() {
+            writeByte(EXTENSION_V0_VERSION)
             encodeCall()
             encodeExtensions()
         }
