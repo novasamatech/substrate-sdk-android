@@ -23,8 +23,8 @@ class OptionalBinaryDecodeTest : BinaryDecodeTest() {
     @Test
     fun `should decode optional boolean value`() {
         runDecodeTest<Boolean?>(raw = byteArrayOf(0x00), expected = null)
-        runDecodeTest<Boolean?>(raw = byteArrayOf(0x01), expected = false)
-        runDecodeTest<Boolean?>(raw = byteArrayOf(0x02), expected = true)
+        runDecodeTest<Boolean?>(raw = byteArrayOf(0x01), expected = true)
+        runDecodeTest<Boolean?>(raw = byteArrayOf(0x02), expected = false)
     }
 
     @Test
@@ -33,7 +33,7 @@ class OptionalBinaryDecodeTest : BinaryDecodeTest() {
         data class TestData(val a: Boolean?)
 
         runDecodeTest<TestData>(raw = byteArrayOf(0x00), expected = TestData(null))
-        runDecodeTest<TestData>(raw = byteArrayOf(0x01), expected = TestData(false))
-        runDecodeTest<TestData>(raw = byteArrayOf(0x02), expected = TestData(true))
+        runDecodeTest<TestData>(raw = byteArrayOf(0x01), expected = TestData(true))
+        runDecodeTest<TestData>(raw = byteArrayOf(0x02), expected = TestData(false))
     }
 }

@@ -49,6 +49,10 @@ object Balance : Schema<Balance>() {
     val value by uint128()
 }
 
+object OptionalBool : Schema<OptionalBool>() {
+    val flag by bool().optional()
+}
+
 object AccountData : Schema<AccountData>() {
     val free by uint128()
     val reserved by uint128()
@@ -183,6 +187,21 @@ class ScaleStructTest {
         val afterIo = writeAndRead(Address, address)
 
         assertNull(afterIo[publicKey], null)
+    }
+
+    @Test
+    fun `should encode and decode optional boolean`() {
+        val trueStruct = OptionalBool { it[OptionalBool.flag] = true }
+        assertEquals("0x01", trueStruct.toHexString())
+        assertEquals(true, OptionalBool.read("0x01")[OptionalBool.flag])
+
+        val falseStruct = OptionalBool { it[OptionalBool.flag] = false }
+        assertEquals("0x02", falseStruct.toHexString())
+        assertEquals(false, OptionalBool.read("0x02")[OptionalBool.flag])
+
+        val nullStruct = OptionalBool { it[OptionalBool.flag] = null }
+        assertEquals("0x00", nullStruct.toHexString())
+        assertNull(OptionalBool.read("0x00")[OptionalBool.flag])
     }
 
     @Test(expected = IllegalArgumentException::class)

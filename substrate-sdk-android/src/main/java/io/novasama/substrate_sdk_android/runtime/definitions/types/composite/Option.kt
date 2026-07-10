@@ -16,8 +16,8 @@ class Option(
         if (typeReference.requireValue() is BooleanType) {
             return when (scaleCodecReader.readByte().toInt()) {
                 0 -> null
-                1 -> false
-                2 -> true
+                1 -> true
+                2 -> false
                 else -> throw EncodeDecodeException("Not a optional boolean")
             }
         }
@@ -29,16 +29,19 @@ class Option(
 
     override fun encode(scaleCodecWriter: ScaleCodecWriter, runtime: RuntimeSnapshot, value: Any?) {
         val type = typeReference.requireValue()
-
         if (type is BooleanType) {
-            scaleCodecWriter.writeOptional(ScaleCodecWriter.BOOL, value as Boolean)
-        } else {
-            if (value == null) {
-                scaleCodecWriter.write(ScaleCodecWriter.BOOL, false)
-            } else {
-                scaleCodecWriter.write(ScaleCodecWriter.BOOL, true)
-                type.encodeUnsafe(scaleCodecWriter, runtime, value)
+            return when (value as Boolean?) {
+                null -> scaleCodecWriter.writeByte(0)
+                true -> scaleCodecWriter.writeByte(1)
+                false -> scaleCodecWriter.writeByte(2)
             }
+        }
+
+        if (value == null) {
+            scaleCodecWriter.write(ScaleCodecWriter.BOOL, false)
+        } else {
+            scaleCodecWriter.write(ScaleCodecWriter.BOOL, true)
+            type.encodeUnsafe(scaleCodecWriter, runtime, value)
         }
     }
 

@@ -34,8 +34,8 @@ class optional<T>(private val dataType: DataType<T>) : DataType<T?>() {
         if (dataType is boolean) {
             return when (reader.readByte().toInt()) {
                 0 -> null
-                1 -> false as T?
-                2 -> true as T?
+                1 -> true as T?
+                2 -> false as T?
                 else -> throw IllegalArgumentException("Not a optional boolean")
             }
         }
@@ -47,7 +47,12 @@ class optional<T>(private val dataType: DataType<T>) : DataType<T?>() {
 
     override fun write(writer: ScaleCodecWriter, value: T?) {
         if (dataType is boolean) {
-            writer.writeOptional(BoolWriter(), value as Boolean)
+            when(value) {
+                null -> writer.writeByte(0)
+                true -> writer.writeByte(1)
+                false -> writer.writeByte(2)
+                else -> throw IllegalArgumentException("Not a optional boolean")
+            }
         } else {
             writer.writeOptional(dataType, value)
         }

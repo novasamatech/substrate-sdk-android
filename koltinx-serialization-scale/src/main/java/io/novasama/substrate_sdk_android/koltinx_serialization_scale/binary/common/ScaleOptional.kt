@@ -14,8 +14,9 @@ internal object ScaleOptional {
 
     const val NOT_NULL_MARK: Byte = 1
 
-    const val OPTIONAL_FALSE: Byte = 1
-    const val OPTIONAL_TRUE: Byte = 2
+    const val OPTIONAL_TRUE: Byte = 1
+
+    const val OPTIONAL_FALSE: Byte = 2
 }
 
 internal fun SerialDescriptor.isOptionalBoolean(): Boolean {
