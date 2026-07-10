@@ -106,7 +106,11 @@ dependencies {
     implementation wsDep
     implementation secureStringDep
     implementation gsonDep
-    implementation web3jDep
+    implementation(web3jDep) {
+        // web3j 4.8.0 transitively pulls EOL org.bouncycastle:bcprov-jdk15on:1.65,
+        // which clashes with the actively maintained bcprov-jdk18on declared above.
+        exclude group: 'org.bouncycastle', module: 'bcprov-jdk15on'
+    }
     implementation apacheXercesDep
     implementation xxHashDep
 
