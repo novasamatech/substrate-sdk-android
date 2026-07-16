@@ -13,7 +13,9 @@ class Module(
     val events: Map<String, Event>?,
     val constants: Map<String, Constant>,
     val errors: Map<Int, ErrorMetadata>,
-    val index: BigInteger
+    val index: BigInteger,
+    // Present in v16+ metadata. Empty otherwise
+    val viewFunctions: Map<String, ViewFunction> = emptyMap()
 ) : WithName
 
 class Storage(

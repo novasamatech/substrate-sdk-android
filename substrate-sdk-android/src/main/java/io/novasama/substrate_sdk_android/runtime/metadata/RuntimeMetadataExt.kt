@@ -17,6 +17,7 @@ import io.novasama.substrate_sdk_android.runtime.metadata.module.Module
 import io.novasama.substrate_sdk_android.runtime.metadata.module.RuntimeApi
 import io.novasama.substrate_sdk_android.runtime.metadata.module.RuntimeApiMethod
 import io.novasama.substrate_sdk_android.runtime.metadata.module.StorageEntry
+import io.novasama.substrate_sdk_android.runtime.metadata.module.ViewFunction
 import io.novasama.substrate_sdk_android.runtime.metadata.module.StorageEntryType
 import io.novasama.substrate_sdk_android.wsrpc.request.runtime.state.StateCallRequest
 import java.io.ByteArrayOutputStream
@@ -295,6 +296,96 @@ fun RuntimeApiMethod.decodeOutput(
 
 private fun runtimeMethodInputNotResolved(methodName: String, argumentName: String): Nothing {
     error("Cannot resolve type for input $argumentName of $methodName method")
+}
+
+/**
+ * Runtime api method used to dispatch any view function.
+ *
+ * Signature: `execute_view_function(id: [u8; 32], input: Vec<u8>) -> Result<Vec<u8>, ViewFunctionDispatchError>`
+ */
+const val VIEW_FUNCTION_RUNTIME_API_METHOD = "RuntimeViewFunction_execute_view_function"
+
+/**
+ * @throws NoSuchElementException if view function was not found
+ */
+fun Module.viewFunction(name: String): ViewFunction =
+    viewFunctionOrNull(name) ?: throw NoSuchElementException()
+
+fun Module.viewFunctionOrNull(name: String): ViewFunction? = viewFunctions[name]
+
+/**
+ * Looks up a view function by its globally-unique 32-byte id across all pallets.
+ * Returns null if no view function with such id exists (or metadata is older than v16).
+ */
+fun RuntimeMetadata.findViewFunction(id: ByteArray): ViewFunction? {
+    return modules.values
+        .flatMap { it.viewFunctions.values }
+        .find { it.id.contentEquals(id) }
+}
+
+/**
+ * Builds a `state_call` request that dispatches this view function via the
+ * [VIEW_FUNCTION_RUNTIME_API_METHOD] runtime api.
+ *
+ * The response is a SCALE-encoded `Result<Vec<u8>, ViewFunctionDispatchError>`. Callers are
+ * expected to decode the `Result`, and, on success, pass the inner bytes to [decodeOutput].
+ */
+fun ViewFunction.createRequest(
+    runtime: RuntimeSnapshot,
+    inputValues: Map<String, Any?>
+): StateCallRequest {
+    val encodedArguments = useScaleWriter {
+        // id: [u8; 32] - fixed-size array, encoded as raw bytes
+        directWrite(id, 0, id.size)
+        // input: Vec<u8> - the concatenated encoded arguments, length-prefixed
+        writeByteArray(encodeInputs(runtime, inputValues))
+    }.toHexString(withPrefix = true)
+
+    return StateCallRequest(
+        runtimeRpcName = VIEW_FUNCTION_RUNTIME_API_METHOD,
+        encodedArguments = encodedArguments
+    )
+}
+
+/**
+ * Encodes the view function inputs into the raw byte blob expected as the `input: Vec<u8>` payload
+ * of [VIEW_FUNCTION_RUNTIME_API_METHOD] (without the outer length prefix).
+ */
+fun ViewFunction.encodeInputs(
+    runtime: RuntimeSnapshot,
+    inputValues: Map<String, Any?>
+): ByteArray {
+    return useScaleWriter {
+        inputs.forEach { methodParam ->
+            val inputValue = inputValues.getValue(methodParam.name)
+
+            val type = methodParam.type ?: viewFunctionInputNotResolved(name, methodParam.name)
+            type.encodeUnsafe(this, runtime, inputValue)
+        }
+    }
+}
+
+/**
+ * Decodes the successful (inner `Vec<u8>`) payload of a view function response into its typed value.
+ *
+ * Note: the runtime api returns a `Result<Vec<u8>, ViewFunctionDispatchError>` - the caller is
+ * responsible for unwrapping the `Result` and passing the `Ok` bytes here.
+ */
+fun ViewFunction.decodeOutput(
+    runtime: RuntimeSnapshot,
+    outputEncoded: String
+): Any? {
+    val outputType = output ?: viewFunctionOutputNotResolved(name)
+
+    return outputType.fromHex(runtime, outputEncoded)
+}
+
+private fun viewFunctionInputNotResolved(viewFunctionName: String, argumentName: String): Nothing {
+    error("Cannot resolve type for input $argumentName of $viewFunctionName view function")
+}
+
+private fun viewFunctionOutputNotResolved(viewFunctionName: String): Nothing {
+    error("Cannot resolve output type of $viewFunctionName view function")
 }
 
 private fun runtimeMethodOutputNotResolved(methodName: String): Nothing {
