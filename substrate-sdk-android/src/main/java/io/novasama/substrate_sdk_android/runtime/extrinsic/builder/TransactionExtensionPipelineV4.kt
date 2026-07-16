@@ -32,7 +32,7 @@ class TransactionExtensionPipelineV4(
             currentNestedLevel = 0,
         )
 
-        val allRuntimeExtensions = runtime.metadata.extrinsic.signedExtensions
+        val allRuntimeExtensions = runtime.metadata.extrinsic.latestTransactionExtensions
         val runtimeExtensionsWithoutSignature = allRuntimeExtensions.filter { it.id != VerifySignature.ID }
 
         val implicationWithoutSignature = runtimeExtensionsWithoutSignature.foldRight(initial) { extensionMetadata, acc ->

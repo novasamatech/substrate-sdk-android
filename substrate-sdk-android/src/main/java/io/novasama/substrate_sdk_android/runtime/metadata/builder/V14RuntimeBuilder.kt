@@ -1,28 +1,15 @@
 package io.novasama.substrate_sdk_android.runtime.metadata.builder
 
-import io.novasama.substrate_sdk_android.extensions.requireOrException
 import io.novasama.substrate_sdk_android.runtime.definitions.registry.TypeRegistry
-import io.novasama.substrate_sdk_android.runtime.definitions.types.Type
-import io.novasama.substrate_sdk_android.runtime.definitions.types.TypeReference
-import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.DictEnum
-import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Struct
-import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.Tuple
-import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Null
 import io.novasama.substrate_sdk_android.runtime.metadata.ExtrinsicMetadata
 import io.novasama.substrate_sdk_android.runtime.metadata.RuntimeMetadata
 import io.novasama.substrate_sdk_android.runtime.metadata.RuntimeMetadataReader
 import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionMetadata
 import io.novasama.substrate_sdk_android.runtime.metadata.groupByName
 import io.novasama.substrate_sdk_android.runtime.metadata.module.Constant
-import io.novasama.substrate_sdk_android.runtime.metadata.module.ErrorMetadata
-import io.novasama.substrate_sdk_android.runtime.metadata.module.Event
-import io.novasama.substrate_sdk_android.runtime.metadata.module.FunctionArgument
-import io.novasama.substrate_sdk_android.runtime.metadata.module.MetadataFunction
 import io.novasama.substrate_sdk_android.runtime.metadata.module.Module
 import io.novasama.substrate_sdk_android.runtime.metadata.module.Storage
 import io.novasama.substrate_sdk_android.runtime.metadata.module.StorageEntry
-import io.novasama.substrate_sdk_android.runtime.metadata.module.StorageEntryType
-import io.novasama.substrate_sdk_android.runtime.metadata.v14.MapTypeV14
 import io.novasama.substrate_sdk_android.runtime.metadata.v14.PalletCallMetadataV14
 import io.novasama.substrate_sdk_android.runtime.metadata.v14.PalletConstantMetadataV14
 import io.novasama.substrate_sdk_android.runtime.metadata.v14.PalletErrorMetadataV14
@@ -33,7 +20,6 @@ import io.novasama.substrate_sdk_android.runtime.metadata.v14.SignedExtensionMet
 import io.novasama.substrate_sdk_android.runtime.metadata.v14.StorageEntryMetadataV14
 import io.novasama.substrate_sdk_android.runtime.metadata.v14.StorageMetadataV14
 import io.novasama.substrate_sdk_android.scale.EncodableStruct
-import java.math.BigInteger
 
 object V14RuntimeBuilder : RuntimeBuilder {
 
@@ -81,14 +67,14 @@ object V14RuntimeBuilder : RuntimeBuilder {
                 buildStorage(typeRegistry, it, moduleName)
             },
             calls = struct[schema.calls]?.let {
-                buildCalls(typeRegistry, it, moduleIndex)
+                PostV14ModuleBuilder.buildCalls(typeRegistry, it[PalletCallMetadataV14.type], moduleIndex)
             },
             events = struct[schema.events]?.let {
-                buildEvents(typeRegistry, it, moduleIndex)
+                PostV14ModuleBuilder.buildEvents(typeRegistry, it[PalletEventMetadataV14.type], moduleIndex)
             },
             constants = buildConstants(typeRegistry, struct[schema.constants]),
             errors = struct[schema.errors]?.let {
-                buildErrors(typeRegistry, it)
+                PostV14ModuleBuilder.buildErrors(typeRegistry, it[PalletErrorMetadataV14.type])
             } ?: emptyMap()
         )
     }
@@ -102,7 +88,7 @@ object V14RuntimeBuilder : RuntimeBuilder {
             StorageEntry(
                 name = entryStruct[StorageEntryMetadataV14.name],
                 modifier = entryStruct[StorageEntryMetadataV14.modifier],
-                type = buildEntryType(typeRegistry, entryStruct[StorageEntryMetadataV14.type]),
+                type = PostV14ModuleBuilder.buildEntryType(typeRegistry, entryStruct[StorageEntryMetadataV14.type]),
                 default = entryStruct[StorageEntryMetadataV14.default],
                 documentation = entryStruct[StorageEntryMetadataV14.documentation],
                 moduleName = moduleName
@@ -116,69 +102,10 @@ object V14RuntimeBuilder : RuntimeBuilder {
         )
     }
 
-    private fun buildCalls(
-        typeRegistry: TypeRegistry,
-        callsRaw: EncodableStruct<PalletCallMetadataV14>,
-        moduleIndex: Int,
-    ): Map<String, MetadataFunction> {
-
-        val type = typeRegistry[callsRaw[PalletCallMetadataV14.type]]
-
-        if (type !is DictEnum) return emptyMap()
-
-        return type.elements.map { (index, call) ->
-            MetadataFunction(
-                name = call.name,
-                arguments = extractArguments(call.value.value!!) { name, type ->
-                    FunctionArgument(name!!, type)
-                },
-                documentation = emptyList(),
-                index = moduleIndex to index
-            )
-        }.groupByName()
-    }
-
-    private fun buildEvents(
-        typeRegistry: TypeRegistry,
-        eventsRaw: EncodableStruct<PalletEventMetadataV14>,
-        moduleIndex: Int,
-    ): Map<String, Event> {
-
-        val type = typeRegistry[eventsRaw[PalletEventMetadataV14.type]]
-
-        if (type !is DictEnum) return emptyMap()
-
-        return type.elements.map { (index, event) ->
-            Event(
-                name = event.name,
-                arguments = extractArguments(event.value.value!!) { _, type -> type },
-                documentation = emptyList(),
-                index = moduleIndex to index
-            )
-        }.groupByName()
-    }
-
-    private fun <T> extractArguments(
-        type: Type<*>,
-        mapper: (name: String?, type: Type<*>?) -> T
-    ): List<T> {
-        return when (type) {
-            is Null -> emptyList()
-            is Tuple -> type.typeReferences.map { typeRef ->
-                mapper(null, typeRef.value)
-            }
-            is Struct -> type.mapping.map { mapEntry ->
-                mapper(mapEntry.key, mapEntry.value.value)
-            }
-            else -> listOf(mapper(null, type))
-        }
-    }
-
     private fun buildConstants(
         typeRegistry: TypeRegistry,
         constantsRaw: List<EncodableStruct<PalletConstantMetadataV14>>,
     ): Map<String, Constant> {
-
         return constantsRaw.map { constantStruct ->
             val typeIndex = constantStruct[PalletConstantMetadataV14.type]
 
@@ -189,68 +116,6 @@ object V14RuntimeBuilder : RuntimeBuilder {
                 documentation = constantStruct[PalletConstantMetadataV14.documentation]
             )
         }.groupByName()
-    }
-
-    private fun buildErrors(
-        typeRegistry: TypeRegistry,
-        errorsRaw: EncodableStruct<PalletErrorMetadataV14>,
-    ): Map<Int, ErrorMetadata> {
-
-        val type = typeRegistry[errorsRaw[PalletErrorMetadataV14.type]]
-
-        if (type !is DictEnum) return emptyMap()
-
-        return type.elements.entries.map { (variantIndex, variantValue) ->
-            ErrorMetadata(
-                index = variantIndex,
-                name = variantValue.name,
-                documentation = emptyList(),
-            )
-        }.associateBy { it.index }
-    }
-
-    private fun buildEntryType(
-        typeRegistry: TypeRegistry,
-        enumValue: Any?
-    ): StorageEntryType {
-        return when (enumValue) {
-            is BigInteger -> {
-                StorageEntryType.Plain(typeRegistry[enumValue])
-            }
-
-            is EncodableStruct<*> -> {
-                requireOrException(enumValue.schema is MapTypeV14) {
-                    cannotConstructStorageEntry(enumValue)
-                }
-
-                val hashers = enumValue[MapTypeV14.hashers]
-
-                val type = typeRegistry[enumValue[MapTypeV14.key]]
-                    ?: cannotConstructStorageEntry(enumValue)
-
-                val keys = if (hashers.size == 1) {
-                    listOf(type)
-                } else {
-                    if (type is Tuple) {
-                        type.typeReferences.mapNotNull(TypeReference::value)
-                    } else {
-                        cannotConstructStorageEntry(enumValue)
-                    }
-                }
-
-                requireOrException(keys.size == hashers.size) {
-                    cannotConstructStorageEntry(enumValue)
-                }
-
-                StorageEntryType.NMap(
-                    keys,
-                    hashers,
-                    typeRegistry[enumValue[MapTypeV14.value]]
-                )
-            }
-
-            else -> cannotConstructStorageEntry(enumValue)
-        }
     }
 
     private fun buildExtrinsic(
@@ -269,9 +134,5 @@ object V14RuntimeBuilder : RuntimeBuilder {
                 )
             }
         )
-    }
-
-    private fun cannotConstructStorageEntry(from: Any?): Nothing {
-        throw IllegalArgumentException("Cannot construct StorageEntryType from $from")
     }
 }

@@ -76,20 +76,18 @@ class Metadata16Test {
     }
 
     @Test
-    fun `should build view function request without inputs`() {
+    fun `should encode view function inputs without arguments`() {
         val viewFunction = runtime.metadata.module("Resources").viewFunction("current_stmt_store_period")
 
-        val request = viewFunction.createRequest(runtime, emptyMap())
-        val (rpcName, encodedArguments) = request.params
+        val encoded = viewFunction.encodeInputs(runtime, emptyMap())
 
-        assertEquals(VIEW_FUNCTION_RUNTIME_API_METHOD, rpcName)
         // id ([u8; 32], raw) followed by an empty Vec<u8> (compact length 0 -> 0x00)
         val expected = "0x" + viewFunction.id.toHexString() + "00"
-        assertEquals(expected, encodedArguments)
+        assertEquals(expected, encoded)
     }
 
     @Test
-    fun `should encode view function inputs`() {
+    fun `should encode view function inputs with arguments`() {
         val viewFunction = runtime.metadata.module("Resources").viewFunction("stmt_store_slot_context_for")
 
         val inputs = mapOf(
@@ -97,15 +95,11 @@ class Metadata16Test {
             "seq" to BigInteger.valueOf(2)
         )
 
-        val encodedInputs = viewFunction.encodeInputs(runtime, inputs).toHexString(withPrefix = true)
-        // two little-endian u32: 1, 2
-        assertEquals("0x0100000002000000", encodedInputs)
+        val encoded = viewFunction.encodeInputs(runtime, inputs)
 
-        val request = viewFunction.createRequest(runtime, inputs)
-        val (_, encodedArguments) = request.params
-        // id ++ Vec<u8>(8 bytes) -> compact length 8 == 0x20
+        // id ++ Vec<u8>(8 bytes) where the payload is two little-endian u32 (1, 2); compact length 8 == 0x20
         val expected = "0x" + viewFunction.id.toHexString() + "20" + "0100000002000000"
-        assertEquals(expected, encodedArguments)
+        assertEquals(expected, encoded)
     }
 
     @Test
@@ -126,8 +120,21 @@ class Metadata16Test {
         assertFalse(metadata.modules.isEmpty())
         assertNotNull(metadata.module("System").storage("Account"))
 
-        // v16 extrinsic exposes a set of supported format versions; we surface the newest supported one
-        assertEquals(BigInteger.valueOf(5), metadata.extrinsic.version)
-        assertTrue(metadata.extrinsic.signedExtensions.isNotEmpty())
+        // v16 extrinsic exposes a set of supported format versions
+        assertEquals(listOf(BigInteger.valueOf(4), BigInteger.valueOf(5)), metadata.extrinsic.versions)
+        assertEquals(BigInteger.valueOf(5), metadata.extrinsic.latestVersion)
+
+        // transaction extension version 0 lists all extensions, which is also the "latest" set
+        assertTrue(metadata.extrinsic.latestTransactionExtensions.isNotEmpty())
+        assertEquals(
+            metadata.extrinsic.transactionExtensions.map { it.id },
+            metadata.extrinsic.latestTransactionExtensions.map { it.id }
+        )
+        assertEquals(
+            metadata.extrinsic.latestTransactionExtensions.map { it.id },
+            metadata.extrinsic.transactionExtensions(0).map { it.id }
+        )
+        // an unsupported extension version resolves to no extensions
+        assertTrue(metadata.extrinsic.transactionExtensions(99).isEmpty())
     }
 }

@@ -324,38 +324,19 @@ fun RuntimeMetadata.findViewFunction(id: ByteArray): ViewFunction? {
 }
 
 /**
- * Builds a `state_call` request that dispatches this view function via the
- * [VIEW_FUNCTION_RUNTIME_API_METHOD] runtime api.
+ * Encodes the arguments of the [VIEW_FUNCTION_RUNTIME_API_METHOD] call that dispatches this view
+ * function: the view function [id] (`[u8; 32]`) followed by the SCALE-encoded inputs wrapped as a
+ * length-prefixed `Vec<u8>`.
  *
- * The response is a SCALE-encoded `Result<Vec<u8>, ViewFunctionDispatchError>`. Callers are
- * expected to decode the `Result`, and, on success, pass the inner bytes to [decodeOutput].
- */
-fun ViewFunction.createRequest(
-    runtime: RuntimeSnapshot,
-    inputValues: Map<String, Any?>
-): StateCallRequest {
-    val encodedArguments = useScaleWriter {
-        // id: [u8; 32] - fixed-size array, encoded as raw bytes
-        directWrite(id, 0, id.size)
-        // input: Vec<u8> - the concatenated encoded arguments, length-prefixed
-        writeByteArray(encodeInputs(runtime, inputValues))
-    }.toHexString(withPrefix = true)
-
-    return StateCallRequest(
-        runtimeRpcName = VIEW_FUNCTION_RUNTIME_API_METHOD,
-        encodedArguments = encodedArguments
-    )
-}
-
-/**
- * Encodes the view function inputs into the raw byte blob expected as the `input: Vec<u8>` payload
- * of [VIEW_FUNCTION_RUNTIME_API_METHOD] (without the outer length prefix).
+ * Clients dispatch it themselves via a `state_call` to [VIEW_FUNCTION_RUNTIME_API_METHOD] and get
+ * back a SCALE-encoded `Result<Vec<u8>, ViewFunctionDispatchError>`, whose `Ok` bytes can be decoded
+ * with [decodeOutput].
  */
 fun ViewFunction.encodeInputs(
     runtime: RuntimeSnapshot,
     inputValues: Map<String, Any?>
-): ByteArray {
-    return useScaleWriter {
+): String {
+    val encodedInput = useScaleWriter {
         inputs.forEach { methodParam ->
             val inputValue = inputValues.getValue(methodParam.name)
 
@@ -363,6 +344,13 @@ fun ViewFunction.encodeInputs(
             type.encodeUnsafe(this, runtime, inputValue)
         }
     }
+
+    return useScaleWriter {
+        // id: [u8; 32] - fixed-size array, encoded as raw bytes
+        directWrite(id, 0, id.size)
+        // input: Vec<u8> - the concatenated encoded arguments, length-prefixed
+        writeByteArray(encodedInput)
+    }.toHexString(withPrefix = true)
 }
 
 /**
