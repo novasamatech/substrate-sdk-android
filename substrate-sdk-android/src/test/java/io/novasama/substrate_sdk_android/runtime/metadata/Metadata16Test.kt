@@ -45,7 +45,7 @@ class Metadata16Test {
         assertNotNull(metadata.runtimeApiOrNull("Core"))
 
         // the runtime api used to dispatch view functions must be present in a v16 runtime
-        assertNotNull(metadata.runtimeApiOrNull(VIEW_FUNCTION_RUNTIME_API_METHOD.substringBefore("_")))
+        assertNotNull(metadata.runtimeApiOrNull("RuntimeViewFunction"))
     }
 
     @Test

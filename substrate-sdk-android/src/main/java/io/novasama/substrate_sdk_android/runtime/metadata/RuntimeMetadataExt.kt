@@ -299,13 +299,6 @@ private fun runtimeMethodInputNotResolved(methodName: String, argumentName: Stri
 }
 
 /**
- * Runtime api method used to dispatch any view function.
- *
- * Signature: `execute_view_function(id: [u8; 32], input: Vec<u8>) -> Result<Vec<u8>, ViewFunctionDispatchError>`
- */
-const val VIEW_FUNCTION_RUNTIME_API_METHOD = "RuntimeViewFunction_execute_view_function"
-
-/**
  * @throws NoSuchElementException if view function was not found
  */
 fun Module.viewFunction(name: String): ViewFunction =
@@ -324,13 +317,12 @@ fun RuntimeMetadata.findViewFunction(id: ByteArray): ViewFunction? {
 }
 
 /**
- * Encodes the arguments of the [VIEW_FUNCTION_RUNTIME_API_METHOD] call that dispatches this view
- * function: the view function [id] (`[u8; 32]`) followed by the SCALE-encoded inputs wrapped as a
+ * Encodes the arguments of the view function: the view function [id] (`[u8; 32]`) followed by the SCALE-encoded inputs wrapped as a
  * length-prefixed `Vec<u8>`.
  *
- * Clients dispatch it themselves via a `state_call` to [VIEW_FUNCTION_RUNTIME_API_METHOD] and get
+ * Clients dispatch it themselves via a `state_call` to RuntimeViewFunction_execute_view_function and get
  * back a SCALE-encoded `Result<Vec<u8>, ViewFunctionDispatchError>`, whose `Ok` bytes can be decoded
- * with [decodeOutput].
+ * with [ViewFunction.decodeOutput].
  */
 fun ViewFunction.encodeInputs(
     runtime: RuntimeSnapshot,
