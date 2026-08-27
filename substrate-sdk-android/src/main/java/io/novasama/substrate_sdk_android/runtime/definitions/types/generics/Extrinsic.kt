@@ -39,9 +39,8 @@ private const val TYPE_SIGNATURE = "ExtrinsicSignature"
  *    Bare: version_byte | call
  *    General: version_byte | extensions_version | transaction_extensions_for(extensions_version) | call
  *
- * TODO Note that for v5 General transactions encoded extensions depend on used extensions_version, providing versioning
- * However, this is not implemented **yet** and we currently encode a fixed set of extensions present in extrinsic metadata
- * We will be able to support versioning once Metadata V16 (or v15 custom fields) become available
+ * Note that for v5 General transactions encoded extensions depend on used extensions_version, providing versioning.
+ * The set of extensions is resolved via [io.novasama.substrate_sdk_android.runtime.metadata.ExtrinsicMetadata.transactionExtensions]
  *
  * For more deatails about transaction extensions @see [TransactionExtension] docs
  */
@@ -134,7 +133,7 @@ object Extrinsic : Type<Extrinsic.Instance>("ExtrinsicsDecoder") {
         scaleCodecReader: ScaleCodecReader
     ): ExtrinsicType.GeneralTransaction {
         val extensionsVersion = scaleCodecReader.readByte()
-        val explicits = ExtrasIncludedInExtrinsic.decode(scaleCodecReader, runtime)
+        val explicits = ExtrasIncludedInExtrinsic.decode(scaleCodecReader, runtime, extensionsVersion)
 
         return ExtrinsicType.GeneralTransaction(extensionsVersion, explicits)
     }
@@ -194,7 +193,7 @@ object Extrinsic : Type<Extrinsic.Instance>("ExtrinsicsDecoder") {
     ) {
         writer.writeByte(generalType.extensionsVersion)
 
-        ExtrasIncludedInExtrinsic.encodeUnsafe(writer, runtime, generalType.extensionExplicits)
+        ExtrasIncludedInExtrinsic.encode(writer, runtime, generalType.extensionExplicits, generalType.extensionsVersion)
     }
 
     override fun isValidInstance(instance: Any?): Boolean {

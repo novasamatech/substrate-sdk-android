@@ -19,7 +19,13 @@ import io.novasama.substrate_sdk_android.ss58.SS58Encoder.publicKeyToSubstrateAc
 import io.novasama.substrate_sdk_android.ss58.SS58Encoder.toAccountId
 import io.novasama.substrate_sdk_android.wsrpc.request.runtime.chain.RuntimeVersion
 import kotlinx.coroutines.test.runBlockingTest
+import io.novasama.substrate_sdk_android.common.assertThrows
+import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.DefaultSignedExtensions
+import io.novasama.substrate_sdk_android.runtime.metadata.ExtrinsicMetadata
+import io.novasama.substrate_sdk_android.runtime.metadata.RuntimeMetadata
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.math.BigInteger
 
@@ -36,6 +42,9 @@ private const val EXTRINSIC_SIGNATURE =
 
 private const val BIG_TRANSACTION =
     "0x790e8400fdc41550fb5186d71cae699c31731b3e1baa10680c7bd6b3831a6d222cf4d168008d6ba41aa56d09071bbd96c1aa0378000b8a048699d5b751a27a01e7c3ce955363005df217f3ef1edb63d4c26787e8743d3797a1cf76fcaf3ae4899bd2cc660eb5038800100250040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402"
+
+private const val V5_TRANSFER_EXTRINSIC =
+    "0xc04500b503880000040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402"
 
 private fun ExtrinsicBuilder.testSingleTransfer(): ExtrinsicBuilder {
     return transfer(
@@ -195,8 +204,7 @@ class ExtrinsicBuilderTest {
     fun `should build v5 general transaction`() = runBlockingTest {
         val runtime = RealRuntimeProvider.buildRuntimePostV14("westend_v15")
 
-        val expectedTx =
-            "0xc04500b503880000040000340a806419d5e278172e45cb0e50da1b031795366c99ddfe0a680bd53b142c630700e40b5402"
+        val expectedTx = V5_TRANSFER_EXTRINSIC
 
         val extrinsicBuilder = createExtrinsicBuilder(
             usedRuntime = runtime,
@@ -208,6 +216,77 @@ class ExtrinsicBuilderTest {
             .extrinsicHex
 
         assertEquals(expectedTx, extrinsic)
+    }
+
+    @Test
+    fun `should build v5 general transaction using requested extensions version`() = runBlockingTest {
+        val runtime = RealRuntimeProvider.buildRuntimePostV14("westend_v15").withExtensionVersionWithoutTip()
+
+        val extrinsicV0 = createExtrinsicBuilder(usedRuntime = runtime, extrinsicVersion = ExtrinsicVersion.V5())
+            .testSingleTransfer()
+            .buildExtrinsic()
+            .extrinsicHex
+
+        val extrinsicV1 = createExtrinsicBuilder(usedRuntime = runtime, extrinsicVersion = ExtrinsicVersion.V5(extensionVersion = 1))
+            .testSingleTransfer()
+            .buildExtrinsic()
+            .extrinsicHex
+
+        // Default V5() must still produce version 0 encoding, regardless of the latest version present in metadata
+        assertEquals(V5_TRANSFER_EXTRINSIC, extrinsicV0)
+
+        val decodedV0 = Extrinsic.fromHex(runtime, extrinsicV0).type as Extrinsic.ExtrinsicType.GeneralTransaction
+        val decodedV1 = Extrinsic.fromHex(runtime, extrinsicV1).type as Extrinsic.ExtrinsicType.GeneralTransaction
+
+        assertEquals(0.toByte(), decodedV0.extensionsVersion)
+        assertEquals(1.toByte(), decodedV1.extensionsVersion)
+
+        assertTrue(DefaultSignedExtensions.CHECK_TX_PAYMENT in decodedV0.extensionExplicits)
+        assertFalse(DefaultSignedExtensions.CHECK_TX_PAYMENT in decodedV1.extensionExplicits)
+        assertEquals(
+            decodedV0.extensionExplicits.keys - DefaultSignedExtensions.CHECK_TX_PAYMENT,
+            decodedV1.extensionExplicits.keys
+        )
+
+        // Bytes differ exactly by extensions version byte and the dropped single-byte tip (compact 0)
+        assertEquals(extrinsicV0.fromHex().size - 1, extrinsicV1.fromHex().size)
+    }
+
+    @Test
+    fun `should fail to build v5 general transaction for unsupported extensions version`() = runBlockingTest {
+        val runtime = RealRuntimeProvider.buildRuntimePostV14("westend_v15")
+
+        assertThrows<IllegalArgumentException> {
+            runBlockingTest {
+                createExtrinsicBuilder(usedRuntime = runtime, extrinsicVersion = ExtrinsicVersion.V5(extensionVersion = 7))
+                    .testSingleTransfer()
+                    .buildExtrinsic()
+            }
+        }
+    }
+
+    /**
+     * Adds transaction extensions version 1 that contains all extensions except ChargeTransactionPayment,
+     * so version 1 becomes the latest
+     */
+    private fun RuntimeSnapshot.withExtensionVersionWithoutTip(): RuntimeSnapshot {
+        val extrinsic = metadata.extrinsic
+        val allExtensions = extrinsic.transactionExtensions
+        val withoutTip = allExtensions.indices.filter { allExtensions[it].id != DefaultSignedExtensions.CHECK_TX_PAYMENT }
+
+        val patchedExtrinsic = ExtrinsicMetadata(
+            versions = extrinsic.versions,
+            transactionExtensions = allExtensions,
+            transactionExtensionsByVersion = extrinsic.transactionExtensionsByVersion + (1 to withoutTip)
+        )
+        val patchedMetadata = RuntimeMetadata(
+            metadataVersion = metadata.metadataVersion,
+            modules = metadata.modules,
+            extrinsic = patchedExtrinsic,
+            apis = metadata.apis
+        )
+
+        return RuntimeSnapshot(typeRegistry, patchedMetadata)
     }
 
     private fun createExtrinsicBuilder(
