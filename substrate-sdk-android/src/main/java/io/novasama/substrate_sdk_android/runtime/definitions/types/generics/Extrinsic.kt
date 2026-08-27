@@ -203,7 +203,7 @@ object Extrinsic : Type<Extrinsic.Instance>("ExtrinsicsDecoder") {
 
     private fun ExtrinsicType.versionByte(runtime: RuntimeSnapshot): Byte {
         return when (this) {
-            ExtrinsicType.Bare -> runtime.metadata.extrinsic.version.toByte() or TYPE_BARE
+            ExtrinsicType.Bare -> runtime.metadata.extrinsic.latestVersion.toByte() or TYPE_BARE
 
             is ExtrinsicType.GeneralTransaction -> EXTRINSIC_FORMAT_VERSION or TYPE_GENERAL
 

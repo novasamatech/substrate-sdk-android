@@ -2,9 +2,11 @@ package io.novasama.substrate_sdk_android.runtime.metadata
 
 import io.emeraldpay.polkaj.scale.ScaleCodecReader
 import io.novasama.substrate_sdk_android.extensions.fromHex
+import io.novasama.substrate_sdk_android.runtime.metadata.v14.LookupSchema
 import io.novasama.substrate_sdk_android.runtime.metadata.v14.PostV14MetadataSchema
 import io.novasama.substrate_sdk_android.runtime.metadata.v14.RuntimeMetadataSchemaV14
 import io.novasama.substrate_sdk_android.runtime.metadata.v15.RuntimeMetadataSchemaV15
+import io.novasama.substrate_sdk_android.runtime.metadata.v16.RuntimeMetadataSchemaV16
 import io.novasama.substrate_sdk_android.scale.EncodableStruct
 import io.novasama.substrate_sdk_android.scale.Schema
 import io.novasama.substrate_sdk_android.scale.uint32
@@ -37,6 +39,26 @@ class RuntimeMetadataReader private constructor(
             }
 
             return metadata as EncodableStruct<RuntimeMetadataSchemaV15>
+        }
+
+    val metadataV16: EncodableStruct<RuntimeMetadataSchemaV16>
+        get() {
+            require(metadata.schema is RuntimeMetadataSchemaV16) {
+                "Metadata is not v16"
+            }
+
+            return metadata as EncodableStruct<RuntimeMetadataSchemaV16>
+        }
+
+    /**
+     * Type lookup section, available in all post-v14 metadata versions (v14, v15, v16).
+     * Convenient entry point for feeding the type parser regardless of the concrete metadata version.
+     */
+    val lookup: EncodableStruct<LookupSchema>
+        get() = when (val schema = metadata.schema) {
+            is PostV14MetadataSchema<*> -> metadataPostV14[schema.lookup]
+            is RuntimeMetadataSchemaV16 -> metadataV16[RuntimeMetadataSchemaV16.lookup]
+            else -> error("Metadata is pre v14, type lookup is not available")
         }
 
     companion object {
@@ -76,8 +98,11 @@ class RuntimeMetadataReader private constructor(
                 runtimeVersion == 14 -> {
                     RuntimeMetadataSchemaV14.read(reader)
                 }
-                else -> {
+                runtimeVersion == 15 -> {
                     RuntimeMetadataSchemaV15.read(reader)
+                }
+                else -> {
+                    RuntimeMetadataSchemaV16.read(reader)
                 }
             }
 

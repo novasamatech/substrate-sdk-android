@@ -50,7 +50,7 @@ abstract class ExtrinsicPayloadExtras(name: String) : Type<ExtrinsicPayloadExtra
         scaleCodecReader: ScaleCodecReader,
         runtime: RuntimeSnapshot
     ): ExtrinsicPayloadExtrasInstance {
-        val enabledSignedExtras = runtime.metadata.extrinsic.signedExtensions
+        val enabledSignedExtras = runtime.metadata.extrinsic.latestTransactionExtensions
 
         return enabledSignedExtras.associateBy(
             keySelector = { it.id },
@@ -65,7 +65,7 @@ abstract class ExtrinsicPayloadExtras(name: String) : Type<ExtrinsicPayloadExtra
         runtime: RuntimeSnapshot,
         value: ExtrinsicPayloadExtrasInstance
     ) {
-        val enabledSignedExtras = runtime.metadata.extrinsic.signedExtensions
+        val enabledSignedExtras = runtime.metadata.extrinsic.latestTransactionExtensions
 
         return enabledSignedExtras.forEach { signedExtension ->
             getTypeFrom(signedExtension)?.let { type ->

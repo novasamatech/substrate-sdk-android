@@ -23,6 +23,20 @@ object boolean : DataType<Boolean>() {
     override fun conformsType(value: Any?) = value is Boolean
 }
 
+/**
+ * A [DataType] that occupies zero bytes. Useful for representing dataless enum variants
+ * (e.g. unit variants inside a keyed union) that still need a slot in the codec.
+ */
+object noValue : DataType<Unit>() {
+    override fun read(reader: ScaleCodecReader) = Unit
+
+    override fun write(writer: ScaleCodecWriter, value: Unit) {
+        // Nothing to write
+    }
+
+    override fun conformsType(value: Any?) = value is Unit
+}
+
 object byteArray : DataType<ByteArray>() {
     override fun read(reader: ScaleCodecReader): ByteArray {
         val readByteArray = reader.readByteArray()

@@ -138,6 +138,6 @@ class ExtrasIncludedInExtrinsicTest {
 
     private fun extrinsicContainsExtras(vararg extras: String) {
         val signedExtensions = DefaultSignedExtensions.ALL.filter { it.id in extras }
-        `when`(extrinsicMetadata.signedExtensions).thenReturn(signedExtensions)
+        `when`(extrinsicMetadata.latestTransactionExtensions).thenReturn(signedExtensions)
     }
 }

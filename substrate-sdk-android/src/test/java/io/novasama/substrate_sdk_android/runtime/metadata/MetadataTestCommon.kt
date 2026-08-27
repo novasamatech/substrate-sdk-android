@@ -7,7 +7,6 @@ import io.novasama.substrate_sdk_android.runtime.definitions.registry.TypeRegist
 import io.novasama.substrate_sdk_android.runtime.definitions.registry.v14Preset
 import io.novasama.substrate_sdk_android.runtime.definitions.v14.TypesParserV14
 import io.novasama.substrate_sdk_android.runtime.metadata.builder.VersionedRuntimeBuilder
-import io.novasama.substrate_sdk_android.runtime.metadata.v14.RuntimeMetadataSchemaV14
 
 object MetadataTestCommon {
 
@@ -15,10 +14,8 @@ object MetadataTestCommon {
         val inHex = getFileContentFromResources(fileName)
         val metadataReader = RuntimeMetadataReader.read(inHex)
 
-        val schema = metadataReader.metadataPostV14.schema
-
         val typePreset = TypesParserV14.parse(
-            lookup = metadataReader.metadata[schema.lookup],
+            lookup = metadataReader.lookup,
             typePreset = v14Preset()
         )
 

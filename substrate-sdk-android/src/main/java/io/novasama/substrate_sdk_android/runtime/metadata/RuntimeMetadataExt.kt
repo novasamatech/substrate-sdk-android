@@ -17,6 +17,7 @@ import io.novasama.substrate_sdk_android.runtime.metadata.module.Module
 import io.novasama.substrate_sdk_android.runtime.metadata.module.RuntimeApi
 import io.novasama.substrate_sdk_android.runtime.metadata.module.RuntimeApiMethod
 import io.novasama.substrate_sdk_android.runtime.metadata.module.StorageEntry
+import io.novasama.substrate_sdk_android.runtime.metadata.module.ViewFunction
 import io.novasama.substrate_sdk_android.runtime.metadata.module.StorageEntryType
 import io.novasama.substrate_sdk_android.wsrpc.request.runtime.state.StateCallRequest
 import java.io.ByteArrayOutputStream
@@ -295,6 +296,76 @@ fun RuntimeApiMethod.decodeOutput(
 
 private fun runtimeMethodInputNotResolved(methodName: String, argumentName: String): Nothing {
     error("Cannot resolve type for input $argumentName of $methodName method")
+}
+
+/**
+ * @throws NoSuchElementException if view function was not found
+ */
+fun Module.viewFunction(name: String): ViewFunction =
+    viewFunctionOrNull(name) ?: throw NoSuchElementException()
+
+fun Module.viewFunctionOrNull(name: String): ViewFunction? = viewFunctions[name]
+
+/**
+ * Looks up a view function by its globally-unique 32-byte id across all pallets.
+ * Returns null if no view function with such id exists (or metadata is older than v16).
+ */
+fun RuntimeMetadata.findViewFunction(id: ByteArray): ViewFunction? {
+    return modules.values
+        .flatMap { it.viewFunctions.values }
+        .find { it.id.contentEquals(id) }
+}
+
+/**
+ * Encodes the arguments of the view function: the view function [id] (`[u8; 32]`) followed by the SCALE-encoded inputs wrapped as a
+ * length-prefixed `Vec<u8>`.
+ *
+ * Clients dispatch it themselves via a `state_call` to RuntimeViewFunction_execute_view_function and get
+ * back a SCALE-encoded `Result<Vec<u8>, ViewFunctionDispatchError>`, whose `Ok` bytes can be decoded
+ * with [ViewFunction.decodeOutput].
+ */
+fun ViewFunction.encodeInputs(
+    runtime: RuntimeSnapshot,
+    inputValues: Map<String, Any?>
+): String {
+    val encodedInput = useScaleWriter {
+        inputs.forEach { methodParam ->
+            val inputValue = inputValues.getValue(methodParam.name)
+
+            val type = methodParam.type ?: viewFunctionInputNotResolved(name, methodParam.name)
+            type.encodeUnsafe(this, runtime, inputValue)
+        }
+    }
+
+    return useScaleWriter {
+        // id: [u8; 32] - fixed-size array, encoded as raw bytes
+        directWrite(id, 0, id.size)
+        // input: Vec<u8> - the concatenated encoded arguments, length-prefixed
+        writeByteArray(encodedInput)
+    }.toHexString(withPrefix = true)
+}
+
+/**
+ * Decodes the successful (inner `Vec<u8>`) payload of a view function response into its typed value.
+ *
+ * Note: the runtime api returns a `Result<Vec<u8>, ViewFunctionDispatchError>` - the caller is
+ * responsible for unwrapping the `Result` and passing the `Ok` bytes here.
+ */
+fun ViewFunction.decodeOutput(
+    runtime: RuntimeSnapshot,
+    outputEncoded: String
+): Any? {
+    val outputType = output ?: viewFunctionOutputNotResolved(name)
+
+    return outputType.fromHex(runtime, outputEncoded)
+}
+
+private fun viewFunctionInputNotResolved(viewFunctionName: String, argumentName: String): Nothing {
+    error("Cannot resolve type for input $argumentName of $viewFunctionName view function")
+}
+
+private fun viewFunctionOutputNotResolved(viewFunctionName: String): Nothing {
+    error("Cannot resolve output type of $viewFunctionName view function")
 }
 
 private fun runtimeMethodOutputNotResolved(methodName: String): Nothing {

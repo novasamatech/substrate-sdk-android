@@ -21,9 +21,91 @@ class RuntimeMetadata(
 )
 
 class ExtrinsicMetadata(
-    val version: BigInteger,
+    /**
+     * All supported extrinsic format versions (e.g. `[4, 5]`). Distinct from the transaction
+     * extension version that keys [transactionExtensionsByVersion].
+     */
+    val versions: List<BigInteger>,
+    /**
+     * All transaction extensions present across every supported transaction extension version.
+     */
+    val transactionExtensions: List<TransactionExtensionMetadata>,
+    /**
+     * Maps each supported transaction extension version to the indices (into [transactionExtensions])
+     * of the extensions that are active for that version.
+     *
+     * Pre-v16 metadata has no separate extension version, so it exposes a single entry whose value
+     * lists all extensions.
+     */
+    val transactionExtensionsByVersion: Map<Int, List<Int>>
+) {
+
+    /**
+     * Backwards-compatible constructor for metadata versions that expose a single extrinsic version
+     * with all transaction extensions active (v13, v14, v15).
+     *
+     * Pre-v16 metadata has no explicit transaction extension version, so all extensions are placed
+     * under the default one ([DEFAULT_TRANSACTION_EXTENSION_VERSION]).
+     */
+    constructor(
+        version: BigInteger,
+        signedExtensions: List<TransactionExtensionMetadata>
+    ) : this(
+        versions = listOf(version),
+        transactionExtensions = signedExtensions,
+        transactionExtensionsByVersion = mapOf(
+            DEFAULT_TRANSACTION_EXTENSION_VERSION to signedExtensions.indices.toList()
+        )
+    )
+
+    /**
+     * Newest supported extrinsic format version.
+     */
+    val latestVersion: BigInteger
+        get() = versions.maxOrNull() ?: BigInteger.ZERO
+
+    @Deprecated(
+        message = "Extrinsic format is now multi-versioned. Use latestVersion or versions.",
+        replaceWith = ReplaceWith("latestVersion")
+    )
+    val version: BigInteger
+        get() = latestVersion
+
+    /**
+     * Transaction extensions active for the given [extensionsVersion] (the transaction extension
+     * version, not the extrinsic format [versions]). Returns an empty list if it is not supported.
+     */
+    fun transactionExtensions(extensionsVersion: Int): List<TransactionExtensionMetadata> {
+        val activeIndices = transactionExtensionsByVersion[extensionsVersion].orEmpty()
+
+        return activeIndices.map(transactionExtensions::get)
+    }
+
+    /**
+     * Transaction extensions active for the newest supported transaction extension version.
+     */
+    val latestTransactionExtensions: List<TransactionExtensionMetadata>
+        get() {
+            val latestExtensionsVersion = transactionExtensionsByVersion.keys.maxOrNull() ?: return emptyList()
+
+            return transactionExtensions(latestExtensionsVersion)
+        }
+
+    @Deprecated(
+        message = "Transaction extensions are now versioned. Use latestTransactionExtensions or transactionExtensions(version).",
+        replaceWith = ReplaceWith("latestTransactionExtensions")
+    )
     val signedExtensions: List<TransactionExtensionMetadata>
-)
+        get() = latestTransactionExtensions
+
+    companion object {
+
+        /**
+         * Transaction extension version used when the metadata does not specify one (pre-v16).
+         */
+        const val DEFAULT_TRANSACTION_EXTENSION_VERSION = 0
+    }
+}
 
 typealias TransactionExtensionId = String
 
@@ -64,5 +146,5 @@ class TransactionExtensionMetadata(
 }
 
 fun ExtrinsicMetadata.findSignedExtension(id: TransactionExtensionId): TransactionExtensionMetadata? {
-    return signedExtensions.find { it.id == id }
+    return latestTransactionExtensions.find { it.id == id }
 }
