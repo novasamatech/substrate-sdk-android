@@ -82,6 +82,18 @@ class ExtrinsicMetadata(
     }
 
     /**
+     * Same as [transactionExtensions] but throws if [extensionsVersion] is not supported by the runtime
+     */
+    fun transactionExtensionsOrThrow(extensionsVersion: Int): List<TransactionExtensionMetadata> {
+        require(extensionsVersion in transactionExtensionsByVersion) {
+            "Transaction extensions version $extensionsVersion is not supported by the runtime. " +
+                "Supported versions: ${transactionExtensionsByVersion.keys}"
+        }
+
+        return transactionExtensions(extensionsVersion)
+    }
+
+    /**
      * Transaction extensions active for the newest supported transaction extension version.
      */
     val latestTransactionExtensions: List<TransactionExtensionMetadata>

@@ -21,7 +21,7 @@ class TransactionBuildingPipelineV5(
     override suspend fun constructExtrinsicType(
         generalTransactionParams: GeneralTransactionParams
     ): Extrinsic.ExtrinsicType {
-        val allRuntimeExtensions = runtime.metadata.extrinsic.latestTransactionExtensions
+        val allRuntimeExtensions = runtime.metadata.extrinsic.transactionExtensionsOrThrow(extrinsicVersion.extensionVersion.toInt())
 
         val lastExtension = allRuntimeExtensions.last().id
         val initial = InheritedImplicationV5(

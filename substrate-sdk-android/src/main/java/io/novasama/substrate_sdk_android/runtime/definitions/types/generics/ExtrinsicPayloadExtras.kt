@@ -7,6 +7,7 @@ import io.novasama.substrate_sdk_android.runtime.definitions.types.RuntimeType
 import io.novasama.substrate_sdk_android.runtime.definitions.types.Type
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.isEmptyStruct
 import io.novasama.substrate_sdk_android.runtime.definitions.types.composite.isEmptyTuple
+import io.novasama.substrate_sdk_android.runtime.metadata.ExtrinsicMetadata.Companion.DEFAULT_TRANSACTION_EXTENSION_VERSION
 import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionId
 import io.novasama.substrate_sdk_android.runtime.metadata.TransactionExtensionMetadata
 
@@ -46,11 +47,35 @@ abstract class ExtrinsicPayloadExtras(name: String) : Type<ExtrinsicPayloadExtra
 
     protected abstract fun getTypeFrom(signedExtension: TransactionExtensionMetadata): Type<*>?
 
+    /**
+     * Decodes extras using transaction extensions set from [DEFAULT_TRANSACTION_EXTENSION_VERSION].
+     * Prefer version-aware overload when extensions version is known
+     */
     override fun decode(
         scaleCodecReader: ScaleCodecReader,
         runtime: RuntimeSnapshot
     ): ExtrinsicPayloadExtrasInstance {
-        val enabledSignedExtras = runtime.metadata.extrinsic.latestTransactionExtensions
+        return decode(scaleCodecReader, runtime, DEFAULT_TRANSACTION_EXTENSION_VERSION.toByte())
+    }
+
+    /**
+     * Encodes extras using transaction extensions set from [DEFAULT_TRANSACTION_EXTENSION_VERSION].
+     * Prefer version-aware overload when extensions version is known
+     */
+    override fun encode(
+        scaleCodecWriter: ScaleCodecWriter,
+        runtime: RuntimeSnapshot,
+        value: ExtrinsicPayloadExtrasInstance
+    ) {
+        encode(scaleCodecWriter, runtime, value, DEFAULT_TRANSACTION_EXTENSION_VERSION.toByte())
+    }
+
+    fun decode(
+        scaleCodecReader: ScaleCodecReader,
+        runtime: RuntimeSnapshot,
+        extensionsVersion: Byte,
+    ): ExtrinsicPayloadExtrasInstance {
+        val enabledSignedExtras = runtime.metadata.extrinsic.transactionExtensionsOrThrow(extensionsVersion.toInt())
 
         return enabledSignedExtras.associateBy(
             keySelector = { it.id },
@@ -60,12 +85,13 @@ abstract class ExtrinsicPayloadExtras(name: String) : Type<ExtrinsicPayloadExtra
         )
     }
 
-    override fun encode(
+    fun encode(
         scaleCodecWriter: ScaleCodecWriter,
         runtime: RuntimeSnapshot,
-        value: ExtrinsicPayloadExtrasInstance
+        value: ExtrinsicPayloadExtrasInstance,
+        extensionsVersion: Byte,
     ) {
-        val enabledSignedExtras = runtime.metadata.extrinsic.latestTransactionExtensions
+        val enabledSignedExtras = runtime.metadata.extrinsic.transactionExtensionsOrThrow(extensionsVersion.toInt())
 
         return enabledSignedExtras.forEach { signedExtension ->
             getTypeFrom(signedExtension)?.let { type ->

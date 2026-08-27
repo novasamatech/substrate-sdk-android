@@ -4,6 +4,7 @@ import io.emeraldpay.polkaj.scale.ScaleCodecWriter
 import io.novasama.substrate_sdk_android.runtime.RuntimeSnapshot
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.Extrinsic
 import io.novasama.substrate_sdk_android.runtime.definitions.types.generics.GenericCall
+import io.novasama.substrate_sdk_android.runtime.metadata.ExtrinsicMetadata.Companion.DEFAULT_TRANSACTION_EXTENSION_VERSION
 import io.novasama.substrate_sdk_android.runtime.definitions.types.instances.AddressInstanceConstructor
 import io.novasama.substrate_sdk_android.runtime.extrinsic.ExtrinsicVersion
 import io.novasama.substrate_sdk_android.runtime.extrinsic.v5.GeneralTransactionParams
@@ -32,7 +33,7 @@ class TransactionExtensionPipelineV4(
             currentNestedLevel = 0,
         )
 
-        val allRuntimeExtensions = runtime.metadata.extrinsic.latestTransactionExtensions
+        val allRuntimeExtensions = runtime.metadata.extrinsic.transactionExtensionsOrThrow(DEFAULT_TRANSACTION_EXTENSION_VERSION)
         val runtimeExtensionsWithoutSignature = allRuntimeExtensions.filter { it.id != VerifySignature.ID }
 
         val implicationWithoutSignature = runtimeExtensionsWithoutSignature.foldRight(initial) { extensionMetadata, acc ->
