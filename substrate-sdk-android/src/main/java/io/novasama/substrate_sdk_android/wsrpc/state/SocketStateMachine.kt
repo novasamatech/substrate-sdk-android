@@ -492,3 +492,17 @@ object SocketStateMachine {
 }
 
 internal fun Set<SocketStateMachine.Sendable>.withCounter() = associateWith { 0 }
+
+/**
+ * All requests currently pending on this state: queued while (re)connecting or paused, or sent and
+ * awaiting a response while connected. Elements are stable [SocketStateMachine.Sendable] instances
+ * (there is no id), so callers may track them by referential identity.
+ */
+val SocketStateMachine.State.pendingRequests: Set<SocketStateMachine.Sendable>
+    get() = when (this) {
+        is SocketStateMachine.State.Connecting -> pendingSendables
+        is SocketStateMachine.State.WaitingForReconnect -> pendingSendables
+        is SocketStateMachine.State.Paused -> pendingSendables
+        is SocketStateMachine.State.Connected -> waitingForResponse.keys
+        SocketStateMachine.State.Disconnected -> emptySet()
+    }
